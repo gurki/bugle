@@ -1,5 +1,5 @@
 #include "filteritem.h"
-#include "messageutility.h"
+#include "utility"
 
 #include <QDebug>
 #include <QRegularExpression>

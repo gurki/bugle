@@ -1,3 +1,9 @@
+# User files
+*.user
+
+# Products
+build/
+
 # Prerequisites
 *.d
 
