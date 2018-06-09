@@ -1,15 +1,14 @@
-QT += qml quick quickcontrols2
+TEMPLATE = app
+
 CONFIG += c++14
+
+CONFIG -= \
+    app_bundle \
+    qt
 
 SOURCES += \
     main.cpp
 
-RESOURCES += \
-    qml.qrc
-
 include( $$PWD/messagecenter.pri )
 include( $$PWD/messagecenterexamples.pri )
-include( $$PWD/dependencies/json/json.pri )
-
-
-
+include( $$PWD/dependencies/json.pri )
