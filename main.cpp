@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto clog = std::make_shared<ConsoleLogger>();
+    auto clog = std::make_shared<mc::ConsoleLogger>();
     MC.addObserver( clog, "" );
 
     MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );

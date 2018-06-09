@@ -13,17 +13,21 @@
 #include <unordered_set>
 
 
-#define MC ( MessageCenter::instance() )
+#define MC ( mc::MessageCenter::instance() )
 
-#ifndef MC_DISABLE_POST
-    #define MC_POST( text ) ( MC.post( text, MC_INFO ) )
-    #define MC_POST_RICH( text, ... ) ( MC.post( text, __VA_ARGS__, MC_INFO ) )
-#else
+#ifdef MC_DISABLE_POST
     #define MC_POST( text )
     #define MC_POST_RICH( text, ... )
+#else
+    #define MC_POST( text ) ( MC.post( text, MC_INFO ) )
+    #define MC_POST_RICH( text, ... ) ( MC.post( text, __VA_ARGS__, MC_INFO ) )
 #endif
 
 #define MC_PROST MC_POST_RICH
+
+
+
+namespace mc {
 
 
 class Message;
@@ -103,3 +107,6 @@ class MessageCenter
 //        static QMutex levelMutex_;
         static MessageCenterPtr instance_;
 };
+
+
+}   //  mc::

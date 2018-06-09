@@ -3,6 +3,8 @@
 #include "messageobserver.h"
 //#include "messageformatter.h"
 
+namespace mc {
+
 
 class ConsoleLogger : public MessageObserver
 {
@@ -20,3 +22,6 @@ class ConsoleLogger : public MessageObserver
 
 //        MessageFormatter* formatter_ = nullptr;
 };
+
+
+}   //  mc::

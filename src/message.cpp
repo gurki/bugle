@@ -1,5 +1,6 @@
 #include "messagecenter/message.h"
-//#include "messagecenter.h"
+
+namespace mc {
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,3 +105,6 @@ Message::Message(
 //QString Message::timeInfo( const Qt::DateFormat format ) const {
 //    return datetime_.time().toString( format );
 //}
+
+
+}   //  mc::

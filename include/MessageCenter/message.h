@@ -7,6 +7,9 @@
 #include <chrono>
 
 
+namespace mc {
+
+
 class Message
 {
     public:
@@ -60,3 +63,6 @@ class Message
         nlohmann::json tags_ = {};
         std::thread::id threadId_ = {};
 };
+
+
+}   //  mc::

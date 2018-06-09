@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+namespace mc {
+
 
 ////////////////////////////////////////////////////////////////////////////////
 MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
@@ -241,3 +243,6 @@ void MessageCenter::post( const Message& message ) const
         observer.lock()->notify( message );
     }
 }
+
+
+}   //  mc::

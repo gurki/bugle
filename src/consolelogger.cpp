@@ -5,6 +5,8 @@
 //#include "systeminfo.h"
 #include <iostream>
 
+namespace mc {
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleLogger::ConsoleLogger()
@@ -83,3 +85,6 @@ void ConsoleLogger::printSystemInfo() const
 
 //    formatter_->popType();
 }
+
+
+}   //  mc::
