@@ -1,34 +1,45 @@
 #pragma once
 
-#ifndef MC_DISABLE_SCOPE
-    #define MC_ENTER MessageScope __message_scope( MC_INFO )
-#else
-    #define MC_ENTER
-#endif
+#include "messagecenter/messageinfo.h"
+#include "messagecenter/message.h"
 
 
-#include <QMutex>
-#include <QThread>
+//#define MCS ( mc::MessageScope( {}, MC_INFO ) )
+//#define MCS ( mc::MessageScope( MC_INFO ) )
+#define MCS(...) ( mc::MessageScope( { __VA_ARGS__ }, MC_INFO ) )
+#define MCE ( mc::MessageScope::EmitMessage )
 
-#include "messageinfo.h"
-#include "message.h"
+
+namespace mc {
 
 
 class MessageScope
 {
     public:
 
-        MessageScope( MC_INFO_DEFINE );
+        enum Flag {
+            EmitMessage
+        };
+
+        MessageScope( MC_INFO_DEFINE_DEFAULT );
+        MessageScope( const nlohmann::json& tags = {}, MC_INFO_DEFINE_DEFAULT );
         ~MessageScope();
 
-        QString timeInfo() const;
-        int level() const { return level_; }
+        void append( const nlohmann::json& object );
+        void emit();
+
+        MessageScope& operator << ( const nlohmann::json& object );
+        MessageScope& operator << ( const MessageScope::Flag flag );
 
     private:
 
-        MessageScope();
-
+        MessageScope() {}
         Message message_;
-        QTime time_;
-        int level_ = -1;
+
+        bool dirty_ = true;
 };
+
+
+
+
+}   //  mc::

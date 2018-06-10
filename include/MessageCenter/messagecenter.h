@@ -26,7 +26,6 @@
 #define MC_PROST MC_POST_RICH
 
 
-
 namespace mc {
 
 
@@ -39,6 +38,10 @@ using MessageCenterPtr =  std::shared_ptr<class MessageCenter>;
 class MessageCenter
 {
     public:
+
+        enum Flag {
+            EndOfMessage
+        };
 
         MessageCenter();
         ~MessageCenter();
@@ -62,12 +65,12 @@ class MessageCenter
         );
 
         void post(
-            const std::string& text,
+            const nlohmann::json& object,
             MC_INFO_DEFINE_DEFAULT
         ) const;
 
         void post(
-            const std::string& text,
+            const nlohmann::json& object,
             const nlohmann::json& tags,
             MC_INFO_DEFINE_DEFAULT
         ) const;
@@ -99,14 +102,28 @@ class MessageCenter
         bool enabled_ = true;
         mutable std::unordered_set<
             MessageObserverRef,
-            mc::WeakPtrHash<MessageObserver>,
-            mc::WeakPtrEqual<MessageObserver> >
+            WeakPtrHash<MessageObserver>,
+            WeakPtrEqual<MessageObserver> >
             observers_;
+
+        std::mutex observerMutex_;
 
 //        static QMap<Qt::HANDLE, int> levels_;
 //        static QMutex levelMutex_;
         static MessageCenterPtr instance_;
 };
+
+
+const MessageCenter& operator << (
+    const MessageCenter& msgcntr,
+    const nlohmann::json& data
+);
+
+
+const MessageCenter& operator << (
+    const MessageCenter& msgcntr,
+    const MessageCenter::Flag flag
+);
 
 
 }   //  mc::

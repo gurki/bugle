@@ -1,9 +1,10 @@
 #include "messagecenter/consolelogger.h"
 //#include "messagescope.h"
-//#include "colortable.h"
+#include "messagecenter/colortable.h"
 //#include "messagecenter.h"
 //#include "systeminfo.h"
 #include <iostream>
+
 
 namespace mc {
 
@@ -37,7 +38,14 @@ void ConsoleLogger::notify( const Message& message )
 
 //    formatter_->popType();
 
-    std::cout << message.text_ << message.tags_ << std::endl;
+    std::cout << ColorTable::ansiEscapeCode( "#ff0000" );
+    std::cout << message.object_.dump();
+
+    if ( ! message.tags_.empty() ) {
+        std::cout << ", " << message.tags_.dump();
+    }
+
+    std::cout << std::endl;
 }
 
 

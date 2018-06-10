@@ -20,11 +20,7 @@ MessageCenter::MessageCenter()
 
 ////////////////////////////////////////////////////////////////////////////////
 MessageCenter::~MessageCenter()
-{
-#ifndef MC_DISABLE_POST
-
-#endif
-}
+{}
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +94,12 @@ void MessageCenter::addObserver(
     return;
 #endif
 
+    std::lock_guard<std::mutex> guard( observerMutex_ );
+
     observers_.insert( observer );
+
+    //  TODO: filter
+
 //    if ( ! observers_.contains( observer ) )
 //    {
 //        auto filter = new BooleanFilter();
@@ -111,35 +112,23 @@ void MessageCenter::addObserver(
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::posts(
-//    const QString& text,
-//    const QString& tag,
-//    MC_INFO_DEFINE ) const
-//{
-//#ifndef MC_DISABLE_POST
-//    postm( text, {{ tag, QVariant() }}, MC_INFO_NAMES );
-//#endif
-//}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
-    const std::string& text,
+    const nlohmann::json& object,
     MC_INFO_DEFINE ) const
 {
 #ifdef MC_DISABLE_POST
     return;
 #endif
 
-    Message message( MC_INFO_NAMES, text );
+    Message message( MC_INFO_NAMES, object );
     post( message );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
-    const std::string& text,
+    const nlohmann::json& object,
     const nlohmann::json& tags,
     MC_INFO_DEFINE ) const
 {
@@ -147,61 +136,9 @@ void MessageCenter::post(
     return;
 #endif
 
-    Message message( MC_INFO_NAMES, text, tags );
+    Message message( MC_INFO_NAMES, object, tags );
     post( message );
 }
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::postl(
-//    const QString& text,
-//    const QVariantList& tags,
-//    MC_INFO_DEFINE ) const
-//{
-//#ifndef MC_DISABLE_POST
-
-//    QVariantMap richTags;
-
-//    for ( const auto& tag : tags )
-//    {
-//        if ( tag.type() == QVariant::String ) {
-//            richTags[ tag.toString() ] = QVariant();
-//        }
-//        else if ( tag.type() == QVariant::Map )
-//        {
-//            const QVariantMap map = tag.toMap();
-//            QMapIterator<QString, QVariant> iter( map );
-
-//            while ( iter.hasNext() )
-//            {
-//                const auto item = iter.next();
-//                const auto& key = item.key();
-//                const QVariant& value = item.value();
-
-//                richTags[ key ] = mc::parseVariant( value );
-//            }
-//        }
-//    }
-
-//    postm( text, richTags, MC_INFO_NAMES );
-
-//#endif
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::postm(
-//    const QString& text,
-//    const QVariantMap& tags,
-//    MC_INFO_DEFINE ) const
-//{
-//#ifndef MC_DISABLE_POST
-//    Message msg( MC_INFO_NAMES );
-//    msg.set( text, tags );
-//    post( msg );
-//#endif
-//}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -215,26 +152,10 @@ void MessageCenter::post( const Message& message ) const
         return;
     }
 
-//    #ifndef MC_DISABLE_SCOPE
-//        if ( message.tags().contains( "__scope" ) )
-//        {
-//            if ( ! enter_ && message.tags()[ "__scope" ] == "enter" ) {
-//                return;
-//            }
-
-//            if ( ! leave_ && message.tags()[ "__scope" ] == "leave" ) {
-//                return;
-//            }
-//        };
-//    #endif
-
-//    QMapIterator<MessageObserver*, BooleanFilter*> iter( observers_ );
-
     for ( const auto& observer : observers_ )
     {
-//        if ( filter->passes( message.tags() ) ) {
-//            observer->notify( message );
-//        }
+        //  TODO: filter
+
         if ( observer.expired() ) {
             observers_.erase( observer );
             continue;
@@ -242,6 +163,26 @@ void MessageCenter::post( const Message& message ) const
 
         observer.lock()->notify( message );
     }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+const MessageCenter& operator << (
+    const MessageCenter& msgcntr,
+    const nlohmann::json& data )
+{
+    msgcntr.post( data.dump(), nullptr, nullptr, -1 );
+    return msgcntr;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+const MessageCenter& operator << (
+    const MessageCenter& msgcntr,
+    const MessageCenter::Flag flag )
+{
+    msgcntr.post( "EOM", nullptr, nullptr, -1 );
+    return msgcntr;
 }
 
 

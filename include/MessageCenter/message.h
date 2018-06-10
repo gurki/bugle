@@ -20,13 +20,8 @@ class Message
             const char* file,
             const char* function,
             const int line,
-            const std::string& text,
+            const nlohmann::json& object,
             const nlohmann::json& tags = {}
-        );
-
-        Message(
-            const std::string& text,
-            const nlohmann::json& tags
         );
 
 //        void set(
@@ -59,7 +54,7 @@ class Message
         int level_ = -1;
 
         std::chrono::system_clock::time_point datetime_ = {};
-        std::string text_ = {};
+        nlohmann::json object_ = {};
         nlohmann::json tags_ = {};
         std::thread::id threadId_ = {};
 };

@@ -17,28 +17,21 @@ Message::Message(
     const char* file,
     const char* function,
     const int line,
-    const std::string& text,
+    const nlohmann::json& object,
     const nlohmann::json& tags ):
     Message()
 {
-    file_ = file;
-    function_ = function;
+    if ( file )
+        file_ = file;
+
+    if ( function )
+        function_ = function;
+
     line_ = line;
-    text_ = text;
+    object_ = object;
     tags_ = tags;
 
 //    file_.remove( "..\\" );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-Message::Message(
-    const std::string& text,
-    const nlohmann::json& tags ):
-    Message()
-{
-    text_ = text;
-    tags_ = tags;
 }
 
 

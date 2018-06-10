@@ -1,11 +1,10 @@
 #pragma once
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
-#include <QString>
-#include <QColor>
 
 namespace mc {
+
 
 using namespace nlohmann;
 
@@ -13,27 +12,24 @@ using namespace nlohmann;
 //    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 //    https://jonasjacek.github.io/colors/
 
+
 class ColorTable
 {
     public:
 
         ColorTable();
 
-        static uint8_t ansiIndex( const QColor& color );
-        static QString hex( const uint8_t index );
-        static QString ansiEscapeCode( const QColor& color );
-        static QString ansiEscapeCode( const uint8_t index );
+        static uint8_t ansiIndex( const std::string& hex );
+        static std::string hex( const uint8_t index );
+        static std::string ansiEscapeCode( const std::string& hex );
+        static std::string ansiEscapeCode( const uint8_t index );
+        static void printTestTable( const uint8_t numSteps = 6 );
 
     private:
 
-        static json table_;
+        static nlohmann::json table_;
         static ColorTable instance_;
 };
 
 
-QString defaultColor();
-QString lightColor();
-QPair<uint8_t, uint8_t> defaultTagColors();
-QPair<uint8_t, uint8_t> defaultTextColors();
-
-}
+}   //  mc::

@@ -1,11 +1,13 @@
 #include "messagecenter/messagecenter.h"
 #include "messagecenter/consolelogger.h"
-//#include "colortable.h"
+#include "messagecenter/messagescope.h"
+#include "messagecenter/colortable.h"
 //#include "consolelogger.h"
 //#include "jsonlogger.h"
 //#include "messageformatter.h"
 //#include "htmllogger.h"
 
+#include <iostream>
 
 //void scopeTest();
 //void typeTest();
@@ -21,9 +23,28 @@ int main( int argc, char* argv[] )
     auto clog = std::make_shared<mc::ConsoleLogger>();
     MC.addObserver( clog, "" );
 
-    MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );
+    nlohmann::json obj = {
+        {"pi", 3.141},
+        {"happy", true},
+        {"name", "Niels"},
+        {"nothing", nullptr},
+        {"answer", {
+            {"everything", 42}
+        }},
+        {"list", {1, 0, 2}},
+        {"object", {
+            {"currency", "USD"},
+            {"value", 42.99}
+        }}
+    };
 
-//    MC.setTrace( false );
+    MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );
+    MCS( "a", { "b", "c", 4, true } ) << "was geht?";
+    MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
+    MCS( "debug" ) << "lala";
+    MCS() << obj;
+
+    mc::ColorTable::printTestTable();
 
 //    MessageFormatter formatter;
 //    formatter.setTagColor( "status", 213, 219 );
