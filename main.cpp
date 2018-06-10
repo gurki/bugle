@@ -2,6 +2,7 @@
 #include "messagecenter/consolelogger.h"
 #include "messagecenter/messagescope.h"
 #include "messagecenter/colortable.h"
+#include "messagecenter/messageformatter.h"
 //#include "consolelogger.h"
 //#include "jsonlogger.h"
 //#include "messageformatter.h"
@@ -20,7 +21,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
+    auto frmt = std::make_shared<mc::MessageFormatter>();
     auto clog = std::make_shared<mc::ConsoleLogger>();
+    clog->setFormatter( frmt );
+
     MC.addObserver( clog, "" );
 
     nlohmann::json obj = {

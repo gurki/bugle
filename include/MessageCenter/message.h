@@ -1,5 +1,7 @@
 #pragma once
 
+#include "messagecenter/datetime.h"
+
 #include <nlohmann/json.hpp>
 
 #include <string>
@@ -53,7 +55,7 @@ class Message
         int line_ = -1;
         int level_ = -1;
 
-        std::chrono::system_clock::time_point datetime_ = {};
+        DateTime datetime_ = {};
         nlohmann::json object_ = {};
         nlohmann::json tags_ = {};
         std::thread::id threadId_ = {};

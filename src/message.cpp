@@ -5,7 +5,7 @@ namespace mc {
 
 ////////////////////////////////////////////////////////////////////////////////
 Message::Message() :
-    datetime_( std::chrono::system_clock::now() ),
+    datetime_( DateTime::now() ),
     threadId_( std::this_thread::get_id() )
 {
 //    level_ = MessageCenter::level( threadId_ );

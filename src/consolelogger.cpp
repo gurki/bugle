@@ -18,34 +18,19 @@ ConsoleLogger::ConsoleLogger()
 
 
 //////////////////////////////////////////////////////////////////////////////////
-//void ConsoleLogger::setFormatter( MessageFormatter* formatter )
-//{
-//    if ( formatter == formatter_ ) {
-//        return;
-//    }
-
-//    formatter_ = formatter;
-//}
+void ConsoleLogger::setFormatter( const MessageFormatterPtr& formatter ) {
+    formatter_ = formatter;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::notify( const Message& message )
 {
-//    formatter_->pushType( MessageFormatter::AnsiEncoding );
-
-//    QString msg = formatter_->format( message );
-//    qDebug().noquote() << msg;
-
-//    formatter_->popType();
-
-    std::cout << ColorTable::ansiEscapeCode( "#ff0000" );
-    std::cout << message.object_.dump();
-
-    if ( ! message.tags_.empty() ) {
-        std::cout << ", " << message.tags_.dump();
+    if ( ! formatter_ ) {
+        return;
     }
 
-    std::cout << std::endl;
+    std::cout << formatter_->format( message ) << std::endl;
 }
 
 
