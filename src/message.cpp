@@ -28,7 +28,7 @@ Message::Message(
         function_ = function;
 
     line_ = line;
-    object_ = object;
+    payload_ = object;
     tags_ = tags;
 
 //    file_.remove( "..\\" );

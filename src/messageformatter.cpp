@@ -1,9 +1,9 @@
 #include "messagecenter/messageformatter.h"
 #include "messagecenter/utility.h"
+#include "messagecenter/colortable.h"
+
 #include <sstream>
-#include <iomanip>  //  put_time
-#include <ctime>
-#include <iostream>
+#include <string_view>
 
 
 namespace mc {
@@ -24,44 +24,32 @@ void MessageFormatter::setIndent( const uint8_t indent ) {
 std::string MessageFormatter::format( const Message& message ) const
 {
     std::stringstream ss;
-    ss << colorize( message.datetime_.timeInfo( true ), 246 );
-//#ifndef MC_DISABLE_SCOPE
-//    const bool isScope = message.tags().contains( "__scope" );
-//#else
-//    const bool isScope = false;
-//#endif
+    ss << colorize( message.datetime_.timeInfo( DateTime::Microseconds ), "Grey58" );
 
-    if ( ! message.object_.empty() ) // || isScope
+    if ( ! message.payload_.empty() )
     {
         ss << skip( 2 );
 
-//        if ( indent_ ) {
-//            ss << levelIndent( message );
-//        }
+        const std::string msg = message.payload_.dump();
+        std::string_view view( &msg[0], msg.size() );
+//        view.remove_prefix( 1 );
+//        view.remove_suffix( 1 );
 
-//        if ( isScope ) {
-//            ss << colorized( message.function(), 243 );
-//        } else {
-            ss << colorize( message.object_.dump(), 251 );
-//        }
+        std::stringstream ssv;
+        ssv << view;
+
+        ss << colorize( msg, "Gray78" );
     }
 
     ss << skip( 2 );
 
     for ( const auto& tag : message.tags_ )
     {
-//        ss << tag.dump();
-//        const QString tags = tagInfo( message.tags() );
-
         if ( ! tag.empty() ) {
-            ss << tag.dump();
+            ss << tag;
             ss << skip( 2 );
         }
     }
-
-//    if ( message.tags().contains( "debug" ) ) {
-//        ss << colorized( message.info(), 240 );
-//    }
 
     return ss.str();
 }
@@ -72,6 +60,16 @@ std::string MessageFormatter::colorize(
     const std::string& text,
     const uint8_t index ) const
 {
+    return beginColor( index ) + text + endColor();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string MessageFormatter::colorize(
+        const std::string& text,
+        const std::string& colorName ) const
+{
+    const uint8_t index = ColorTable::findName( colorName );
     return beginColor( index ) + text + endColor();
 }
 

@@ -28,9 +28,15 @@ class MessageFormatter
         std::string spacer() const { return spacer_; }
         std::string newline() const { return newline_; }
         std::string skip( const uint8_t count ) const;
+
         std::string colorize(
             const std::string& text,
             const uint8_t index
+        ) const;
+
+        std::string colorize(
+            const std::string& text,
+            const std::string& colorName
         ) const;
 
         void setIndent( const uint8_t indent );

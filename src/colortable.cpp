@@ -26,7 +26,7 @@ ColorTable::ColorTable()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string ColorTable::hex( const uint8_t index )
+std::string ColorTable::hexString( const uint8_t index )
 {
     if ( table_.is_null() ) {
         return "#000000";
@@ -37,27 +37,56 @@ std::string ColorTable::hex( const uint8_t index )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-uint8_t ColorTable::ansiIndex( const std::string& hex )
+uint8_t ColorTable::findName( const std::string& name )
+{
+    if ( table_.is_null() ) {
+        return 0;
+    }
+
+    auto it = std::find_if( table_.begin(), table_.end(), [ &name ]( const json& item ) {
+        return item[ "name" ] == name;
+    });
+
+    if ( it == table_.end() ) {
+        return 0;
+    }
+
+    return (*it)[ "colorId" ];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string ColorTable::colorName( const uint8_t id ) {
+    return table_[ id ][ "name" ];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+uint8_t ColorTable::colorId( const std::string& hex )
 {
     if ( hex.empty() ) {
         return 0;
     }
 
-    const std::string hexstr = ( hex.at( 0 ) == '#' ) ? hex.substr( 1 ) : hex;
+    std::string_view hexstr( &hex[ 0 ], hex.size() );
+
+    if ( hexstr[ 0 ] == '#' ) {
+        hexstr.remove_prefix( 1 );
+    }
 
     if ( hexstr.size() > 8 ) {
         return 0;
     }
-
-    auto conv = []( const int v ) -> int {
-        return std::roundf( 5.f * v / 255.f );
-    };
 
     std::stringstream ss;
     ss << std::hex << hexstr;
 
     uint32_t val;
     ss >> val;
+
+    auto conv = []( const int v ) -> int {
+        return std::roundf( 5.f * v / 255.f );
+    };
 
     const int r = conv( ( val >> 16 ) & 0xff );
     const int g = conv( ( val >> 8 ) & 0xff );
@@ -70,7 +99,7 @@ uint8_t ColorTable::ansiIndex( const std::string& hex )
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string ColorTable::ansiEscapeCode( const std::string& hex ) {
-    return ansiEscapeCode( ansiIndex( hex ) );
+    return ansiEscapeCode( colorId( hex ) );
 }
 
 
@@ -169,6 +198,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
     }
 
     std::cout << std::endl << std::endl;
+    std::cout << ColorTable::colorName( 251 ) << ", " << ColorTable::colorName( 246 ) << std::endl;
 }
 
 

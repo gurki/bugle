@@ -28,25 +28,30 @@ int main( int argc, char* argv[] )
     MC.addObserver( clog, "" );
 
     nlohmann::json obj = {
-        {"pi", 3.141},
-        {"happy", true},
-        {"name", "Niels"},
-        {"nothing", nullptr},
-        {"answer", {
-            {"everything", 42}
+        { "pi", 3.141 },
+        { "happy", true },
+        { "name", "Niels" },
+        { "nothing", nullptr },
+        { "answer", {
+            { "everything", 42 }
         }},
-        {"list", {1, 0, 2}},
-        {"object", {
-            {"currency", "USD"},
-            {"value", 42.99}
+        { "list", { 1, 0, 2 } },
+        { "object", {
+            { "currency", "USD" },
+            { "value", 42.99 }
         }}
     };
 
+    MC_POST( "message only" );
+    MC_PROST( "single tag", "awesome tag" );
     MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );
-    MCS( "a", { "b", "c", 4, true } ) << "was geht?";
+    MCS();
+    MCS() << "simple scope";
     MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
-    MCS( "debug" ) << "lala";
     MCS() << obj;
+    MCS( "debug" ) << "lala";
+    MCS( "a", { "b", "c", 4, true } ) << "was geht?";
+    MCS( "a", { "b", "c", 4, true } ) << obj;
 
     mc::ColorTable::printTestTable();
 

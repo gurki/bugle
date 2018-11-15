@@ -56,7 +56,7 @@ class Message
         int level_ = -1;
 
         DateTime datetime_ = {};
-        nlohmann::json object_ = {};
+        nlohmann::json payload_ = {};
         nlohmann::json tags_ = {};
         std::thread::id threadId_ = {};
 };

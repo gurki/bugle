@@ -33,8 +33,8 @@ void MessageScope::emit()
         return;
     }
 
-    if ( message_.object_.size() == 1 ) {
-        message_.object_ = message_.object_.front();
+    if ( message_.payload_.size() == 1 ) {
+        message_.payload_ = message_.payload_.front();
     }
 
     if ( message_.tags_.size() == 1 ) {
@@ -48,7 +48,7 @@ void MessageScope::emit()
 
 ////////////////////////////////////////////////////////////////////////////////]
 void MessageScope::append( const nlohmann::json& object ) {
-    message_.object_.push_back( object );
+    message_.payload_.push_back( object );
     dirty_ = true;
 }
 
