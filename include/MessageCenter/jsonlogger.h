@@ -1,25 +1,25 @@
-#pragma once
+// #pragma once
 
-#include "messageobserver.h"
-#include <QFile>
+// #include "messageobserver.h"
+// #include <QFile>
 
 
-class JsonLogger : public QObject, public MessageObserver
-{
-    Q_OBJECT
+// class JsonLogger : public QObject, public MessageObserver
+// {
+//     Q_OBJECT
 
-    public:
+//     public:
 
-        explicit JsonLogger( QObject* parent = nullptr );
+//         explicit JsonLogger( QObject* parent = nullptr );
 
-        bool open( const QString& filename );
-        void createDefaultFile();
+//         bool open( const QString& filename );
+//         void createDefaultFile();
 
-    public slots:
+//     public slots:
 
-        virtual void notify( const Message& message );
+//         virtual void notify( const Message& message );
 
-    private:
+//     private:
 
-        QFile file_;
-};
+//         QFile file_;
+// };

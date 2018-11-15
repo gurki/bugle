@@ -21,11 +21,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto frmt = std::make_shared<mc::MessageFormatter>();
-    auto clog = std::make_shared<mc::ConsoleLogger>();
-    clog->setFormatter( frmt );
+    // auto frmt = std::make_shared<mc::MessageFormatter>();
+    // auto clog = std::make_shared<mc::ConsoleLogger>();
+    // clog->setFormatter( frmt );
 
-    MC.addObserver( clog, "" );
+    // MC.addObserver( clog, "" );
 
     nlohmann::json obj = {
         { "pi", 3.141 },
@@ -42,16 +42,16 @@ int main( int argc, char* argv[] )
         }}
     };
 
-    MC_POST( "message only" );
-    MC_PROST( "single tag", "awesome tag" );
-    MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );
-    MCS();
-    MCS() << "simple scope";
-    MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
-    MCS() << obj;
-    MCS( "debug" ) << "lala";
-    MCS( "a", { "b", "c", 4, true } ) << "was geht?";
-    MCS( "a", { "b", "c", 4, true } ) << obj;
+    // MC_POST( "message only" );
+    // MC_PROST( "single tag", "awesome tag" );
+    // MC_PROST( "was geht?", { "a", { "b", "c", 4, true } } );
+    // MCS();
+    // MCS() << "simple scope";
+    // MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
+    // MCS() << obj;
+    // MCS( "debug" ) << "lala";
+    // MCS( "a", { "b", "c", 4, true } ) << "was geht?";
+    // MCS( "a", { "b", "c", 4, true } ) << obj;
 
     mc::ColorTable::printTestTable();
 

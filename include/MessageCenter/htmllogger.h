@@ -1,39 +1,39 @@
-#pragma once
+// #pragma once
 
-#include "messageobserver.h"
-#include "messageformatter.h"
+// #include "messageobserver.h"
+// #include "messageformatter.h"
 
-#include <QFile>
-#include <QTextStream>
+// #include <QFile>
+// #include <QTextStream>
 
 
-class HtmlLogger : public QObject, public MessageObserver
-{
-    Q_OBJECT
+// class HtmlLogger : public QObject, public MessageObserver
+// {
+//     Q_OBJECT
 
-    public:
+//     public:
 
-        HtmlLogger( QObject* parent = nullptr );
-        ~HtmlLogger();
+//         HtmlLogger( QObject* parent = nullptr );
+//         ~HtmlLogger();
 
-        void createDefaultFile( const bool open = false );
-        void createFile( const QString& name, const bool open = false );
+//         void createDefaultFile( const bool open = false );
+//         void createFile( const QString& name, const bool open = false );
 
-        void setFormatter( MessageFormatter* formatter );
+//         void setFormatter( MessageFormatter* formatter );
 
-    public slots:
+//     public slots:
 
-        virtual void notify( const Message& message );
+//         virtual void notify( const Message& message );
 
-    private:
+//     private:
 
-        void writeHeader();
-        void writeSystemInfo();
-        void writeSessionInfo();
-        void writeTitle();
-        void writeDiv( const QString& key, const QString& value );
+//         void writeHeader();
+//         void writeSystemInfo();
+//         void writeSessionInfo();
+//         void writeTitle();
+//         void writeDiv( const QString& key, const QString& value );
 
-        QFile fout_;
-        QTextStream stream_;
-        MessageFormatter* formatter_ = nullptr;
-};
+//         QFile fout_;
+//         QTextStream stream_;
+//         MessageFormatter* formatter_ = nullptr;
+// };

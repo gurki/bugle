@@ -1,7 +1,7 @@
 #include "messagecenter/colortable.h"
 #include <iostream>
 #include <fstream>
-#include <strstream>
+#include <sstream>
 
 
 namespace mc {
