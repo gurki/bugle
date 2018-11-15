@@ -3,6 +3,7 @@
 
 # Products
 build/
+.vscode/
 
 # Prerequisites
 *.d
