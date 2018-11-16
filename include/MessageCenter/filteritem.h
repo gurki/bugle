@@ -1,43 +1,37 @@
-// #pragma once
+#pragma once
 
-// #include <QVariant>
-// #include <QMap>
-// #include <functional>
+#include <nlohmann/json.hpp>
 
-
-// class FilterItem
-// {
-//     public:
-
-//         FilterItem();
-
-//         bool parse( QString plaintext );
-//         bool compare( const QVariant& target ) const;
-
-//         bool isValid() const { return valid_; }
-//         bool isEmpty() const { return key_.isEmpty(); }
-//         bool hasValue() const;
-//         uint hash() const;
-//         const QString& key() const { return key_; }
-//         const QVariant& value() const { return value_; }
-
-//     private:
-
-//         typedef std::function< bool( const QVariant&, const QVariant& ) > Comparator;
-
-//         static Comparator comparatorForString( const QString& string );
-
-//         bool valid_ = false;
-//         QString key_;
-//         QVariant value_;
-//         Comparator comparator_;
-// };
+#include <string>
+#include <functional>
 
 
-// inline uint qHash( const FilterItem& item ) {
-//     return item.hash();
-// }
+class FilterItem
+{
+    public:
 
-// inline bool qMapLessThanKey( const FilterItem& key1, const FilterItem& key2 )  {
-//     return qHash( key1 ) < qHash( key2 );
-// }
+        FilterItem();
+
+        bool parse( const std::string& plaintext );
+        bool compare( const nlohmann::json& target ) const;
+
+        bool valid() const { return valid_; }
+        bool empty() const { return key_.empty(); }
+        bool hasValue() const;
+        const std::string& key() const { return key_; }
+        const nlohmann::json& value() const { return value_; }
+
+    private:
+
+        typedef std::function< bool( const nlohmann::json&, const nlohmann::json& ) > Comparator;
+
+        static Comparator comparatorForString( const std::string& str );
+
+        bool valid_ = false;
+        bool negate_ = false;
+        std::string key_;
+        nlohmann::json value_;
+        Comparator comparator_;
+};
+
+

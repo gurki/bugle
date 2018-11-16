@@ -1,92 +1,88 @@
-// #include "messagecenter/filteritem.h"
-// #include "messagecenter/utility.h"
+#include "messagecenter/filteritem.h"
+#include "messagecenter/utility.h"
 
-// #include <QDebug>
-// #include <QRegularExpression>
-// #include <QDateTime>
-
-
-// ////////////////////////////////////////////////////////////////////////////////
-// FilterItem::FilterItem()
-// {}
+#include <regex>
+#include <string>
+#include <iostream>
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// bool FilterItem::compare( const QVariant& target ) const {
-//     return comparator_( target, value_ );
-// }
+////////////////////////////////////////////////////////////////////////////////
+FilterItem::FilterItem()
+{}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// bool FilterItem::hasValue() const {
-//     return ! value_.isNull() && value_.isValid();
-// }
+////////////////////////////////////////////////////////////////////////////////
+bool FilterItem::compare( const nlohmann::json& target ) const {
+    return comparator_( target, value_ ) ^ negate_;
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// bool FilterItem::parse( QString plaintext )
-// {
-//     static const QString validOperators = "(>=|<=|!=|=|>|<)";
-//     static const QString validSymbols = "\\w|\\.|-|_|:";
-//     static const QString validNames = "((?:" + validSymbols + ")+)";
-//     static const QString validValues = "(?:(?:" + validOperators + validNames + ")?)";
-//     static const QRegularExpression re( validNames + validValues );
-
-//     const QRegularExpressionMatch match = re.match( plaintext );
-
-//     if ( ! match.hasMatch() ) {
-//         valid_ = false;
-//         return false;
-//     }
-
-//     //  valid match => non-empty key, optional ( non-empty operator and non-empty value )
-
-//     valid_ = true;
-//     key_ = match.captured( 1 );
-
-//     const QString valueStr = match.captured( 3 );
-//     const QString op = match.captured( 2 );
-
-//     //  early return for key-only
-//     if ( op.isEmpty() ) {
-//         return true;
-//     }
-
-//     value_ = mc::parseValue( valueStr );
-//     comparator_ = comparatorForString( op );
-
-//     return true;
-// }
+////////////////////////////////////////////////////////////////////////////////
+bool FilterItem::hasValue() const {
+    // return ! value_.isNull() && value_.isValid();
+    return false;
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// uint FilterItem::hash() const
-// {
-//     return (
-//         qHash( key_ ) ^
-//         qHash( value_.toString() ) ^
-//         *( reinterpret_cast<const uint8_t*>( &comparator_ ) )
-//     );
-// }
+////////////////////////////////////////////////////////////////////////////////
+bool FilterItem::parse( const std::string& plaintext )
+{
+    static const std::string validOperators = "(>=|<=|!=|=|>|<)";
+    static const std::string validSymbols = "\\w|\\.|-|_|:";
+    static const std::string validNames = "((?:" + validSymbols + ")+)";
+    static const std::string validValues = "(?:(?:" + validOperators + validNames + ")?)";
+
+    std::regex re( validNames + validValues );
+    std::cmatch m;
+    std::regex_match( plaintext, m, re );
+
+    std::cout << m.size() << std::endl;
+    // static const QRegularExpression re( validNames + validValues );
+
+    // const QRegularExpressionMatch match = re.match( plaintext );
+
+    // if ( ! match.hasMatch() ) {
+    //     valid_ = false;
+    //     return false;
+    // }
+
+    // //  valid match => non-empty key, optional ( non-empty operator and non-empty value )
+
+    // valid_ = true;
+    // key_ = match.captured( 1 );
+
+    // const auto valueStr = match.captured( 3 );
+    // const auto op = match.captured( 2 );
+
+    // //  early return for key-only
+    // if ( op.isEmpty() ) {
+    //     return true;
+    // }
+
+    // value_ = mc::parseValue( valueStr );
+    // comparator_ = comparatorForString( op );
+
+    return true;
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// FilterItem::Comparator FilterItem::comparatorForString( const QString& string )
-// {
-//     if ( string == ">=" ) {
-//         return std::greater_equal<QVariant>();
-//     } else if ( string == "<=" ) {
-//         return std::less_equal<QVariant>();
-//     } else if ( string == "!=" ) {
-//         return std::not_equal_to<QVariant>();
-//     } else if ( string == ">" ) {
-//         return std::greater<QVariant>();
-//     } else if ( string == "<" ) {
-//         return std::less<QVariant>();
-//     } else if ( string == "=" ) {
-//         return std::equal_to<QVariant>();
-//     } else {
-//         qCritical() << "this should never be reached";
-//         return Comparator();
-//     }
-// }
+////////////////////////////////////////////////////////////////////////////////
+FilterItem::Comparator FilterItem::comparatorForString( const std::string& str )
+{
+    if ( str == ">=" ) {
+        return std::greater_equal<nlohmann::json>();
+    } else if ( str == "<=" ) {
+        return std::less_equal<nlohmann::json>();
+    } else if ( str == "!=" ) {
+        return std::not_equal_to<nlohmann::json>();
+    } else if ( str == ">" ) {
+        return std::greater<nlohmann::json>();
+    } else if ( str == "<" ) {
+        return std::less<nlohmann::json>();
+    } else if ( str == "=" ) {
+        return std::equal_to<nlohmann::json>();
+    } else {
+        assert( "bug in comparator parsing" );
+        return Comparator();
+    }
+}

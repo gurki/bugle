@@ -27,17 +27,11 @@ void MessageCenter::addObserver(
 
     observers_.insert( observer );
 
-    //  TODO: filter
-
-//    if ( ! observers_.contains( observer ) )
-//    {
-//        auto filter = new BooleanFilter();
-//        filter->moveToThread( this->thread() );
-
-//        observers_[ observer ] = filter;
-//    }
-
-//    observers_[ observer ]->unite( filter );
+    if ( filter_.find( observer ) == filter_.end() ) {
+        filter_[ observer ] = BooleanFilter();
+    }
+    
+    filter_[ observer ].unite( filter );
 }
 
 
@@ -52,7 +46,7 @@ void MessageCenter::post(
 #endif
 
     Message message( MC_INFO_NAMES, object, tags );
-    std::async( &MessageCenter::postMessage, this, std::move( message ) );
+    auto f = std::async( &MessageCenter::postMessage, this, std::move( message ) );
 }
 
 

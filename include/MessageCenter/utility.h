@@ -28,7 +28,7 @@ inline std::string repeat( const std::string& word, size_t times )
 
 
 template<typename T>
-struct WeakPtrHash : public std::unary_function< std::weak_ptr<T>, size_t >
+struct WeakPtrHash
 {
     size_t operator()( const std::weak_ptr<T>& wp ) const {
         const T* raw = wp.lock().get();
@@ -38,7 +38,7 @@ struct WeakPtrHash : public std::unary_function< std::weak_ptr<T>, size_t >
 
 
 template<typename T>
-struct WeakPtrEqual : public std::unary_function< std::weak_ptr<T>, bool >  {
+struct WeakPtrEqual {
     bool operator()( const std::weak_ptr<T>& left, const std::weak_ptr<T>& right ) const {
         return ! left.owner_before( right ) && ! right.owner_before( left );
     }
