@@ -3,86 +3,15 @@
 #include "messagecenter/messageobserver.h"
 
 #include <algorithm>
+#include <iostream>
+#include <thread>
+#include <future>
+
 
 namespace mc {
 
 
-////////////////////////////////////////////////////////////////////////////////
 MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
-//QMap<Qt::HANDLE, int> MessageCenter::levels_;
-//QMutex MessageCenter::levelMutex_;
-
-
-////////////////////////////////////////////////////////////////////////////////
-MessageCenter::MessageCenter()
-{}
-
-
-////////////////////////////////////////////////////////////////////////////////
-MessageCenter::~MessageCenter()
-{}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::setTrace( const bool enabled ) {
-//    setTrace( enabled, enabled );
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::setTrace( const bool enter, const bool leave ) {
-//    setEnter( enter );
-//    setLeave( leave );
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::setEnter( const bool enabled )
-//{
-//    if ( enter_ == enabled ) {
-//        return;
-//    }
-
-//    enter_ = enabled;
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::setLeave( const bool enabled )
-//{
-//    if ( leave_ == enabled ) {
-//        return;
-//    }
-
-//    leave_ = enabled;
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//int MessageCenter::level( const Qt::HANDLE threadId )
-//{
-//    levelMutex_.lock();
-//    const int level = levels_[ threadId ];
-//    levelMutex_.unlock();
-
-//    return level;
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::increaseLevel( const Qt::HANDLE threadId ) {
-//    levelMutex_.lock();
-//    levels_[ threadId]++;
-//    levelMutex_.unlock();
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void MessageCenter::decreaseLevel( const Qt::HANDLE threadId ) {
-//    levelMutex_.lock();
-//    levels_[ threadId ]--;
-//    levelMutex_.unlock();
-//}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,34 +44,20 @@ void MessageCenter::addObserver(
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
     const nlohmann::json& object,
-    MC_INFO_DEFINE ) const
-{
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
-    Message message( MC_INFO_NAMES, object );
-    post( message );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::post(
-    const nlohmann::json& object,
-    const nlohmann::json& tags,
-    MC_INFO_DEFINE ) const
+    MC_INFO_DEFINE,
+    const nlohmann::json& tags )
 {
 #ifdef MC_DISABLE_POST
     return;
 #endif
 
     Message message( MC_INFO_NAMES, object, tags );
-    post( message );
+    std::async( &MessageCenter::postMessage, this, std::move( message ) );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::post( const Message& message ) const
+void MessageCenter::postMessage( const Message& message )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -151,6 +66,8 @@ void MessageCenter::post( const Message& message ) const
     if ( ! enabled_ ) {
         return;
     }
+
+    std::lock_guard<std::mutex> guard( observerMutex_ );
 
     for ( const auto& observer : observers_ )
     {
@@ -163,26 +80,6 @@ void MessageCenter::post( const Message& message ) const
 
         observer.lock()->notify( message );
     }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-const MessageCenter& operator << (
-    const MessageCenter& msgcntr,
-    const nlohmann::json& data )
-{
-    msgcntr.post( data.dump(), nullptr, nullptr, -1 );
-    return msgcntr;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-const MessageCenter& operator << (
-    const MessageCenter& msgcntr,
-    const MessageCenter::Flag flag )
-{
-    msgcntr.post( "EOM", nullptr, nullptr, -1 );
-    return msgcntr;
 }
 
 

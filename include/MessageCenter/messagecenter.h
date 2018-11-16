@@ -15,15 +15,29 @@
 
 #define MC ( mc::MessageCenter::instance() )
 
+#define PP_THIRD_ARG(a,b,c,...) c
+#define VA_OPT_SUPPORTED_I(...) PP_THIRD_ARG(__VA_OPT__(,),true,false,)
+#define VA_OPT_SUPPORTED VA_OPT_SUPPORTED_I(?)
+
 #ifdef MC_DISABLE_POST
     #define MC_POST( text )
-    #define MC_POST_RICH( text, ... )
+    #define MC_POST_TAGGED( text, ... )
 #else
-    #define MC_POST( text ) ( MC.post( text, MC_INFO ) )
-    #define MC_POST_RICH( text, ... ) ( MC.post( text, __VA_ARGS__, MC_INFO ) )
+    #ifdef VA_OPT_SUPPORTED
+        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO __VA_OPT__(, __VA_ARGS__) ))
+    #else
+        #define MC_POST( text ) ( MC.post( text, {}, MC_INFO ) )
+        #define MC_POST_TAGGED( text, ... ) ( MC.post( text, MC_INFO, __VA_ARGS__ ) )
+    #endif
 #endif
 
-#define MC_PROST MC_POST_RICH
+#ifdef VA_OPT_SUPPORTED
+    #define MCP MC_POST
+    #define MCT MC_POST
+#else
+    #define MCP MC_POST
+    #define MCT MC_POST_TAGGED
+#endif
 
 
 namespace mc {
@@ -31,6 +45,7 @@ namespace mc {
 
 class Message;
 class MessageObserver;
+
 using MessageObserverRef = std::weak_ptr<MessageObserver>;
 using MessageCenterPtr =  std::shared_ptr<class MessageCenter>;
 
@@ -39,26 +54,12 @@ class MessageCenter
 {
     public:
 
-        enum Flag {
-            EndOfMessage
-        };
-
-        MessageCenter();
-        ~MessageCenter();
+        MessageCenter() {}
+        ~MessageCenter() {}
 
         void enable() { enabled_ = true; }
         void disable() { enabled_ = false; }
-//        void setEnter( const bool enabled );
-//        void setLeave( const bool enabled );
-//        void setTrace( const bool enabled );
-//        void setTrace( const bool enter, const bool leave );
-
-//        static int level( const Qt::HANDLE threadId );
-//        static void increaseLevel( const Qt::HANDLE threadId );
-//        static void decreaseLevel( const Qt::HANDLE threadId );
-        static MessageCenter& instance() { return *instance_; }
-
-
+        
         void addObserver(
             const MessageObserverRef& observer,
             const std::string& filter
@@ -66,41 +67,18 @@ class MessageCenter
 
         void post(
             const nlohmann::json& object,
-            MC_INFO_DEFINE_DEFAULT
-        ) const;
+            MC_INFO_DEFINE_DEFAULT,
+            const nlohmann::json& tags = {}
+        );
 
-        void post(
-            const nlohmann::json& object,
-            const nlohmann::json& tags,
-            MC_INFO_DEFINE_DEFAULT
-        ) const;
+        void postMessage( const Message& text );
 
-//        void posts(
-//            const QString& text,
-//            const QString& tag,
-//            MC_INFO_DEFINE_DEFAULT
-//        ) const;
-
-//        void postl(
-//            const QString& text,
-//            const QVariantList& tags,
-//            MC_INFO_DEFINE_DEFAULT
-//        ) const;
-
-//        void postm(
-//            const QString& text,
-//            const QVariantMap& tags,
-//            MC_INFO_DEFINE_DEFAULT
-//        ) const;
-
-        void post( const Message& text ) const;
+        static MessageCenter& instance() { return *instance_; }
 
     private:
 
-//        bool enter_ = false;
-//        bool leave_ = false;
         bool enabled_ = true;
-        mutable std::unordered_set<
+        std::unordered_set<
             MessageObserverRef,
             WeakPtrHash<MessageObserver>,
             WeakPtrEqual<MessageObserver> >
@@ -108,22 +86,8 @@ class MessageCenter
 
         std::mutex observerMutex_;
 
-//        static QMap<Qt::HANDLE, int> levels_;
-//        static QMutex levelMutex_;
         static MessageCenterPtr instance_;
 };
-
-
-const MessageCenter& operator << (
-    const MessageCenter& msgcntr,
-    const nlohmann::json& data
-);
-
-
-const MessageCenter& operator << (
-    const MessageCenter& msgcntr,
-    const MessageCenter::Flag flag
-);
 
 
 }   //  mc::

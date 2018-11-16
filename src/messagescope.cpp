@@ -41,7 +41,7 @@ void MessageScope::emit()
         message_.tags_ = message_.tags_.front();
     }
 
-    MC.post( message_ );
+    MC.postMessage( message_ );
     dirty_ = false;
 }
 
