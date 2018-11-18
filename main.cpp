@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <thread>
+#include <future>
 
 //void scopeTest();
 //void typeTest();
@@ -47,6 +48,7 @@ int main( int argc, char* argv[] )
     MC_POST( "single tag", "awesome tag" );
     MC_POST( "single tag" );
     MC_POST( "was geht?", { "a", { "b", "c", 4, true } } );
+
     // MCS();
     // MCS() << "simple scope";
     // MCS() << "woah" << 4.2 << 3.14159265f << true << 1;

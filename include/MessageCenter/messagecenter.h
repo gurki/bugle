@@ -54,7 +54,7 @@ class MessageCenter
 {
     public:
 
-        MessageCenter() {}
+        MessageCenter();
         ~MessageCenter() {}
 
         void enable() { enabled_ = true; }

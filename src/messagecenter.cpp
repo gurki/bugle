@@ -15,6 +15,11 @@ MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
 
 
 ////////////////////////////////////////////////////////////////////////////////
+MessageCenter::MessageCenter() 
+{}
+
+
+////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::addObserver(
     const MessageObserverRef& observer,
     const std::string& filter )
