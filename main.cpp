@@ -27,7 +27,7 @@ int main( int argc, char* argv[] )
     auto clog = std::make_shared<mc::ConsoleLogger>();
     clog->setFormatter( frmt );
 
-    MC.addObserver( clog, "" );
+    MC.addObserver( clog, "!discard" );
 
     nlohmann::json obj = {
         { "pi", 3.141 },
@@ -46,8 +46,10 @@ int main( int argc, char* argv[] )
 
     MC_POST( "message only" );
     MC_POST( "single tag", "awesome tag" );
-    MC_POST( "single tag" );
-    MC_POST( "was geht?", { "a", { "b", "c", 4, true } } );
+    MC_POST( "multiple tags", { "i'm a tag", "me too" } );
+    MC_POST( "json payload", { "a", { "b", "c", 4, true } } );
+
+    MC_POST( "discarded message", "discard" );
 
     // MCS();
     // MCS() << "simple scope";
@@ -57,7 +59,7 @@ int main( int argc, char* argv[] )
     // MCS( "a", { "b", "c", 4, true } ) << "was geht?";
     // MCS( "a", { "b", "c", 4, true } ) << obj;
 
-    mc::ColorTable::printTestTable();
+    // mc::ColorTable::printTestTable();
 
 //    MessageFormatter formatter;
 //    formatter.setTagColor( "status", 213, 219 );

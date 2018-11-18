@@ -76,7 +76,7 @@ std::string MessageFormatter::colorize(
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string MessageFormatter::beginColor( const uint8_t index ) const {
-    return "\033[38;5;" + std::to_string( index ) + "m";
+    return "\x1b[38;5;" + std::to_string( index ) + "m";
 //    const QString hex = mc::ColorTable::hex( index );
 //    return "<font color='" + hex + "'>";
 }
@@ -84,7 +84,7 @@ std::string MessageFormatter::beginColor( const uint8_t index ) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string MessageFormatter::endColor() const {
-    return "\033[0m";
+    return "\x1b[0m";
 //    case Html: return "</font>";
 }
 

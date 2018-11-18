@@ -1,59 +1,53 @@
-// #pragma once
+#pragma once
 
-// #include "filteritem.h"
-
-// #include <QVector>
-// #include <QVariantMap>
-
-
-// //  some distant takeaways in the first google result [1]
-// //  [1] http://booleanblackbelt.com/2008/12/basic-boolean-search-operators-and-query-modifiers-explained/
+#include "messagecenter/filteritem.h"
+#include <nlohmann/json.hpp>
+#include <vector>
 
 
-// typedef QMap<FilterItem, bool> FilterConjunction;
-// typedef QVector<FilterConjunction> FilterDisjunction;
+//  some distant takeaways in the first google result [1]
+//  [1] http://booleanblackbelt.com/2008/12/basic-boolean-search-operators-and-query-modifiers-explained/
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// //  disjunctive normal form of
-// class BooleanFilter : public QObject
-// {
-//     Q_OBJECT
+typedef std::vector<FilterItem> FilterConjunction;
+typedef std::vector<FilterConjunction> FilterDisjunction;
 
-//     public:
 
-//         BooleanFilter( QObject* parent = nullptr );
+////////////////////////////////////////////////////////////////////////////////
+//  disjunctive normal form of
+class BooleanFilter
+{
+    public:
 
-//         bool set( QString plaintext );
-//         bool unite( QString line );
-//         bool passes( const QVariantMap& set ) const;
+        BooleanFilter( const std::string& plaintext = {} );
 
-//         const int size() const { return normalForm_.size(); }
-//         bool isEmpty() const { return normalForm_.isEmpty(); }
-//         const QString& plaintext() const { return plaintext_; }
+        bool set( const std::string& plaintext );
+        bool unite( const std::string& line );
+        bool passes( const nlohmann::json& set ) const;
 
-//         static bool passes(
-//             const QVariantMap& set,
-//             const FilterItem& item,
-//             const bool negate
-//         );
-//         static bool isSubset(
-//             const FilterConjunction& conjunct,
-//             const QVariantMap& set
-//         );
-//         static bool containsSubset(
-//             const FilterDisjunction& disjunct,
-//             const QVariantMap& set
-//         );
+        size_t size() const { return normalForm_.size(); }
+        bool empty() const { return normalForm_.empty(); }
+        const std::string& plaintext() const { return plaintext_; }
 
-//     signals:
+        static bool passes(
+            const FilterItem& item,
+            const nlohmann::json& set
+        );
 
-//         void changed() const;
+        static bool isSubset(
+            const FilterConjunction& conjunct,
+            const nlohmann::json& set
+        );
 
-//     private:
+        static bool containsSubset(
+            const FilterDisjunction& disjunct,
+            const nlohmann::json& set
+        );
 
-//         FilterDisjunction parseLine( const QString& plaintext );
+    private:
 
-//         FilterDisjunction normalForm_;    //  or -> and -> (tag, not)
-//         QString plaintext_;
-// };
+        FilterDisjunction parseLine( const std::string& plaintext );
+
+        FilterDisjunction normalForm_;    //  or -> and -> (tag, not)
+        std::string plaintext_;
+};

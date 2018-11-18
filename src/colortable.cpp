@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <ios>  //  std::hex
+#include <string_view>
 
 
 namespace mc {
@@ -85,7 +87,7 @@ uint8_t ColorTable::colorId( const std::string& hex )
     ss >> val;
 
     auto conv = []( const int v ) -> int {
-        return std::roundf( 5.f * v / 255.f );
+        return int( std::roundf( 5.f * v / 255.f ) );
     };
 
     const int r = conv( ( val >> 16 ) & 0xff );
@@ -142,7 +144,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     std::cout << std::endl;
 
-    for ( size_t i = 0; i < 8; i++ ) {
+    for ( uint8_t i = 0; i < 8; i++ ) {
         std::cout << mc::ColorTable::ansiEscapeCode( i ) << u8"●";
     }
 
@@ -193,7 +195,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     std::cout << std::endl;
 
-    for ( size_t i = 232; i < 256; i++ ) {
+    for ( uint8_t i = 232; i < 256; i++ ) {
         std::cout << mc::ColorTable::ansiEscapeCode( i ) << u8"●";
     }
 
