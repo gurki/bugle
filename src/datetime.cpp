@@ -21,9 +21,11 @@ DateTime::DateTime()
 std::string DateTime::info() const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
+    struct tm buf;
+    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( std::localtime( &time ), "%F %T" );
+    ss << std::put_time( &buf, "%F %T" );
     ss << "." << milliseconds();
 
     return ss.str();
@@ -34,9 +36,11 @@ std::string DateTime::info() const
 std::string DateTime::timeInfo( const Resolution resolution ) const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
+    struct tm buf;
+    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( std::localtime( &time ), "%T" );
+    ss << std::put_time( &buf, "%T" );
 
     if ( resolution == Microseconds ) {
         ss << "." << microseconds();
@@ -52,9 +56,11 @@ std::string DateTime::timeInfo( const Resolution resolution ) const
 std::string DateTime::dateInfo() const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
+    struct tm buf;
+    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( std::localtime( &time ), "%F" );
+    ss << std::put_time( &buf, "%F" );
 
     return ss.str();
 }
@@ -90,7 +96,7 @@ DateTime DateTime::parse( const std::string& str )
     DateTime dt = {};
 
     std::tm t = {};
-    std::get_time( &t, "%F %T" );
+    auto res = std::get_time( &t, "%F %T" );
     auto time = std::mktime( &t );
 
     dt.timestamp_ = std::chrono::system_clock::from_time_t( time );

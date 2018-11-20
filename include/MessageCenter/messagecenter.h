@@ -39,9 +39,7 @@
 namespace mc {
 
 
-class MessageObserver;
-
-using MessageObserverRef = std::weak_ptr<MessageObserver>;
+using MessageObserverRef = std::weak_ptr<class MessageObserver>;
 using MessageCenterPtr =  std::shared_ptr<class MessageCenter>;
 
 
