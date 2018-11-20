@@ -1,5 +1,13 @@
 #include "messagecenter/booleanfilter.h"
 
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+
+
+namespace mc {
+
 
 ////////////////////////////////////////////////////////////////////////////////
 BooleanFilter::BooleanFilter( const std::string& plaintext ) {
@@ -8,51 +16,75 @@ BooleanFilter::BooleanFilter( const std::string& plaintext ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+void BooleanFilter::clear() {
+    plaintext_.clear();
+    normalForm_.clear();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 bool BooleanFilter::set( const std::string& plaintext )
 {
-    // //  convert linebreaks to conjunctions
+    clear();
 
-    // plaintext.replace( '\n', ',' );
+    if ( plaintext.empty() ) {
+        return true;
+    }
 
-    // if ( plaintext == plaintext_ ) {
-    //     return true;
-    // }
+    //  convert linebreaks to conjunctions
 
-    // //  parse line
-    // const FilterDisjunction disjunction = parseLine( plaintext );
+    std::string pt = plaintext;
+    std::replace( pt.begin(), pt.end(), '\n', ',' );
 
-    // //  invalid line
-    // if ( disjunction.isEmpty() && ! plaintext.isEmpty() ) {
-    //     return false;
-    // }
+    if ( pt == plaintext_ ) {
+        return true;
+    }
 
-    // //  set
-    // if ( normalForm_ == disjunction ) {
-    //     return true;
-    // }
+    //  parse line
+    const FilterDisjunction disjunction = parseLine( pt );
 
-    // plaintext_ = plaintext;
-    // normalForm_ = disjunction;
+    //  invalid line
+    if ( disjunction.empty() ) {
+        return false;
+    }
+
+    //  set
+    
+    plaintext_ = plaintext;
+
+    if ( normalForm_ == disjunction ) {
+        return true;
+    }
+
+    plaintext_ = plaintext;
+    normalForm_ = disjunction;
 
     return true;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::unite( const std::string& line )
+bool BooleanFilter::unite( const std::string& plaintext )
 {
-    // if ( line.isEmpty() ) {
-    //     return true;
-    // }
+    if ( plaintext.empty() ) {
+        return true;
+    }
 
-    // const FilterDisjunction disjunction = parseLine( line );
+    std::string pt = plaintext;
+    std::replace( pt.begin(), pt.end(), '\n', ',' );
 
-    // if ( disjunction.isEmpty() && ! line.isEmpty() ) {
-    //     return false;
-    // }
+    const auto disjunction = parseLine( pt );
 
-    // plaintext_ += "," + line;
-    // normalForm_.append( disjunction );
+    if ( disjunction.empty() ) {
+        return false;
+    }
+
+    plaintext_ += "," + pt;
+
+    normalForm_.insert( 
+        normalForm_.end(),
+        disjunction.begin(), disjunction.end()
+    );
 
     return true;
 }
@@ -61,104 +93,87 @@ bool BooleanFilter::unite( const std::string& line )
 ////////////////////////////////////////////////////////////////////////////////
 FilterDisjunction BooleanFilter::parseLine( const std::string& line )
 {
-    // //  split into conjuncts
-    // const auto disjuncts = line.split( ',' );
+    if ( line.empty() ) {
+        return {};
+    }
+
+    //  split into disjuncts
 
     FilterDisjunction disjunction;
+    const auto disjuncts = tokenize( line, ',' );
 
-    // for ( const auto& disjunct : disjuncts )
-    // {
-    //     FilterConjunction conjunction;
+    for ( const auto& disjunct : disjuncts )
+    {
+        if ( disjunct.empty() ) {
+            continue;
+        }
 
-    //     if ( disjunct.isEmpty() ) {
-    //         continue;
-    //     }
+        //  split expression into conjuncts
 
-    //     //  split expression into and-items
-    //     const auto conjuncts = disjunct.split( QRegExp("\\s+"), QString::SkipEmptyParts );
+        FilterConjunction conjunction;
+        const auto conjuncts = tokenize( disjunct, ' ' );
 
-    //     for ( const auto& conjunct : conjuncts )
-    //     {
-    //         const bool negate = conjunct[0] == '!';
-    //         const std::string variable = negate ? conjunct.mid( 1 ) : conjunct;
+        for ( const auto& conjunct : conjuncts )
+        {
+            FilterItem item;
+            const bool valid = item.parse( conjunct );
 
-    //         FilterItem item;
-    //         const bool valid = item.parse( variable );
+            if ( valid ) {
+                conjunction.push_back( item );
+            }
+        }
 
-    //         if ( valid ) {
-    //             conjunction[ item ] = ! negate;
-    //         }
-    //     }
-
-    //     //  add valid option
-    //     if ( ! conjunction.isEmpty() ) {
-    //         disjunction.push_back( conjunction );
-    //     }
-    // }
+        //  add valid option
+        if ( ! conjunction.empty() ) {
+            disjunction.push_back( conjunction );
+        }
+    }
 
     return disjunction;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::passes( const nlohmann::json& set ) const {
-    return containsSubset( normalForm_, set );
+bool BooleanFilter::passes( const jmap_t& tags ) const 
+{
+    return std::any_of( normalForm_.begin(), normalForm_.end(), [ &tags ]( const FilterConjunction& conjunction ) {
+        return std::all_of( conjunction.begin(), conjunction.end(), [ &tags ]( const FilterItem& item ) {
+            const bool suc = item.passes( tags );
+            return suc;
+        });
+    });
+}
+
+
+#ifdef NLOHMANN_JSON_HPP
+
+////////////////////////////////////////////////////////////////////////////////
+void to_json( nlohmann::json& j, const BooleanFilter& filter ) {
+    j = filter.normalForm_;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::containsSubset(
-    const FilterDisjunction& disjunct,
-    const nlohmann::json& set )
-{
-    if ( disjunct.empty() ) {
-        return true;
-    }
-
-    for ( const auto& conjunct : disjunct ) {
-        if ( isSubset( conjunct, set ) ) {
-            return true;
-        }
-    }
-
-    return false;
+void from_json( const nlohmann::json& j, BooleanFilter& filter ) {
+    filter.set( j.get<std::string>() );
 }
+
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::isSubset(
-    const FilterConjunction& conjunct,
-    const nlohmann::json& set )
+std::vector<std::string> tokenize( const std::string& line, const char divider ) 
 {
-    for ( const auto& item : conjunct ) {
-        if ( ! passes( item, set ) ) {
-            return false;
-        }
+    std::vector<std::string> tokens;
+    std::istringstream istr( line );
+    std::string token;
+
+    while ( std::getline( istr, token, divider ) ) {
+        tokens.push_back( token );
     }
 
-    return true;
+    return tokens;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::passes(
-    const FilterItem& item,
-    const nlohmann::json& set )
-{
-    // const std::string& key = item.key();
-    // bool passes = set.contains( key );  //  default for simple tag
-
-    // //  rich tag option
-    // if ( item.hasValue() )
-    // {
-    //     if ( ! passes ) {
-    //         return false;
-    //     }
-
-    //     const nlohmann::json& value = set.value( key );
-    //     passes = item.compare( value );
-    // }
-
-    // return ( passes == negate );
-    return false;
-}
+}   //  ::mc

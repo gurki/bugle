@@ -8,9 +8,15 @@
 //#include "messageformatter.h"
 //#include "htmllogger.h"
 
+#include "messagecenter/filteritem.h"
+#include "messagecenter/datetime.h"
+
 #include <iostream>
 #include <thread>
 #include <future>
+#include <chrono>
+#include <variant>
+#include <utility>
 
 //void scopeTest();
 //void typeTest();
@@ -23,6 +29,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
+    typedef std::variant< std::string, std::pair<std::string, int> > tag_t;
+
+    tag_t t1 = "hallo";
+    tag_t t2 = { "debug", 2 };
+
+
     auto frmt = std::make_shared<mc::MessageFormatter>();
     auto clog = std::make_shared<mc::ConsoleLogger>();
     clog->setFormatter( frmt );
@@ -50,6 +62,51 @@ int main( int argc, char* argv[] )
     MC_POST( "json payload", { "a", { "b", "c", 4, true } } );
 
     MC_POST( "discarded message", "discard" );
+    
+    //  test filter item 
+
+    mc::FilterItem item;
+
+    ///  spacing
+    item.parse( "value>5.4");
+    item.parse( "!value>5.4");
+    item.parse( " value>5.4");
+    item.parse( "! value>5.4");
+    item.parse( "value> 5.4");
+    item.parse( "value >5.4");
+
+    ///  key
+    item.parse( "! amen brother > 5.4");    //  invalid
+    item.parse( "! amen-brother > 5.4");
+    item.parse( "! amen_brother > 5.4");
+
+    //  values
+    item.parse( "value=1" );
+    item.parse( "value=1.0" );
+    item.parse( "value=1.0f" ); //  string_t
+    item.parse( "value=lel" );
+    item.parse( "value={1, 2, {3, 4}}" );   //  invalid
+
+
+    //  test boolean filter
+
+    mc::BooleanFilter filter;
+
+    //  parsing
+
+    filter.set( "debug");
+    filter.set( "debug,network");
+    filter.set( " debug , network ");
+    filter.set( "debug radio, network");
+    filter.set( " debug radio , network input     error ");
+    filter.set( "priority>2");
+    filter.set( "debug priority>2 file=main.cpp, priority<4 network");
+
+    //  execution
+
+    filter.set( "debug" );
+    const bool suc = filter.passes( { { "radio", {} }, { "debug", {} }, { "priority", 3.14 } });
+    std::cout << suc << std::endl;
 
     // MCS();
     // MCS() << "simple scope";

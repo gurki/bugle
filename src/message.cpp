@@ -18,14 +18,16 @@ Message::Message(
     const char* function,
     const int line,
     const nlohmann::json& object,
-    const nlohmann::json& tags ):
+    const jmap_t& tags ):
     Message()
 {
-    if ( file )
+    if ( file ) {
         file_ = file;
+    }
 
-    if ( function )
+    if ( function ) {
         function_ = function;
+    }
 
     line_ = line;
     payload_ = object;

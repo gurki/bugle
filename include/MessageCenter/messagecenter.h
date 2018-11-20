@@ -2,6 +2,7 @@
 
 #include "messagecenter/messageinfo.h"
 #include "messagecenter/utility.h"
+#include "messagecenter/message.h"
 //#include "messagescope.h"
 //#include "colortable.h"
 #include "messagecenter/booleanfilter.h"
@@ -35,7 +36,6 @@
 namespace mc {
 
 
-class Message;
 class MessageObserver;
 
 using MessageObserverRef = std::weak_ptr<MessageObserver>;
@@ -63,7 +63,7 @@ class MessageCenter
             const nlohmann::json& tags = {}
         );
 
-        void postMessage( const Message& text );
+        void postMessage( const Message& message );
 
         static MessageCenter& instance() { return *instance_; }
 
@@ -85,4 +85,4 @@ class MessageCenter
 };
 
 
-}   //  mc::
+}   //  ::mc

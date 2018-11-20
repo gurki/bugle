@@ -37,10 +37,6 @@ void MessageScope::emit()
         message_.payload_ = message_.payload_.front();
     }
 
-    if ( message_.tags_.size() == 1 ) {
-        message_.tags_ = message_.tags_.front();
-    }
-
     MC.postMessage( message_ );
     dirty_ = false;
 }

@@ -6,61 +6,85 @@
 #include <iostream>
 
 
+namespace mc {
+
+
 ////////////////////////////////////////////////////////////////////////////////
 FilterItem::FilterItem()
 {}
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool FilterItem::compare( const nlohmann::json& target ) const {
-    return comparator_( target, value_ ) ^ negate_;
+void FilterItem::clear() 
+{
+    negate_ = false;
+    key_.clear();
+    value_.clear();
+    comparator_ = {};
+    plaintext_.clear();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool FilterItem::hasValue() const {
-    // return ! value_.isNull() && value_.isValid();
-    return false;
+bool FilterItem::compare( const nlohmann::json& value ) const {
+    return comparator_( value, value_ ) ^ negate_;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+bool FilterItem::passes( const jmap_t& tags ) const
+{
+    if ( tags.find( key_ ) == tags.end() ) {
+        return negate_;
+    }
+
+    return compare( tags.at( key_ ) );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 bool FilterItem::parse( const std::string& plaintext )
 {
-    static const std::string validOperators = "(>=|<=|!=|=|>|<)";
+    static const std::string validOperators = ">=|<=|!=|=|>|<";
     static const std::string validSymbols = "\\w|\\.|-|_|:";
     static const std::string validNames = "((?:" + validSymbols + ")+)";
-    static const std::string validValues = "(?:(?:" + validOperators + validNames + ")?)";
+    static const std::string validValues = "(?:(" + validOperators + ")\\s*" + validNames + ")?";
+    static const std::string validRegex = "(!)?\\s*" + validNames + "\\s*" + validValues;
+    static std::regex re( validRegex );
 
-    std::regex re( validNames + validValues );
-    std::cmatch m;
-    std::regex_match( plaintext, m, re );
+    clear();
 
-    std::cout << m.size() << std::endl;
-    // static const QRegularExpression re( validNames + validValues );
+    std::smatch match;
+    std::regex_match( plaintext, match, re );
 
-    // const QRegularExpressionMatch match = re.match( plaintext );
+    if ( match.empty() ) {
+        return false;
+    }
 
-    // if ( ! match.hasMatch() ) {
-    //     valid_ = false;
-    //     return false;
-    // }
+    //  valid match => non-empty key, optional ( non-empty operator and non-empty value )
 
-    // //  valid match => non-empty key, optional ( non-empty operator and non-empty value )
+    key_ = match[ 2 ];
 
-    // valid_ = true;
-    // key_ = match.captured( 1 );
+    const std::string value = match[ 4 ];
+    const std::string op = match[ 3 ];
 
-    // const auto valueStr = match.captured( 3 );
-    // const auto op = match.captured( 2 );
+    negate_ = ( match[ 1 ].length() != 0 );
+    plaintext_ = ( negate_ ? "!" : "" ) + key_;
 
-    // //  early return for key-only
-    // if ( op.isEmpty() ) {
-    //     return true;
-    // }
+    //  early return for key-only
+    if ( op.empty() ) {
+        return true;
+    }
 
-    // value_ = mc::parseValue( valueStr );
-    // comparator_ = comparatorForString( op );
+    plaintext_ += op + value;
+
+    try {
+        value_ = nlohmann::json::parse( value ); //  number
+    } catch ( const std::exception& ) {
+        value_ = nlohmann::json::string_t( value );  //  else string
+    }
+
+    comparator_ = comparatorForString( op );
 
     return true;
 }
@@ -86,3 +110,28 @@ FilterItem::Comparator FilterItem::comparatorForString( const std::string& str )
         return Comparator();
     }
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+bool operator == ( const FilterItem& item1, const FilterItem& item2 ) {
+    return item1.plaintext() == item2.plaintext();
+}
+
+
+#ifdef NLOHMANN_JSON_HPP
+
+////////////////////////////////////////////////////////////////////////////////
+void to_json( nlohmann::json& j, const FilterItem& item )  {
+    j = item.plaintext();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void from_json( const nlohmann::json& j, FilterItem& item ) {
+    item.parse( j.get<std::string>() );
+}
+
+#endif
+
+
+}   //  ::mc

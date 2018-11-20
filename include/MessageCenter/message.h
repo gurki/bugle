@@ -12,6 +12,9 @@
 namespace mc {
 
 
+typedef std::unordered_map<std::string, nlohmann::json> jmap_t;
+
+
 class Message
 {
     public:
@@ -23,7 +26,7 @@ class Message
             const char* function,
             const int line,
             const nlohmann::json& object,
-            const nlohmann::json& tags = {}
+            const jmap_t& tags = {}
         );
 
 //        void set(
@@ -57,7 +60,7 @@ class Message
 
         DateTime datetime_ = {};
         nlohmann::json payload_ = {};
-        nlohmann::json tags_ = {};
+        jmap_t tags_ = {};
         std::thread::id threadId_ = {};
 };
 

@@ -19,17 +19,19 @@ class DateTime
 
         DateTime();
 
+        bool valid() const { return timestamp_.time_since_epoch().count() > 0; }
         std::string info() const;
-        std::string timeInfo( const Resolution resolution ) const;
+        std::string timeInfo( const Resolution resolution = Seconds ) const;
         std::string dateInfo() const;
         uint16_t milliseconds() const;
         uint32_t microseconds() const;
 
         static DateTime now();
+        static DateTime parse( const std::string& str );
 
     private:
 
-        std::chrono::system_clock::time_point timestamp_;
+        std::chrono::system_clock::time_point timestamp_ = {};
 };
 
 

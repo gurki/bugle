@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <string_view>
+#include <unordered_map>
 
 
 namespace mc {
@@ -45,10 +46,13 @@ std::string MessageFormatter::format( const Message& message ) const
 
     for ( const auto& tag : message.tags_ )
     {
-        if ( ! tag.empty() ) {
-            ss << tag;
-            ss << skip( 2 );
+        ss << tag.first;
+
+        if ( ! tag.second.empty() ) {
+            ss << ":" << tag.second;
         }
+
+        ss << skip( 2 );
     }
 
     return ss.str();

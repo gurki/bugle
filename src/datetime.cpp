@@ -12,8 +12,7 @@ using std::chrono::system_clock;
 
 
 //////////////////////////////////////////////////////////////////////////////////
-DateTime::DateTime() :
-    timestamp_( system_clock::now() )
+DateTime::DateTime()
 {}
 
 
@@ -78,7 +77,24 @@ uint32_t DateTime::microseconds() const {
 
 //////////////////////////////////////////////////////////////////////////////////
 DateTime DateTime::now() {
-    return DateTime();
+    DateTime dt = {};
+    dt.timestamp_ = system_clock::now();
+    return dt;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+DateTime DateTime::parse( const std::string& str ) 
+{
+    DateTime dt = {};
+
+    std::tm t = {};
+    std::get_time( &t, "%F %T" );
+    auto time = std::mktime( &t );
+
+    dt.timestamp_ = std::chrono::system_clock::from_time_t( time );
+
+    return dt;
 }
 
 

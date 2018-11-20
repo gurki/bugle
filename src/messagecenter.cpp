@@ -33,10 +33,10 @@ void MessageCenter::addObserver(
     observers_.insert( observer );
 
     if ( filter_.find( observer ) == filter_.end() ) {
-        filter_[ observer ] = BooleanFilter();
+        filter_[ observer ] = BooleanFilter( filter );
+    } else {
+        filter_[ observer ].unite( filter );
     }
-    
-    filter_[ observer ].unite( filter );
 }
 
 
@@ -50,7 +50,21 @@ void MessageCenter::post(
     return;
 #endif
 
-    Message message( MC_INFO_NAMES, object, tags );
+    jmap_t jmap;
+
+    if ( tags.is_string() ) {
+        jmap[ tags.get<std::string>() ] = {};
+    } 
+    // else if ( tags.is_array() || tags.is_object() ) 
+    // {
+    //     std::cout << tags << std::endl;
+
+    //     for ( const auto& tag : tags ) {
+    //         std::cout << tag.type_name() << std::endl;
+    //     }
+    // }
+
+    Message message( MC_INFO_NAMES, object, jmap );
     auto f = std::async( &MessageCenter::postMessage, this, std::move( message ) );
 }
 
@@ -82,4 +96,4 @@ void MessageCenter::postMessage( const Message& message )
 }
 
 
-}   //  mc::
+}   //  ::mc
