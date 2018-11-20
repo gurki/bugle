@@ -11,6 +11,9 @@
 
 
 namespace mc {
+    
+    
+nlohmann::json filterTags( const nlohmann::json& tags );
 
 
 class jmap_t : public std::unordered_map<std::string, nlohmann::json>

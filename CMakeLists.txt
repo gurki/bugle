@@ -14,3 +14,7 @@ add_executable(messagecenter examples/main.cpp ${SOURCES})
 target_link_libraries(messagecenter PRIVATE nlohmann_json::nlohmann_json)
 
 add_compile_definitions(MC_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")
+
+#  message center options
+# add_compile_definitions(MC_DISABLE_POST)
+# add_compile_definitions(MC_DISABLE_LOWERCASE_DEFINES)

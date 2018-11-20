@@ -102,4 +102,47 @@ Message::Message(
 //}
 
 
+//////////////////////////////////////////////////////////////////////////////////
+nlohmann::json filterTags( const nlohmann::json& tags ) 
+{
+    static auto insert = []( nlohmann::json& jobj, const nlohmann::json& tag ) -> void
+    {
+        //  ignores arrays, numbers and bool
+
+        if ( tag.is_string() ) {
+            jobj[ tag.get<std::string>() ] = {};
+        }
+
+        if ( tag.is_object() ) {
+            for ( auto it = tag.begin(); it != tag.end(); ++it ) {
+                jobj[ it.key() ] = it.value();
+            }
+        }            
+    };
+    
+    //  only considers first level strings, objects and convertible arrays
+    //  ignores all numbers, bools and second-level non-convertible arrays
+
+    nlohmann::json jobj( nlohmann::json::value_t::object );
+    insert( jobj, tags );
+    
+    if ( tags.is_array() ) 
+    {
+        for ( const auto& tag : tags ) 
+        {
+            if ( tag.is_array() && tag.size() == 2 ) {
+                if ( tag[0].is_string() ) {
+                    jobj[ tag[0].get<std::string>() ] = tag[1];
+                }
+            }
+            else {
+                insert( jobj, tag );
+            }
+        }
+    }
+
+    return jobj;
+}
+
+
 }   //  mc::

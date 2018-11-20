@@ -15,15 +15,13 @@
 
 
 #define MC ( mc::MessageCenter::instance() )
-#define mci MC
-
-#define PP_THIRD_ARG(a,b,c,...) c
-#define VA_OPT_SUPPORTED_I(...) PP_THIRD_ARG(__VA_OPT__(,),true,false,)
-#define VA_OPT_SUPPORTED VA_OPT_SUPPORTED_I(?)
+#ifndef MC_DISABLE_LOWERCASE_DEFINES
+    #define mci MC
+#endif
 
 #ifdef MC_DISABLE_POST
     #define MC_POST( text )
-#else    
+#else 
     #if VA_OPT_SUPPORTED
         #define MC_POST( text, ... ) ( MC.post( text, MC_INFO __VA_OPT__(, __VA_ARGS__) ))
     #else
@@ -32,8 +30,10 @@
 #endif
 
 #define MCP MC_POST
-#define mcp MC_POST
-#define mc_post MC_POST 
+#ifndef MC_DISABLE_LOWERCASE_DEFINES
+    #define mcp MC_POST
+    #define mc_post MC_POST 
+#endif
 
 
 namespace mc {
