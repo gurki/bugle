@@ -50,21 +50,7 @@ void MessageCenter::post(
     return;
 #endif
 
-    jmap_t jmap;
-
-    if ( tags.is_string() ) {
-        jmap[ tags.get<std::string>() ] = {};
-    } 
-    // else if ( tags.is_array() || tags.is_object() ) 
-    // {
-    //     std::cout << tags << std::endl;
-
-    //     for ( const auto& tag : tags ) {
-    //         std::cout << tag.type_name() << std::endl;
-    //     }
-    // }
-
-    Message message( MC_INFO_NAMES, object, jmap );
+    Message message( MC_INFO_NAMES, object, tags );
     auto f = std::async( &MessageCenter::postMessage, this, std::move( message ) );
 }
 

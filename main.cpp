@@ -29,12 +29,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    typedef std::variant< std::string, std::pair<std::string, int> > tag_t;
-
-    tag_t t1 = "hallo";
-    tag_t t2 = { "debug", 2 };
-
-
     auto frmt = std::make_shared<mc::MessageFormatter>();
     auto clog = std::make_shared<mc::ConsoleLogger>();
     clog->setFormatter( frmt );
@@ -57,12 +51,24 @@ int main( int argc, char* argv[] )
     };
 
     MC_POST( "message only" );
-    MC_POST( "single tag", "awesome tag" );
-    MC_POST( "multiple tags", { "i'm a tag", "me too" } );
-    MC_POST( "json payload", { "a", { "b", "c", 4, true } } );
+    MC_POST( "single tag", "awesome-tag" );
+    MC_POST( "multiple tags", { "im-a-tag", "me-too" } );
+    MC_POST( "array", { "a", 4 } );
+    MC_POST( "object", {{ "a", 4 }} );
+    MC_POST( "object in array", { "a", {{ "b", 4 }} });
+    MC_POST( "array value", { "a", { "b", { "c", 4, true } }});
+    MC_POST( "large object", obj );
 
     MC_POST( "discarded message", "discard" );
+
+
+    //  test jmap_t
+
+    mc::jmap_t jmap = { "radio", "debug", { "priority", 3.14 } };
+    std::cout << jmap << std::endl;
     
+    std::cout << MC_RESOURCE_DIR << std::endl;
+
     //  test filter item 
 
     mc::FilterItem item;
@@ -104,9 +110,9 @@ int main( int argc, char* argv[] )
 
     //  execution
 
-    filter.set( "debug" );
-    const bool suc = filter.passes( { { "radio", {} }, { "debug", {} }, { "priority", 3.14 } });
-    std::cout << suc << std::endl;
+    // filter.set( "debug" );
+    // const bool suc = filter.passes( { "radio", "debug", { "priority", 3.14 } } );
+    // std::cout << suc << std::endl;
 
     // MCS();
     // MCS() << "simple scope";

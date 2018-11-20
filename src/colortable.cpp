@@ -9,6 +9,9 @@
 namespace mc {
 
 
+using namespace std::string_literals;
+
+
 nlohmann::json ColorTable::table_ = {};
 ColorTable ColorTable::instance_ = {};
 
@@ -16,14 +19,13 @@ ColorTable ColorTable::instance_ = {};
 ////////////////////////////////////////////////////////////////////////////////
 ColorTable::ColorTable()
 {
-    //  FIXME: relative path
-    std::ifstream fin( "/Users/tobiasgurdan/Documents/projects/2018/messagecenter/data/colors.json" );
+    std::ifstream fin( MC_RESOURCE_DIR + "colors.json"s );
 
-    if ( ! fin.is_open() ) {
-        return;
-    }
+    assert( fin.is_open() );
 
     table_ = nlohmann::json::parse( fin );
+
+    std::cout << table_.dump( 2 ) << std::endl;
 }
 
 
@@ -42,7 +44,7 @@ std::string ColorTable::hexString( const uint8_t index )
 uint8_t ColorTable::findName( const std::string& name )
 {
     if ( table_.is_null() ) {
-        return 0;
+        return 15;  //  white
     }
 
     auto it = std::find_if( table_.begin(), table_.end(), [ &name ]( const json& item ) {
@@ -50,7 +52,7 @@ uint8_t ColorTable::findName( const std::string& name )
     });
 
     if ( it == table_.end() ) {
-        return 0;
+        return 15;  //  white
     }
 
     return (*it)[ "colorId" ];
@@ -67,7 +69,7 @@ std::string ColorTable::colorName( const uint8_t id ) {
 uint8_t ColorTable::colorId( const std::string& hex )
 {
     if ( hex.empty() ) {
-        return 0;
+        return 15;  //  white
     }
 
     std::string_view hexstr( &hex[ 0 ], hex.size() );
@@ -77,7 +79,7 @@ uint8_t ColorTable::colorId( const std::string& hex )
     }
 
     if ( hexstr.size() > 8 ) {
-        return 0;
+        return 15;  //  white
     }
 
     std::stringstream ss;
