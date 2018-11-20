@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messagecenter/messageobserver.h"
-#include "messagecenter/messageformatter.h"
+#include "messagecenter/formatter.h"
 
 
 namespace mc {
@@ -13,7 +13,7 @@ class ConsoleLogger : public MessageObserver
 
         ConsoleLogger();
 
-        void setFormatter( const MessageFormatterPtr& formatter );
+        void setFormatter( const FormatterPtr& formatter );
 
         virtual void notify( const Message& message );
 
@@ -21,7 +21,7 @@ class ConsoleLogger : public MessageObserver
 
         void printSystemInfo() const;
 
-        MessageFormatterPtr formatter_ = nullptr;
+        FormatterPtr formatter_ = nullptr;
 };
 
 

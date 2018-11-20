@@ -25,35 +25,28 @@ void Formatter::setIndent( const uint8_t indent ) {
 std::string Formatter::format( const Message& message ) const
 {
     std::stringstream ss;
-    ss << colorize( message.datetime_.timeInfo( DateTime::Microseconds ), "Grey58" );
+    ss << colorize( message.datetime_.timeInfo( DateTime::Microseconds ), 246 );
 
-    if ( ! message.payload_.empty() )
-    {
+    if ( ! message.payload_.empty() ) {
         ss << skip( 2 );
-
         const std::string msg = message.payload_.dump();
-        std::string_view view( &msg[0], msg.size() );
-//        view.remove_prefix( 1 );
-//        view.remove_suffix( 1 );
-
-        std::stringstream ssv;
-        ssv << view;
-
-        ss << colorize( msg, "Gray78" );
+        ss << colorize( msg.substr( 1, msg.size() - 2 ), 251 );
     }
 
     ss << skip( 2 );
 
-    for ( const auto& tag : message.tags_ )
-    {
-        ss << tag.first;
+    // for ( const auto& tag : message.tags_ )
+    // {
+        // ss << tag.first;
 
-        if ( ! tag.second.empty() ) {
-            ss << ":" << tag.second;
-        }
+        // if ( ! tag.second.empty() ) {
+        //     ss << ":" << tag.second;
+        // }
 
-        ss << skip( 1 );
-    }
+        // ss << skip( 1 );
+    // }
+
+    ss << tagInfo( message.tags_ );
 
     return ss.str();
 }
@@ -64,16 +57,6 @@ std::string Formatter::colorize(
     const std::string& text,
     const uint8_t index ) const
 {
-    return beginColor( index ) + text + endColor();
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::colorize(
-        const std::string& text,
-        const std::string& colorName ) const
-{
-    const uint8_t index = ColorTable::findName( colorName );
     return beginColor( index ) + text + endColor();
 }
 
@@ -129,55 +112,63 @@ std::string Formatter::skip( const uint8_t count ) const  {
 //}
 
 
-//////////////////////////////////////////////////////////////////////////////////
-//QString Formatter::tagInfo( const QVariantMap& tags ) const
-//{
-//    static const uint8_t textColor = 246;
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::tagInfo( const jmap_t& tags ) const
+{
+    static const uint8_t text1 = 246;
+    static const uint8_t tag1 = 248;
+    static const uint8_t tag2 = 243;
+    static const size_t maxSize = 24;
 
-//    QString info;
-//    QTextStream stream( &info );
+    std::stringstream stream;
 
-//    auto iter = tags.constBegin();
-//    bool firstItem = true;
+    bool firstItem = true;
 
-//    while ( iter != tags.constEnd() )
-//    {
-//        const auto& tag = iter.key();
+    for ( const auto& tag : tags )
+    {
+        const auto& key = tag.first;
+        const auto& value = tag.second;
 
-//        if ( ! systemTags_ && tag.startsWith( "__" ) ) {
-//            iter++;
-//            continue;
-//        }
+        // if ( ! systemTags_ && key.startsWith( "__" ) ) {
+        //     iter++;
+        //     continue;
+        // }
 
-//        if ( firstItem ) {
-//            stream << colorized( "[", textColor );
-//            firstItem = false;
-//        } else {
-//            stream << colorized( ",", textColor );
-//        }
+        if ( firstItem ) {
+            // stream << colorize( "[", text1 );
+            firstItem = false;
+        } else {
+            stream << colorize( " ", text1 );
+        }
 
-//        auto codes = mc::defaultTagColors();
+        // auto codes = mc::defaultTagColors();
 
-//        if ( colors_.contains( tag ) ) {
-//            codes = colors_[ tag ];
-//        }
+        // if ( colors_.contains( key ) ) {
+        //     codes = colors_[ key ];
+        // }
 
-//        stream << colorized( iter.key(), codes.first );
+        stream << colorize( "#", text1 );
+        stream << colorize( key, tag1 );
 
-//        if ( iter.value().isValid() ) {
-//            stream << colorized( ":", textColor );
-//            stream << colorized( iter.value().toString(), codes.second );
-//        }
+        if ( ! value.empty() ) 
+        {
+            stream << colorize( ":", text1 );
 
-//        iter++;
-//    }
+            const std::string valueStr = value.dump();
+            stream << colorize( valueStr.substr( 0, maxSize ), tag2 );
+            
+            if ( valueStr.size() > maxSize ) {
+                stream << colorize( "\xE2\x80\xA6", tag2 );
+            }
+        }
+    }
 
-//    if ( ! firstItem ) {
-//        stream << colorized( "]", textColor );
-//    }
+    // if ( ! firstItem ) {
+    //     stream << colorize( "]", text1 );
+    // }
 
-//    return info;
-//}
+    return stream.str();
+}
 
 
 

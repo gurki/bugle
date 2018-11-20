@@ -15,6 +15,7 @@
 
 
 #define MC ( mc::MessageCenter::instance() )
+#define mci MC
 
 #define PP_THIRD_ARG(a,b,c,...) c
 #define VA_OPT_SUPPORTED_I(...) PP_THIRD_ARG(__VA_OPT__(,),true,false,)
@@ -31,6 +32,8 @@
 #endif
 
 #define MCP MC_POST
+#define mcp MC_POST
+#define mc_post MC_POST 
 
 
 namespace mc {

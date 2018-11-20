@@ -12,7 +12,7 @@
 // HtmlLogger::HtmlLogger( QObject* parent ) :
 //     QObject( parent )
 // {
-//     formatter_ = new MessageFormatter( this );
+//     formatter_ = new Formatter( this );
 // }
 
 
@@ -28,7 +28,7 @@
 
 
 // ////////////////////////////////////////////////////////////////////////////////
-// void HtmlLogger::setFormatter( MessageFormatter* formatter )
+// void HtmlLogger::setFormatter( Formatter* formatter )
 // {
 //     if ( formatter == formatter_ ) {
 //         return;
@@ -188,7 +188,7 @@
 //         return;
 //     }
 
-//     formatter_->pushType( MessageFormatter::Html );
+//     formatter_->pushType( Formatter::Html );
 
 //     const QString text = formatter_->format( message );
 //     stream_ << "<div>" << text.toUtf8() << "</div> \n";

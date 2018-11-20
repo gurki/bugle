@@ -2,10 +2,10 @@
 #include "messagecenter/consolelogger.h"
 #include "messagecenter/messagescope.h"
 #include "messagecenter/colortable.h"
-#include "messagecenter/messageformatter.h"
+#include "messagecenter/formatter.h"
 //#include "consolelogger.h"
 //#include "jsonlogger.h"
-//#include "messageformatter.h"
+//#include "formatter.h"
 //#include "htmllogger.h"
 
 #include "messagecenter/filteritem.h"
@@ -25,15 +25,17 @@
 //void timingTest();
 //void timingTestRandom();
 
+using namespace mc;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto frmt = std::make_shared<mc::MessageFormatter>();
+    auto frmt = std::make_shared<mc::Formatter>();
     auto clog = std::make_shared<mc::ConsoleLogger>();
     clog->setFormatter( frmt );
 
-    MC.addObserver( clog, "!discard" );
+    mci.addObserver( clog, "!discard" );
 
     nlohmann::json obj = {
         { "pi", 3.141 },
@@ -50,28 +52,30 @@ int main( int argc, char* argv[] )
         }}
     };
 
-    MC_POST( "message only" );
-    MC_POST( "single tag", "awesome-tag" );
-    MC_POST( "multiple tags", { "im-a-tag", "me-too" } );
-    MC_POST( "array", { "a", 4 } );
-    MC_POST( "object", {{ "a", 4 }} );
-    MC_POST( "object in array", { "a", {{ "b", 4 }} });
-    MC_POST( "array value", { "a", { "b", { "c", 4, true } }});
-    MC_POST( "large object", obj );
+    mc_post( "message only" );
+    mc_post( "single tag", "awesometag" );
+    mc_post( "multiple tags", { "imatag", "metoo" } );
+    mc_post( "array", { "a", 4 } );
+    mc_post( "object", {{ "a", 4 }} );
+    mc_post( "object in array", { "a", {{ "b", 4 }} });
+    mc_post( "array value", { "a", { "b", { "c", 4, true } }});
+    mc_post( "large object", obj );
 
-    MC_POST( "discarded message", "discard" );
+    mc_post( "discarded message", "discard" );
 
 
     //  test jmap_t
 
-    mc::jmap_t jmap = { "radio", "debug", { "priority", 3.14 } };
-    std::cout << jmap << std::endl;
+    jmap_t jmap;
+    jmap = { "radio" };
+    jmap = { "radio", "debug", {{ "priority", 3.14 }} };
+    jmap = { "radio", "debug", { "priority", 3.14 } };
+    jmap = {{ "radio" }};   //  invalid, array<array<>>
     
-    std::cout << MC_RESOURCE_DIR << std::endl;
 
     //  test filter item 
 
-    mc::FilterItem item;
+    FilterItem item;
 
     ///  spacing
     item.parse( "value>5.4");
@@ -96,7 +100,7 @@ int main( int argc, char* argv[] )
 
     //  test boolean filter
 
-    mc::BooleanFilter filter;
+    BooleanFilter filter;
 
     //  parsing
 
@@ -124,7 +128,7 @@ int main( int argc, char* argv[] )
 
     // mc::ColorTable::printTestTable();
 
-//    MessageFormatter formatter;
+//    Formatter formatter;
 //    formatter.setTagColor( "status", 213, 219 );
 //    formatter.setIndent( 2 );
 

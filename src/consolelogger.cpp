@@ -13,13 +13,13 @@ namespace mc {
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleLogger::ConsoleLogger()
 {
-//    formatter_ = new MessageFormatter( this );
+//    formatter_ = new Formatter( this );
     printSystemInfo();
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::setFormatter( const MessageFormatterPtr& formatter ) {
+void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
     formatter_ = formatter;
 }
 
@@ -38,7 +38,7 @@ void ConsoleLogger::notify( const Message& message )
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::printSystemInfo() const
 {
-//    formatter_->pushType( MessageFormatter::AnsiEncoding );
+//    formatter_->pushType( Formatter::AnsiEncoding );
 
 //    //  title
 

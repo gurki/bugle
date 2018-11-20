@@ -1,7 +1,7 @@
 // #pragma once
 
 // #include "messageobserver.h"
-// #include "messageformatter.h"
+// #include "formatter.h"
 
 // #include <QFile>
 // #include <QTextStream>
@@ -19,7 +19,7 @@
 //         void createDefaultFile( const bool open = false );
 //         void createFile( const QString& name, const bool open = false );
 
-//         void setFormatter( MessageFormatter* formatter );
+//         void setFormatter( Formatter* formatter );
 
 //     public slots:
 
@@ -35,5 +35,5 @@
 
 //         QFile fout_;
 //         QTextStream stream_;
-//         MessageFormatter* formatter_ = nullptr;
+//         Formatter* formatter_ = nullptr;
 // };

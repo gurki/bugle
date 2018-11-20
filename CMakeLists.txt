@@ -10,7 +10,7 @@ add_subdirectory("dependencies/json")
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
-add_executable(messagecenter main.cpp ${SOURCES})
+add_executable(messagecenter examples/main.cpp ${SOURCES})
 target_link_libraries(messagecenter PRIVATE nlohmann_json::nlohmann_json)
 
 add_compile_definitions(MC_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")

@@ -8,8 +8,7 @@
 namespace mc {
 
 
-class Theme;
-using ThemePtr = std::shared_ptr<Theme>;
+using ThemePtr = std::shared_ptr<class Theme>;
 using FormatterRef = std::weak_ptr<class Formatter>;
 using FormatterPtr = std::shared_ptr<class Formatter>;
 
@@ -34,11 +33,6 @@ class Formatter
             const uint8_t index
         ) const;
 
-        std::string colorize(
-            const std::string& text,
-            const std::string& colorName
-        ) const;
-
         void setIndent( const uint8_t indent );
 
     protected:
@@ -49,7 +43,7 @@ class Formatter
 
     private:
 
-//        QString tagInfo( const QVariantMap& tags ) const;
+        std::string tagInfo( const jmap_t& tags ) const;
 //        QString levelIndent( const Message& message ) const;
 
         uint8_t indent_ = 0;

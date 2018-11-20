@@ -17,15 +17,10 @@ ColorTable ColorTable::instance_ = {};
 
 
 ////////////////////////////////////////////////////////////////////////////////
-ColorTable::ColorTable()
-{
+ColorTable::ColorTable() {
     std::ifstream fin( MC_RESOURCE_DIR + "colors.json"s );
-
     assert( fin.is_open() );
-
     table_ = nlohmann::json::parse( fin );
-
-    std::cout << table_.dump( 2 ) << std::endl;
 }
 
 
@@ -54,8 +49,8 @@ uint8_t ColorTable::findName( const std::string& name )
     if ( it == table_.end() ) {
         return 15;  //  white
     }
-
-    return (*it)[ "colorId" ];
+    
+    return it->at( "colorId" );
 }
 
 
@@ -140,6 +135,8 @@ std::string ColorTable::ansiEscapeCode( const uint8_t index ) {
 //////////////////////////////////////////////////////////////////////////////////
 void ColorTable::printTestTable( const uint8_t numSteps )
 {
+    static const std::string sym = "\xe2\x97\x8f";
+
     if ( numSteps == 0 ) {
         return;
     }
@@ -147,25 +144,25 @@ void ColorTable::printTestTable( const uint8_t numSteps )
     std::cout << std::endl;
 
     for ( uint8_t i = 0; i < 8; i++ ) {
-        std::cout << mc::ColorTable::ansiEscapeCode( i ) << u8"●";
+        std::cout << mc::ColorTable::ansiEscapeCode( i ) << sym;
     }
 
     std::cout << " ";
 
 //    for ( size_t i = 8; i < 16; i++ ) {
-//        std::cout << mc::ColorTable::ansiEscapeCode( i ) << u8"●";
+//        std::cout << mc::ColorTable::ansiEscapeCode( i ) << sym;
 //    }
 
 //    std::cout << std::endl;
 
-    std::cout << mc::ColorTable::ansiEscapeCode( "#000000" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ff0000" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#00ff00" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ffff00" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#0000ff" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ff00ff" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#00ffff" ) << u8"●";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ffffff" ) << u8"●";
+    std::cout << mc::ColorTable::ansiEscapeCode( "#000000" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#ff0000" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#00ff00" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#ffff00" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#0000ff" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#ff00ff" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#00ffff" ) << sym;
+    std::cout << mc::ColorTable::ansiEscapeCode( "#ffffff" ) << sym;
     std::cout << std::endl;
     std::cout << std::endl;
 
@@ -186,7 +183,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
                 std::stringstream ss;
                 ss << "#" << std::hex << val;
-                std::cout << mc::ColorTable::ansiEscapeCode( ss.str() ) << u8"●";
+                std::cout << mc::ColorTable::ansiEscapeCode( ss.str() ) << sym;
             }
 
             std::cout << " ";
@@ -197,12 +194,12 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     std::cout << std::endl;
 
-    for ( uint8_t i = 232; i < 256; i++ ) {
-        std::cout << mc::ColorTable::ansiEscapeCode( i ) << u8"●";
+    //  NOTE(tgurdan): uint8_t causes endless loop here
+    for ( uint16_t i = 232; i < 255; i++ ) {
+        std::cout << mc::ColorTable::ansiEscapeCode( uint8_t( i ) ) << sym;
     }
 
     std::cout << std::endl << std::endl;
-    std::cout << ColorTable::colorName( 251 ) << ", " << ColorTable::colorName( 246 ) << std::endl;
 }
 
 
