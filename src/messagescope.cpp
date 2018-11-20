@@ -33,10 +33,6 @@ void MessageScope::emit()
         return;
     }
 
-    if ( message_.content_.size() == 1 ) {
-        message_.content_ = message_.content_.front();
-    }
-
     MC.postMessage( message_ );
     dirty_ = false;
 }
@@ -44,7 +40,8 @@ void MessageScope::emit()
 
 ////////////////////////////////////////////////////////////////////////////////]
 void MessageScope::append( const nlohmann::json& object ) {
-    message_.content_.push_back( object );
+    // TODO
+    // message_.content_.push_back( object );
     dirty_ = true;
 }
 

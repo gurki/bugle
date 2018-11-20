@@ -1,4 +1,6 @@
 #include "messagecenter/message.h"
+#include <sstream>
+
 
 namespace mc {
 
@@ -79,21 +81,21 @@ Message::Message(
 //}
 
 
-//////////////////////////////////////////////////////////////////////////////////
-//QString Message::info() const
-//{
-//    if ( ! isIndexed() ) {
-//        return QString();
-//    }
+////////////////////////////////////////////////////////////////////////////////
+std::string Message::info() const
+{
+   if ( ! isIndexed() ) {
+       return {};
+   }
 
-//    QString info;
-//    info += function_;
-//    info += " - " + file_;
-//    info += " l." + QString::number( line_ );
-//    info += " [" + QString::number( (qint64)threadId_ ) + "]";
+   std::stringstream info;
+   info << function_;
+   info << " - " << file_;
+   info << " l." << line_;
+   info << " [" << threadId_ << "]";
 
-//    return info;
-//}
+   return info.str();
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////

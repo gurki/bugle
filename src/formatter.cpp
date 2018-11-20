@@ -25,28 +25,25 @@ void Formatter::setIndent( const uint8_t indent ) {
 std::string Formatter::format( const Message& message ) const
 {
     std::stringstream ss;
-    ss << colorize( message.datetime_.timeInfo( DateTime::Microseconds ), 246 );
+    ss << colorize( message.timestamp().timeInfo( DateTime::Microseconds ), 244 );
 
-    if ( ! message.content_.empty() ) {
+    if ( ! message.content().empty() ) {
         ss << skip( 2 );
-        const std::string msg = message.content_.dump();
-        ss << colorize( msg.substr( 1, msg.size() - 2 ), 251 );
+        const std::string msg = message.content().dump();
+        ss << colorize( msg.substr( 1, msg.size() - 2 ), 252 );
     }
 
     ss << skip( 2 );
 
-    // for ( const auto& tag : message.tags_ )
-    // {
-        // ss << tag.first;
+    const std::string tinfo = tagInfo( message.tags() );
 
-        // if ( ! tag.second.empty() ) {
-        //     ss << ":" << tag.second;
-        // }
+    if ( ! tinfo.empty() ) {
+        ss << tinfo << skip( 2 );
+    }
 
-        // ss << skip( 1 );
-    // }
-
-    ss << tagInfo( message.tags_ );
+    if ( message.isIndexed() ) {
+        ss << colorize( message.info(), 238 );
+    }
 
     return ss.str();
 }
@@ -115,9 +112,9 @@ std::string Formatter::skip( const uint8_t count ) const  {
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::tagInfo( const tags_t& tags ) const
 {
-    static const uint8_t text1 = 246;
+    static const uint8_t text1 = 240;
     static const uint8_t tag1 = 248;
-    static const uint8_t tag2 = 243;
+    static const uint8_t tag2 = 242;
     static const size_t maxSize = 24;
 
     std::stringstream stream;
@@ -138,7 +135,7 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
             // stream << colorize( "[", text1 );
             firstItem = false;
         } else {
-            stream << colorize( " ", text1 );
+            stream << " ";
         }
 
         // auto codes = mc::defaultTagColors();

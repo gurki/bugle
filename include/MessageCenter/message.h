@@ -37,21 +37,20 @@ class Message
 //        );
 //        void updateTimestamp();
 
-//        const std::chrono::time_point& timestamp() const { return datetime_; }
-//        const std::string& text() const { return text_; }
-//        const nlohmann::json& tags() const { return tags_; }
-//        const std::string& file() const { return file_; }
-//        const std::string& function() const { return function_; }
-//        int line() const { return line_; }
-//        int level() const { return level_; }
-//        std::thread::id threadId() const { return threadId_; }
+        const DateTime& timestamp() const { return datetime_; }
+        const nlohmann::json& content() const { return content_; }
+        const tags_t& tags() const { return tags_; }
+        const std::string& file() const { return file_; }
+        const std::string& function() const { return function_; }
+        const std::thread::id& threadId() const { return threadId_; }
+        int line() const { return line_; }
+        int level() const { return level_; }
 
-//        std::string info() const;
-//        std::string timeInfo( const Qt::DateFormat format = Qt::ISODateWithMs ) const;
+        std::string info() const;
         bool hasTags() const { return ! tags_.empty(); }
         bool isIndexed() const { return line_ >= 0; }
 
-//    private:
+   private:
 
 //        void addSystemTags();
 

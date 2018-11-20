@@ -31,8 +31,8 @@ using namespace mc;
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto frmt = std::make_shared<mc::Formatter>();
-    auto clog = std::make_shared<mc::ConsoleLogger>();
+    auto frmt = std::make_shared<Formatter>();
+    auto clog = std::make_shared<ConsoleLogger>();
     clog->setFormatter( frmt );
 
     mci.addObserver( clog, "!discard" );
@@ -67,10 +67,12 @@ int main( int argc, char* argv[] )
     //  test json to tags_t conversion
 
     tags_t jmap;
-    jmap = filterTags( { "radio" } );
-    jmap = filterTags( { "radio", "debug", {{ "priority", 3.14 }}} );
-    jmap = filterTags( { "radio", "debug", { "priority", 3.14 }} );
-    jmap = filterTags( {{ "radio" }} );   //  invalid, array<array<>>
+    jmap = filterTags( "debug" );
+    jmap = filterTags( { "debug", "radio" } );
+    jmap = filterTags( { "debug", {{ "priority", 3.14 }} });
+    jmap = filterTags( { "debug", { "priority", 3.14 } });  //  convenience conversion of array<string,json> to tag:value
+    jmap = filterTags( { "debug", { 3.14, "priority" } });  //  invalid array<json,string>
+    jmap = filterTags( {{ "debug" }} );   //  invalid array<array<>>
     
 
     //  test filter item 
