@@ -27,9 +27,9 @@ std::string Formatter::format( const Message& message ) const
     std::stringstream ss;
     ss << colorize( message.datetime_.timeInfo( DateTime::Microseconds ), 246 );
 
-    if ( ! message.payload_.empty() ) {
+    if ( ! message.content_.empty() ) {
         ss << skip( 2 );
-        const std::string msg = message.payload_.dump();
+        const std::string msg = message.content_.dump();
         ss << colorize( msg.substr( 1, msg.size() - 2 ), 251 );
     }
 
@@ -113,7 +113,7 @@ std::string Formatter::skip( const uint8_t count ) const  {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::tagInfo( const jmap_t& tags ) const
+std::string Formatter::tagInfo( const tags_t& tags ) const
 {
     static const uint8_t text1 = 246;
     static const uint8_t tag1 = 248;

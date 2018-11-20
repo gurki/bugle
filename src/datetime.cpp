@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include <sstream>
-#include <iomanip>  //  put_time
-#include <ctime>    //  localtime
+#include <iomanip>  //  std::put_time
+#include <ctime>    //  localtime_s
 
 
 namespace mc {

@@ -134,7 +134,7 @@ FilterDisjunction BooleanFilter::parseLine( const std::string& line )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool BooleanFilter::passes( const jmap_t& tags ) const 
+bool BooleanFilter::passes( const tags_t& tags ) const 
 {
     return std::any_of( normalForm_.begin(), normalForm_.end(), [ &tags ]( const FilterConjunction& conjunction ) {
         return std::all_of( conjunction.begin(), conjunction.end(), [ &tags ]( const FilterItem& item ) {

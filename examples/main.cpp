@@ -64,13 +64,13 @@ int main( int argc, char* argv[] )
     mc_post( "discarded message", "discard" );
 
 
-    //  test jmap_t
+    //  test json to tags_t conversion
 
-    jmap_t jmap;
-    jmap = { "radio" };
-    jmap = { "radio", "debug", {{ "priority", 3.14 }} };
-    jmap = { "radio", "debug", { "priority", 3.14 } };
-    jmap = {{ "radio" }};   //  invalid, array<array<>>
+    tags_t jmap;
+    jmap = filterTags( { "radio" } );
+    jmap = filterTags( { "radio", "debug", {{ "priority", 3.14 }}} );
+    jmap = filterTags( { "radio", "debug", { "priority", 3.14 }} );
+    jmap = filterTags( {{ "radio" }} );   //  invalid, array<array<>>
     
 
     //  test filter item 

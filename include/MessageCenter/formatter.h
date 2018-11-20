@@ -43,7 +43,7 @@ class Formatter
 
     private:
 
-        std::string tagInfo( const jmap_t& tags ) const;
+        std::string tagInfo( const tags_t& tags ) const;
 //        QString levelIndent( const Message& message ) const;
 
         uint8_t indent_ = 0;

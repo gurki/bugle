@@ -18,7 +18,7 @@ Message::Message(
     const char* function,
     const int line,
     const nlohmann::json& object,
-    const jmap_t& tags ):
+    const nlohmann::json& tags ):
     Message()
 {
     if ( file ) {
@@ -30,8 +30,8 @@ Message::Message(
     }
 
     line_ = line;
-    payload_ = object;
-    tags_ = tags;
+    content_ = object;
+    tags_ = filterTags( tags );
 
 //    file_.remove( "..\\" );
 }
@@ -103,9 +103,9 @@ Message::Message(
 
 
 //////////////////////////////////////////////////////////////////////////////////
-nlohmann::json filterTags( const nlohmann::json& tags ) 
+tags_t filterTags( const nlohmann::json& tags ) 
 {
-    static auto insert = []( nlohmann::json& jobj, const nlohmann::json& tag ) -> void
+    static auto insert = []( tags_t& jobj, const nlohmann::json& tag ) -> void
     {
         //  ignores arrays, numbers and bool
 
@@ -123,7 +123,7 @@ nlohmann::json filterTags( const nlohmann::json& tags )
     //  only considers first level strings, objects and convertible arrays
     //  ignores all numbers, bools and second-level non-convertible arrays
 
-    nlohmann::json jobj( nlohmann::json::value_t::object );
+    tags_t jobj;
     insert( jobj, tags );
     
     if ( tags.is_array() ) 

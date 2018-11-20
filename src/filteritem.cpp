@@ -32,7 +32,7 @@ bool FilterItem::compare( const nlohmann::json& value ) const {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool FilterItem::passes( const jmap_t& tags ) const
+bool FilterItem::passes( const tags_t& tags ) const
 {
     if ( tags.find( key_ ) == tags.end() ) {
         return negate_;

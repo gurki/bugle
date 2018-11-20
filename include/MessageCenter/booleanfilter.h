@@ -27,7 +27,7 @@ class BooleanFilter
         void clear();
         bool set( const std::string& plaintext );
         bool unite( const std::string& plaintext );
-        bool passes( const jmap_t& tags ) const;
+        bool passes( const tags_t& tags ) const;
 
         size_t size() const { return normalForm_.size(); }
         bool empty() const { return normalForm_.empty(); }

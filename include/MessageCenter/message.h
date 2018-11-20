@@ -13,84 +13,8 @@
 namespace mc {
     
     
-nlohmann::json filterTags( const nlohmann::json& tags );
-
-
-class jmap_t : public std::unordered_map<std::string, nlohmann::json>
-{
-    public:
-
-        jmap_t() {}
-        jmap_t( const nlohmann::json& jobj ) 
-        {
-            //  only considers first level strings, objects and convertible arrays
-            //  ignores all numbers, bools and second-level non-convertible arrays
-
-            insert( jobj );
-
-            if ( jobj.is_array() ) 
-            {
-                for ( const auto& tag : jobj ) 
-                {
-                    if ( tag.is_array() && tag.size() == 2 ) {
-                        if ( tag[0].is_string() ) {
-                            this->emplace( tag[0], tag[1] );
-                        }
-                    }
-                    else {
-                        insert( tag );
-                    }
-                }
-            }
-        }
-
-        jmap_t( std::initializer_list<nlohmann::json> init ) :
-            jmap_t( nlohmann::json( init ) )
-        {}
-
-        void insert( const nlohmann::json& tag ) 
-        {
-            //  ignores arrays, numbers and bool
-
-            if ( tag.is_string() ) {
-                this->emplace( tag, nlohmann::json() );
-            }
-
-            if ( tag.is_object() ) {
-                for ( auto it = tag.begin(); it != tag.end(); ++it ) {
-                    this->emplace( it.key(), it.value() );
-                }
-            }            
-        };
-
-        
-        friend std::ostream& operator << ( std::ostream& out, const jmap_t& jmap ) 
-        {
-            size_t count = 0;
-
-            out << "{";
-
-            for ( const auto& it : jmap ) 
-            {
-                if ( it.second.is_null() ) {
-                    out << it.first;
-                }
-                else {
-                    out << it.first << ":" << it.second;
-                }
-
-                if ( count + 1 < jmap.size() ) {
-                    out << ", ";
-                }
-
-                count++;
-            }
-
-            out << "}";
-
-            return out;
-        }
-};
+typedef nlohmann::json::object_t tags_t;
+tags_t filterTags( const nlohmann::json& tags );
 
 
 class Message
@@ -104,7 +28,7 @@ class Message
             const char* function,
             const int line,
             const nlohmann::json& object,
-            const jmap_t& tags = {}
+            const nlohmann::json& tags = {}
         );
 
 //        void set(
@@ -137,8 +61,8 @@ class Message
         int level_ = -1;
 
         DateTime datetime_ = {};
-        nlohmann::json payload_ = {};
-        jmap_t tags_ = {};
+        nlohmann::json content_ = {};
+        tags_t tags_ = {};
         std::thread::id threadId_ = {};
 };
 

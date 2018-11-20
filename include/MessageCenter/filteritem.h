@@ -20,7 +20,7 @@ class FilterItem
         void clear();
         bool parse( const std::string& plaintext );
         bool compare( const nlohmann::json& value ) const;
-        bool passes( const jmap_t& set ) const;
+        bool passes( const tags_t& set ) const;
 
         bool empty() const { return key_.empty(); }
         bool hasValue() const { return ! empty() && ! value_.empty(); };
