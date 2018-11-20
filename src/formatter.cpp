@@ -25,15 +25,15 @@ void Formatter::setIndent( const uint8_t indent ) {
 std::string Formatter::format( const Message& message ) const
 {
     std::stringstream ss;
-    ss << colorize( message.timestamp().timeInfo( DateTime::Microseconds ), 244 );
+    ss << colorize( message.timestamp().timeInfo( DateTime::Microseconds ), 242 );
 
     if ( ! message.content().empty() ) {
         ss << skip( 2 );
         const std::string msg = message.content().dump();
-        ss << colorize( msg.substr( 1, msg.size() - 2 ), 252 );
+        ss << colorize( msg.substr( 1, msg.size() - 2 ), 254 );
     }
 
-    ss << skip( 2 );
+    ss << skip( 1 );
 
     const std::string tinfo = tagInfo( message.tags() );
 
@@ -41,9 +41,9 @@ std::string Formatter::format( const Message& message ) const
         ss << tinfo << skip( 2 );
     }
 
-    if ( message.isIndexed() ) {
-        ss << colorize( message.info(), 238 );
-    }
+    // if ( message.isIndexed() ) {
+    //     ss << colorize( message.info(), 238 );
+    // }
 
     return ss.str();
 }
@@ -112,8 +112,8 @@ std::string Formatter::skip( const uint8_t count ) const  {
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::tagInfo( const tags_t& tags ) const
 {
-    static const uint8_t text1 = 240;
-    static const uint8_t tag1 = 248;
+    static const uint8_t text1 = 238;
+    static const uint8_t tag1 = 246;
     static const uint8_t tag2 = 242;
     static const size_t maxSize = 24;
 
@@ -126,43 +126,36 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         const auto& key = tag.first;
         const auto& value = tag.second;
 
-        // if ( ! systemTags_ && key.startsWith( "__" ) ) {
-        //     iter++;
-        //     continue;
-        // }
-
-        if ( firstItem ) {
-            // stream << colorize( "[", text1 );
+        if ( ! value.empty() ) {
             firstItem = false;
-        } else {
-            stream << " ";
+            continue;
         }
 
-        // auto codes = mc::defaultTagColors();
-
-        // if ( colors_.contains( key ) ) {
-        //     codes = colors_[ key ];
-        // }
-
+        stream << skip( 1 );
         stream << colorize( "#", text1 );
         stream << colorize( key, tag1 );
-
-        if ( ! value.empty() ) 
-        {
-            stream << colorize( ":", text1 );
-
-            const std::string valueStr = value.dump();
-            stream << colorize( valueStr.substr( 0, maxSize ), tag2 );
-            
-            if ( valueStr.size() > maxSize ) {
-                stream << colorize( "\xE2\x80\xA6", tag2 );
-            }
-        }
     }
 
-    // if ( ! firstItem ) {
-    //     stream << colorize( "]", text1 );
-    // }
+    if ( firstItem ) {
+        return stream.str();
+    }
+
+    for ( const auto& tag : tags )
+    {
+        const auto& key = tag.first;
+        const auto& value = tag.second;
+
+        if ( value.empty() ) {
+            continue;
+        }
+
+        stream << "\n";
+        stream << skip( 2 );
+        stream << colorize( "#", text1 );
+        stream << colorize( key, tag1 );
+        stream << colorize( ":", text1 );
+        stream << colorize( value.dump(), tag2 );
+    }
 
     return stream.str();
 }

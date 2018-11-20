@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>  //  std::put_time
-#include <ctime>    //  localtime_s
+#include <ctime>    //  localtime
 
 
 namespace mc {
@@ -21,11 +21,9 @@ DateTime::DateTime()
 std::string DateTime::info() const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
-    struct tm buf;
-    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( &buf, "%F %T" );
+    ss << std::put_time( std::localtime( &time ), "%F %T" );
     ss << "." << milliseconds();
 
     return ss.str();
@@ -36,11 +34,9 @@ std::string DateTime::info() const
 std::string DateTime::timeInfo( const Resolution resolution ) const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
-    struct tm buf;
-    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( &buf, "%T" );
+    ss << std::put_time( std::localtime( &time ), "%T" );
 
     if ( resolution == Microseconds ) {
         ss << "." << microseconds();
@@ -56,11 +52,9 @@ std::string DateTime::timeInfo( const Resolution resolution ) const
 std::string DateTime::dateInfo() const
 {
     const auto time = system_clock::to_time_t( timestamp_ );
-    struct tm buf;
-    localtime_s( &buf, &time );
 
     std::stringstream ss;
-    ss << std::put_time( &buf, "%F" );
+    ss << std::put_time( std::localtime( &time ), "%F" );
 
     return ss.str();
 }
