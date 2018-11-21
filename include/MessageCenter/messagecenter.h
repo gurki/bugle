@@ -1,10 +1,8 @@
 #pragma once
 
-#include "messagecenter/messageinfo.h"
+#include "messagecenter/defines.h"
 #include "messagecenter/utility.h"
 #include "messagecenter/message.h"
-//#include "messagescope.h"
-//#include "colortable.h"
 #include "messagecenter/booleanfilter.h"
 
 #include <nlohmann/json.hpp>
@@ -12,28 +10,6 @@
 #include <memory>
 #include <mutex>
 #include <unordered_set>
-
-
-#define MC ( mc::MessageCenter::instance() )
-#ifndef MC_DISABLE_LOWERCASE_DEFINES
-    #define mci MC
-#endif
-
-#ifdef MC_DISABLE_POST
-    #define MC_POST( text )
-#else 
-    #if VA_OPT_SUPPORTED
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES __VA_OPT__(, __VA_ARGS__) ))
-    #else
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES, __VA_ARGS__ ) )
-    #endif
-#endif
-
-#define MCP MC_POST
-#ifndef MC_DISABLE_LOWERCASE_DEFINES
-    #define mcp MC_POST
-    #define mc_post MC_POST 
-#endif
 
 
 namespace mc {

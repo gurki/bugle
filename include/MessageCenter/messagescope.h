@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messagecenter/messageinfo.h"
+#include "messagecenter/defines.h"
 #include "messagecenter/message.h"
 
 
