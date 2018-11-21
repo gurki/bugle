@@ -1,11 +1,8 @@
 #include "messagecenter/messagecenter.h"
 #include "messagecenter/message.h"
-#include "messagecenter/messageobserver.h"
+#include "messagecenter/observer.h"
 
-#include <algorithm>
-#include <iostream>
-#include <thread>
-#include <future>
+#include <future>   //  std::async
 
 
 namespace mc {
@@ -21,7 +18,7 @@ MessageCenter::MessageCenter()
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::addObserver(
-    const MessageObserverRef& observer,
+    const ObserverRef& observer,
     const std::string& filter )
 {
 #ifdef MC_DISABLE_POST
@@ -42,7 +39,7 @@ void MessageCenter::addObserver(
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
-    const nlohmann::json& object,
+    const nlohmann::json& content,
     MC_INFO_DECLARE,
     const nlohmann::json& tags )
 {
@@ -50,7 +47,7 @@ void MessageCenter::post(
     return;
 #endif
 
-    Message message( MC_INFO_NAMES, object, tags );
+    Message message( MC_INFO_NAMES, content, tags );
     auto f = std::async( &MessageCenter::postMessage, this, std::move( message ) );
 }
 

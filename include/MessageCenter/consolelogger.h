@@ -1,13 +1,13 @@
 #pragma once
 
-#include "messagecenter/messageobserver.h"
+#include "messagecenter/observer.h"
 #include "messagecenter/formatter.h"
 
 
 namespace mc {
 
 
-class ConsoleLogger : public MessageObserver
+class ConsoleLogger : public Observer
 {
     public:
 

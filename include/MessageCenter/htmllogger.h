@@ -1,13 +1,13 @@
 // #pragma once
 
-// #include "messageobserver.h"
+// #include "observer.h"
 // #include "formatter.h"
 
 // #include <QFile>
 // #include <QTextStream>
 
 
-// class HtmlLogger : public QObject, public MessageObserver
+// class HtmlLogger : public QObject, public Observer
 // {
 //     Q_OBJECT
 

@@ -1,10 +1,10 @@
 // #pragma once
 
-// #include "messageobserver.h"
+// #include "observer.h"
 // #include <QFile>
 
 
-// class JsonLogger : public QObject, public MessageObserver
+// class JsonLogger : public QObject, public Observer
 // {
 //     Q_OBJECT
 

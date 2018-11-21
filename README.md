@@ -33,11 +33,11 @@ Enjoy and let me know what you think!
 
 Include ```messagecenter.pri``` in your project file and add ```<MessageCenter/messagecenter.h``` to the files where you want to use it.
 
-To register a custom message observer, instantiate it from the ```MessageObserver``` interface and add it to the MC.
+To register a custom message observer, instantiate it from the ```Observer``` interface and add it to the MC.
 
 ```cpp
 //  consolelogger.h
-class ConsoleLogger : public QObject, public MessageObserver
+class ConsoleLogger : public QObject, public Observer
 {
     Q_OBJECT
 
@@ -83,7 +83,7 @@ Take a look at the ```ConsoleLogger``` and ```JsonLogger``` classes for example 
 
 #### Observers
 
-Observers that comply with the ```MessageObserver``` interface can be registered to the MC.
+Observers that comply with the ```Observer``` interface can be registered to the MC.
 They can be hooked to a specific set of tags, which can even be boolean combinations of multiple sets and negated tags.
 ```cpp
 ConsoleLogger log1, log2, log3;

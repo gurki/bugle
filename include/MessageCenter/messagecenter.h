@@ -1,21 +1,22 @@
 #pragma once
 
-#include "messagecenter/defines.h"
-#include "messagecenter/utility.h"
-#include "messagecenter/message.h"
+#include "messagecenter/defines.h"  //  MC_INFO...
+#include "messagecenter/utility.h"  //  WeakPtrHash, WeakPtrEqual
 #include "messagecenter/booleanfilter.h"
 
 #include <nlohmann/json.hpp>
 
 #include <memory>
 #include <mutex>
-#include <unordered_set>
+#include <unordered_set>    
 
 
 namespace mc {
 
 
-using MessageObserverRef = std::weak_ptr<class MessageObserver>;
+class Message;
+class BooleanFilter;
+using ObserverRef = std::weak_ptr<class Observer>;
 using MessageCenterPtr = std::shared_ptr<class MessageCenter>;
 
 
@@ -30,12 +31,12 @@ class MessageCenter
         void disable() { enabled_ = false; }
         
         void addObserver(
-            const MessageObserverRef& observer,
+            const ObserverRef& observer,
             const std::string& filter
         );
 
         void post(
-            const nlohmann::json& object,
+            const nlohmann::json& content,
             MC_INFO_DECLARE_DEFAULT,
             const nlohmann::json& tags = {}
         );
@@ -49,16 +50,16 @@ class MessageCenter
         bool enabled_ = true;
 
         std::unordered_set<
-            MessageObserverRef,
-            WeakPtrHash<MessageObserver>,
-            WeakPtrEqual<MessageObserver> 
+            ObserverRef,
+            WeakPtrHash<Observer>,
+            WeakPtrEqual<Observer> 
         > observers_;
 
         std::unordered_map<
-            MessageObserverRef, 
+            ObserverRef, 
             BooleanFilter, 
-            WeakPtrHash<MessageObserver>,
-            WeakPtrEqual<MessageObserver> 
+            WeakPtrHash<Observer>,
+            WeakPtrEqual<Observer> 
         > filter_;
 
         std::mutex observerMutex_;
