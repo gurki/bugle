@@ -20,11 +20,10 @@ class Formatter
         Formatter();
 
         virtual std::string format( const Message& message ) const;
-        virtual std::string beginColor( const uint8_t index ) const;
-        virtual std::string endColor() const;
+        virtual std::string beginColor( const uint8_t index ) const { return {}; }
+        virtual std::string endColor() const { return {}; }
 
         std::string space() const { return space_; }
-        std::string spacer() const { return spacer_; }
         std::string newline() const { return newline_; }
         std::string skip( const uint8_t count ) const;
 
@@ -37,17 +36,33 @@ class Formatter
 
     protected:
 
-        const std::string spacer_ = u8"\xc2\xb7";   //  &middot
         const std::string space_ = " ";             //  &nbsp;
         const std::string newline_ = "\n";          //  <br>
 
     private:
 
         std::string tagInfo( const tags_t& tags ) const;
-//        QString levelIndent( const Message& message ) const;
 
         uint8_t indent_ = 0;
         ThemePtr theme_ = nullptr;
+};
+
+
+class AsciiFormatter : public Formatter 
+{
+    public:
+
+        virtual std::string beginColor( const uint8_t index ) const;
+        virtual std::string endColor() const;
+};
+
+
+class HtmlFormatter : public Formatter 
+{
+    public:
+
+        virtual std::string beginColor( const uint8_t index ) const;
+        virtual std::string endColor() const;
 };
 
 

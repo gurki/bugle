@@ -31,7 +31,7 @@ using namespace mc;
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto frmt = std::make_shared<Formatter>();
+    auto frmt = std::make_shared<AsciiFormatter>();
     auto clog = std::make_shared<ConsoleLogger>();
     clog->setFormatter( frmt );
 
