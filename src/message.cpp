@@ -35,7 +35,11 @@ Message::Message(
     content_ = object;
     tags_ = filterTags( tags );
 
-//    file_.remove( "..\\" );
+    if ( file_.find( "..\\" ) == 0 ) {
+        file_ = file_.substr( 3 );
+    }
+
+    std::replace( file_.begin(), file_.end(), '\\', '/' );
 }
 
 
