@@ -43,7 +43,7 @@ void MessageCenter::addObserver(
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
     const nlohmann::json& object,
-    MC_INFO_DEFINE,
+    MC_INFO_DECLARE,
     const nlohmann::json& tags )
 {
 #ifdef MC_DISABLE_POST
@@ -70,14 +70,19 @@ void MessageCenter::postMessage( const Message& message )
 
     for ( const auto& observer : observers_ )
     {
-        //  TODO: filter
-
         if ( observer.expired() ) {
             observers_.erase( observer );
             continue;
         }
 
-        observer.lock()->notify( message );
+        const auto& filter = filter_[ observer ];
+        auto& observerRef = observer.lock();
+
+        if ( ! filter.passes( message.tags() ) ) {
+            continue;
+        }
+
+        observerRef->notify( message );
     }
 }
 

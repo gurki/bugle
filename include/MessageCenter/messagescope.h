@@ -4,9 +4,9 @@
 #include "messagecenter/message.h"
 
 
-//#define MCS ( mc::MessageScope( {}, MC_INFO ) )
-//#define MCS ( mc::MessageScope( MC_INFO ) )
-#define MCS(...) ( mc::MessageScope( { __VA_ARGS__ }, MC_INFO ) )
+//#define MCS ( mc::MessageScope( {}, MC_INFO_VALUES ) )
+//#define MCS ( mc::MessageScope( MC_INFO_VALUES ) )
+#define MCS(...) ( mc::MessageScope( { __VA_ARGS__ }, MC_INFO_VALUES ) )
 #define MCE ( mc::MessageScope::EmitMessage )
 
 
@@ -21,8 +21,8 @@ class MessageScope
             EmitMessage
         };
 
-        MessageScope( MC_INFO_DEFINE_DEFAULT );
-        MessageScope( const nlohmann::json& tags = {}, MC_INFO_DEFINE_DEFAULT );
+        MessageScope( MC_INFO_DECLARE_DEFAULT );
+        MessageScope( const nlohmann::json& tags = {}, MC_INFO_DECLARE_DEFAULT );
         ~MessageScope();
 
         void append( const nlohmann::json& object );

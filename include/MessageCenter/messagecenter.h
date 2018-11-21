@@ -23,9 +23,9 @@
     #define MC_POST( text )
 #else 
     #if VA_OPT_SUPPORTED
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO __VA_OPT__(, __VA_ARGS__) ))
+        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES __VA_OPT__(, __VA_ARGS__) ))
     #else
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO, __VA_ARGS__ ) )
+        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES, __VA_ARGS__ ) )
     #endif
 #endif
 
@@ -40,7 +40,7 @@ namespace mc {
 
 
 using MessageObserverRef = std::weak_ptr<class MessageObserver>;
-using MessageCenterPtr =  std::shared_ptr<class MessageCenter>;
+using MessageCenterPtr = std::shared_ptr<class MessageCenter>;
 
 
 class MessageCenter
@@ -60,7 +60,7 @@ class MessageCenter
 
         void post(
             const nlohmann::json& object,
-            MC_INFO_DEFINE_DEFAULT,
+            MC_INFO_DECLARE_DEFAULT,
             const nlohmann::json& tags = {}
         );
 
@@ -71,15 +71,20 @@ class MessageCenter
     private:
 
         bool enabled_ = true;
+
         std::unordered_set<
             MessageObserverRef,
             WeakPtrHash<MessageObserver>,
-            WeakPtrEqual<MessageObserver> > observers_;
+            WeakPtrEqual<MessageObserver> 
+        > observers_;
+
         std::unordered_map<
             MessageObserverRef, 
             BooleanFilter, 
             WeakPtrHash<MessageObserver>,
-            WeakPtrEqual<MessageObserver> > filter_;
+            WeakPtrEqual<MessageObserver> 
+        > filter_;
+
         std::mutex observerMutex_;
 
         static MessageCenterPtr instance_;

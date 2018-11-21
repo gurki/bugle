@@ -35,7 +35,9 @@ int main( int argc, char* argv[] )
     auto clog = std::make_shared<ConsoleLogger>();
     clog->setFormatter( frmt );
 
-    mci.addObserver( clog, "!discard" );
+    mci.addObserver( clog, "debug voltage>3, a, awesometag" );
+
+    //  test message post
 
     nlohmann::json obj = {
         { "pi", 3.141 },
@@ -52,6 +54,7 @@ int main( int argc, char* argv[] )
         }}
     };
 
+    //  different parameters
     mc_post( "message only" );
     mc_post( "single tag", "awesometag" );
     mc_post( "multiple tags", { "imatag", "metoo" } );
@@ -61,8 +64,12 @@ int main( int argc, char* argv[] )
     mc_post( "array value", { "a", { "b", { "c", 4, true } }});
     mc_post( "large object", obj );
 
-    mc_post( "discarded message", "discard" );
-
+    //  filtering
+    mc_post( "debug message", "debug" );
+    mc_post( "radio message", "radio" );
+    mc_post( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
+    mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
+    mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
 
     //  test json to tags_t conversion
 

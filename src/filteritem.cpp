@@ -38,6 +38,11 @@ bool FilterItem::passes( const tags_t& tags ) const
         return negate_;
     }
 
+    if ( value_.empty() ) {
+        //  implies empty comparator
+        return true;
+    }
+
     return compare( tags.at( key_ ) );
 }
 
@@ -106,8 +111,7 @@ FilterItem::Comparator FilterItem::comparatorForString( const std::string& str )
     } else if ( str == "=" ) {
         return std::equal_to<nlohmann::json>();
     } else {
-        assert( "bug in comparator parsing" );
-        return Comparator();
+        return {};
     }
 }
 
