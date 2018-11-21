@@ -9,9 +9,7 @@ namespace mc {
 Message::Message() :
     datetime_( DateTime::now() ),
     threadId_( std::this_thread::get_id() )
-{
-//    level_ = MessageCenter::level( threadId_ );
-}
+{}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,7 +18,7 @@ Message::Message(
     const char* function,
     const int line,
     const nlohmann::json& object,
-    const nlohmann::json& tags ):
+    const nlohmann::json& tags ) :
     Message()
 {
     if ( file ) {
@@ -43,48 +41,6 @@ Message::Message(
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-//void Message::set(
-//    const QString& text,
-//    const QVariantMap& tags )
-//{
-//    text_ = text;
-//    tags_ = tags;
-
-//    addSystemTags();
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void Message::addSystemTags()
-//{
-//    if ( line_ >= 0 ) {
-//        tags_[ "__line" ] = line_;
-//    }
-
-//    if ( ! file_.isEmpty() ) {
-//        tags_[ "__file" ] = file_;
-//    }
-
-//    if ( ! function_.isEmpty() ) {
-//        tags_[ "__func" ] = function_;
-//    }
-
-//    tags_[ "__date" ] = datetime_.date().toString( Qt::ISODate );
-//    tags_[ "__time" ] = datetime_.time().toString( Qt::ISODateWithMs );
-//    tags_[ "__tid" ] = (qint64)threadId_;
-//    tags_[ "__level" ] = level_;
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//void Message::updateTimestamp() {
-//    datetime_ = QDateTime::currentDateTime();
-//    tags_[ "__date" ] = datetime_.date().toString( Qt::ISODate );
-//    tags_[ "__time" ] = datetime_.time().toString( Qt::ISODateWithMs );
-//}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 std::string Message::info() const
 {
@@ -100,12 +56,6 @@ std::string Message::info() const
 
    return info.str();
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//QString Message::timeInfo( const Qt::DateFormat format ) const {
-//    return datetime_.time().toString( format );
-//}
 
 
 //////////////////////////////////////////////////////////////////////////////////

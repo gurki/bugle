@@ -31,12 +31,6 @@ class Message
             const nlohmann::json& tags = {}
         );
 
-//        void set(
-//            const std::string& text,
-//            const nlohmann::json& tags
-//        );
-//        void updateTimestamp();
-
         const DateTime& timestamp() const { return datetime_; }
         const nlohmann::json& content() const { return content_; }
         const tags_t& tags() const { return tags_; }
@@ -51,8 +45,6 @@ class Message
         bool isIndexed() const { return line_ >= 0; }
 
    private:
-
-//        void addSystemTags();
 
         std::string file_ = {};
         std::string function_ = {};
