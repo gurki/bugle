@@ -69,17 +69,17 @@ void MessageCenter::postMessage( const Message& message )
     {
         if ( observer.expired() ) {
             observers_.erase( observer );
+            filter_.erase( observer );
             continue;
         }
 
         const auto& filter = filter_[ observer ];
-        auto& observerRef = observer.lock();
 
         if ( ! filter.passes( message.tags() ) ) {
             continue;
         }
 
-        observerRef->notify( message );
+        observer.lock()->notify(message);
     }
 }
 
