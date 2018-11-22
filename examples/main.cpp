@@ -3,6 +3,7 @@
 #include "messagecenter/messagescope.h"
 #include "messagecenter/colortable.h"
 #include "messagecenter/formatter.h"
+#include "messagecenter/theme.h"
 //#include "consolelogger.h"
 //#include "jsonlogger.h"
 //#include "formatter.h"
@@ -35,11 +36,16 @@ int main( int argc, char* argv[] )
     auto clog = std::make_shared<ConsoleLogger>();
     clog->setFormatter( frmt );
 
-    mci.addObserver( clog, "debug voltage>3, a, awesometag" );
+    mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+
+    //  theme
+
+    auto theme = std::make_shared<Theme>();
+    
 
     //  test message post
 
-    nlohmann::json obj = {
+    static const nlohmann::json obj = {
         { "pi", 3.141 },
         { "happy", true },
         { "name", "Niels" },

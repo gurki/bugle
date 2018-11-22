@@ -1,4 +1,5 @@
 #include "messagecenter/colortable.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -104,32 +105,8 @@ std::string ColorTable::ansiEscapeCode( const std::string& hex ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string ColorTable::ansiEscapeCode( const uint8_t index ) {
-    return std::string( "\033[38;5;" ) + std::to_string( index ) + "m";
+    return "\x1b[38;5;" + std::to_string( index ) + "m";
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//std::string defaultColor() {
-//    return ColorTable::ansiEscapeCode( 251 );
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//std::string lightColor() {
-//    return ColorTable::ansiEscapeCode( 246 );
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//std::p<uint8_t, uint8_t> defaultTagColors() {
-//    return { 243, 248 };    //  grayscale
-//}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//QPair<uint8_t, uint8_t> defaultTextColors() {
-//    return { 251, 246 };
-//}
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -148,13 +125,6 @@ void ColorTable::printTestTable( const uint8_t numSteps )
     }
 
     std::cout << " ";
-
-//    for ( size_t i = 8; i < 16; i++ ) {
-//        std::cout << mc::ColorTable::ansiEscapeCode( i ) << sym;
-//    }
-
-//    std::cout << std::endl;
-
     std::cout << mc::ColorTable::ansiEscapeCode( "#000000" ) << sym;
     std::cout << mc::ColorTable::ansiEscapeCode( "#ff0000" ) << sym;
     std::cout << mc::ColorTable::ansiEscapeCode( "#00ff00" ) << sym;
@@ -195,7 +165,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
     std::cout << std::endl;
 
     //  NOTE(tgurdan): uint8_t causes endless loop here
-    for ( uint16_t i = 232; i < 255; i++ ) {
+    for ( uint16_t i = 232; i <= 255; i++ ) {
         std::cout << mc::ColorTable::ansiEscapeCode( uint8_t( i ) ) << sym;
     }
 

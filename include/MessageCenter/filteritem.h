@@ -30,7 +30,7 @@ class FilterItem
 
     private:
 
-        typedef std::function< bool( const nlohmann::json&, const nlohmann::json& ) > Comparator;
+        using Comparator = std::function< bool( const nlohmann::json&, const nlohmann::json& ) >;
 
         static Comparator comparatorForString( const std::string& str );
 
@@ -43,12 +43,8 @@ class FilterItem
 
 
 bool operator == ( const FilterItem& item1, const FilterItem& item2 );
-
-
-#ifdef NLOHMANN_JSON_HPP
-    void to_json( nlohmann::json& j, const FilterItem& item );
-    void from_json( const nlohmann::json& j, FilterItem& item );
-#endif
+void to_json( nlohmann::json& j, const FilterItem& item );
+void from_json( const nlohmann::json& j, FilterItem& item );
 
 
 }   //  ::mc

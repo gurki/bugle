@@ -122,8 +122,6 @@ bool operator == ( const FilterItem& item1, const FilterItem& item2 ) {
 }
 
 
-#ifdef NLOHMANN_JSON_HPP
-
 ////////////////////////////////////////////////////////////////////////////////
 void to_json( nlohmann::json& j, const FilterItem& item )  {
     j = item.plaintext();
@@ -134,8 +132,6 @@ void to_json( nlohmann::json& j, const FilterItem& item )  {
 void from_json( const nlohmann::json& j, FilterItem& item ) {
     item.parse( j.get<std::string>() );
 }
-
-#endif
 
 
 }   //  ::mc
