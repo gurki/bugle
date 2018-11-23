@@ -34,6 +34,10 @@ bool FilterItem::compare( const nlohmann::json& value ) const {
 ////////////////////////////////////////////////////////////////////////////////
 bool FilterItem::passes( const tags_t& tags ) const
 {
+    if ( empty() ) {
+        return true;
+    }
+
     if ( tags.find( key_ ) == tags.end() ) {
         return negate_;
     }
@@ -58,6 +62,10 @@ bool FilterItem::parse( const std::string& plaintext )
     static std::regex re( validRegex );
 
     clear();
+
+    if ( plaintext.empty() ) {
+        return true;
+    }
 
     std::smatch match;
     std::regex_match( plaintext, match, re );

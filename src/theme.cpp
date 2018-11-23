@@ -24,13 +24,13 @@ void Theme::setSecondary( const uint8_t secondaryId, const uint8_t variantId ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Theme::setColor( const std::string& key, const uint8_t colorId ) {
+void Theme::set( const std::string& key, const uint8_t colorId ) {
     colors_[ key ] = { colorId, colorId };
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void Theme::setColor( 
+void Theme::set( 
     const std::string& key, 
     const uint8_t colorId, 
     const uint8_t variantId ) 
@@ -40,10 +40,10 @@ void Theme::setColor(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-const IndexPair Theme::indices( const std::string& key ) const
+const ColorPair Theme::get( const std::string& key ) const
 {
     if ( colors_.find( key ) == colors_.end() ) {
-        return { primary().second, secondary().first };
+        return { primary().variant, secondary().color };
     }
 
     return colors_.at( key );
@@ -51,8 +51,8 @@ const IndexPair Theme::indices( const std::string& key ) const
 
 
 ////////////////////////////////////////////////////////////////////////////////
-const IndexPair Theme::operator[] ( const std::string& key ) const {
-    return indices( key );
+const ColorPair Theme::operator[] ( const std::string& key ) const {
+    return get( key );
 }
 
 

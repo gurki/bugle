@@ -67,6 +67,7 @@ bool BooleanFilter::set( const std::string& plaintext )
 bool BooleanFilter::unite( const std::string& plaintext )
 {
     if ( plaintext.empty() ) {
+        clear();
         return true;
     }
 
@@ -136,29 +137,16 @@ FilterDisjunction BooleanFilter::parseLine( const std::string& line )
 ////////////////////////////////////////////////////////////////////////////////
 bool BooleanFilter::passes( const tags_t& tags ) const 
 {
+    if ( normalForm_.empty() ) {
+        return true;
+    }
+    
     return std::any_of( normalForm_.begin(), normalForm_.end(), [ &tags ]( const FilterConjunction& conjunction ) {
         return std::all_of( conjunction.begin(), conjunction.end(), [ &tags ]( const FilterItem& item ) {
-            const bool suc = item.passes( tags );
-            return suc;
+            return item.passes( tags );
         });
     });
 }
-
-
-#ifdef NLOHMANN_JSON_HPP
-
-////////////////////////////////////////////////////////////////////////////////
-void to_json( nlohmann::json& j, const BooleanFilter& filter ) {
-    j = filter.normalForm_;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void from_json( const nlohmann::json& j, BooleanFilter& filter ) {
-    filter.set( j.get<std::string>() );
-}
-
-#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,6 +161,18 @@ std::vector<std::string> tokenize( const std::string& line, const char divider )
     }
 
     return tokens;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void to_json( nlohmann::json& j, const BooleanFilter& filter ) {
+    j = filter.normalForm_;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void from_json( const nlohmann::json& j, BooleanFilter& filter ) {
+    filter.set( j.get<std::string>() );
 }
 
 

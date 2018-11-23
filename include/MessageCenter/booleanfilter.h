@@ -33,10 +33,8 @@ class BooleanFilter
         bool empty() const { return normalForm_.empty(); }
         const std::string& plaintext() const { return plaintext_; }
 
-    #ifdef NLOHMANN_JSON_HPP
         friend void to_json( nlohmann::json& j, const BooleanFilter& filter );
         friend void from_json( const nlohmann::json& j, BooleanFilter& filter );
-    #endif
 
     private:
 

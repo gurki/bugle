@@ -6,8 +6,6 @@
 namespace mc {
 
 
-using namespace nlohmann;
-
 //  c.f.
 //    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 //    https://jonasjacek.github.io/colors/

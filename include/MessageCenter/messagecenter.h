@@ -16,6 +16,7 @@ namespace mc {
 
 class Message;
 class BooleanFilter;
+
 using ObserverRef = std::weak_ptr<class Observer>;
 using MessageCenterPtr = std::shared_ptr<class MessageCenter>;
 
@@ -32,7 +33,7 @@ class MessageCenter
         
         void addObserver(
             const ObserverRef& observer,
-            const std::string& filter
+            const std::string& filter = {}
         );
 
         void post(

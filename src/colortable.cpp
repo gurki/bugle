@@ -43,9 +43,12 @@ uint8_t ColorTable::findName( const std::string& name )
         return 15;  //  white
     }
 
-    auto it = std::find_if( table_.begin(), table_.end(), [ &name ]( const json& item ) {
-        return item[ "name" ] == name;
-    });
+    auto it = std::find_if( 
+        table_.begin(), table_.end(), 
+        [ &name ]( const nlohmann::json& item ) {
+            return item[ "name" ] == name;
+        }
+    );
 
     if ( it == table_.end() ) {
         return 15;  //  white

@@ -22,6 +22,12 @@ void Formatter::setIndent( const uint8_t indent ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+void Formatter::setTheme( const ThemePtr& theme ) {
+    theme_ = theme;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::format( const Message& message ) const
 {
     //  time
@@ -29,7 +35,7 @@ std::string Formatter::format( const Message& message ) const
     std::stringstream ss;
     ss << colorize( 
         message.timestamp().timeInfo( DateTime::Microseconds ), 
-        theme_->secondary().first 
+        theme_->secondary().color 
     );
 
     //  message without quotes
@@ -37,7 +43,7 @@ std::string Formatter::format( const Message& message ) const
     if ( ! message.content().empty() ) {
         ss << skip( 2 );
         const std::string msg = message.content().dump();
-        ss << colorize( msg.substr( 1, msg.size() - 2 ), theme_->primary().first );
+        ss << colorize( msg.substr( 1, msg.size() - 2 ), theme_->primary().color );
     }
 
     ss << skip( 2 );
@@ -52,7 +58,7 @@ std::string Formatter::format( const Message& message ) const
     //  meta
 
     if ( message.isIndexed() ) {
-        ss << colorize( message.info(), theme_->secondary().second );
+        ss << colorize( message.info(), theme_->secondary().variant );
     }
 
     return ss.str();
@@ -94,16 +100,16 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
             stream << skip( 1 );
         }
 
-        const auto& colors = theme_->indices( key );
-        stream << colorize( "#", theme_->secondary().second );
-        stream << colorize( key, colors.first );
+        const auto& pair = theme_->get( key );
+        stream << colorize( "#", theme_->secondary().variant );
+        stream << colorize( key, pair.color );
 
         if ( value.empty() ) {
             continue;
         }
 
-        stream << colorize( ":", theme_->secondary().second );
-        stream << colorize( value.dump(), colors.second );
+        stream << colorize( ":", theme_->secondary().variant );
+        stream << colorize( value.dump(), pair.variant );
     }
 
     return stream.str();

@@ -38,11 +38,6 @@ int main( int argc, char* argv[] )
 
     mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
 
-    //  theme
-
-    auto theme = std::make_shared<Theme>();
-    
-
     //  test message post
 
     static const nlohmann::json obj = {
@@ -127,11 +122,23 @@ int main( int argc, char* argv[] )
     filter.set( "priority>2");
     filter.set( "debug priority>2 file=main.cpp, priority<4 network");
 
-    //  execution
 
-    // filter.set( "debug" );
-    // const bool suc = filter.passes( { "radio", "debug", { "priority", 3.14 } } );
-    // std::cout << suc << std::endl;
+    //  test theme
+
+    auto theme = std::make_shared<Theme>();
+    theme->set( "debug", ColorTable::colorId( "#ff98bc" ), ColorTable::colorId( "#ffdce8" ) );
+    theme->set( "info", ColorTable::colorId( "#007aff" ), ColorTable::colorId( "#449dff" ) );
+    theme->set( "success", ColorTable::colorId( "#20b684" ), ColorTable::colorId( "#3ddda8" ) );
+    theme->set( "warning", ColorTable::colorId( "#c87b23" ), ColorTable::colorId( "#e09c4f" ) );
+    theme->set( "error", ColorTable::colorId( "#d51f1a" ), ColorTable::colorId( "#e94e4a" ) );
+    frmt->setTheme( theme );
+
+    mci.addObserver( clog );
+    mc_post( "debug message", {{ "debug", "message" }} );
+    mc_post( "info message", {{ "info", "message" }} );
+    mc_post( "success message", {{ "success", "message" }} );
+    mc_post( "warning message", {{ "warning", "message" }} );
+    mc_post( "error message", {{ "error", "message" }} );
 
     // MCS();
     // MCS() << "simple scope";

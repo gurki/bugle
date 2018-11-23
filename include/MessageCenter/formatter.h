@@ -33,6 +33,7 @@ class Formatter
         ) const;
 
         void setIndent( const uint8_t indent );
+        void setTheme( const ThemePtr& theme );
 
     protected:
 
