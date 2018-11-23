@@ -9,12 +9,6 @@
 namespace mc {
 
 
-static const uint8_t col_text = 254;
-static const uint8_t col_light_text = 246;
-static const uint8_t col_secondary = 242;
-static const uint8_t col_light_secondary = 238;
-
-
 ////////////////////////////////////////////////////////////////////////////////
 Formatter::Formatter() {
     theme_ = std::make_shared<Theme>();
