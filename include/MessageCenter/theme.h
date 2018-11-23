@@ -16,16 +16,23 @@ class Theme
 {
     public:
 
-        Theme();
+        Theme() {}
 
         void clear();
 
-        void setColor( const std::string& key, const uint8_t primary );
-        void setColor( const std::string& key, const uint8_t primary, const uint8_t secondary );
+        void setPrimary( const uint8_t primaryId, const uint8_t variantId );
+        void setSecondary( const uint8_t secondaryId, const uint8_t variantId );
+        void setColor( const std::string& key, const uint8_t colorId );
+        void setColor( 
+            const std::string& key, 
+            const uint8_t colorId, 
+            const uint8_t variantId 
+        );
 
-        const IndexPair& indices( const std::string& key ) const;
-        const IndexPair& primaryIds() const { return primaryIds_; }
-        const IndexPair& secondaryIds() const { return secondaryIds_; }
+        const IndexPair& primary() const { return primary_; }
+        const IndexPair& secondary() const { return secondary_; }
+        const IndexPair indices( const std::string& key ) const;
+        const IndexPair operator[] ( const std::string& key ) const;
 
     private:
 
@@ -37,9 +44,11 @@ class Theme
             { "debug", { 159, 195 } }
         };
         
-        IndexPair primaryIds_ = { 254, 246 };
-        IndexPair secondaryIds_ = { 242, 238 };
+        IndexPair primary_ = { 254, 246 };
+        IndexPair secondary_ = { 242, 238 };
 };
+
+
 
 
 }   //  mc::

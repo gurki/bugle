@@ -1,6 +1,7 @@
 #include "messagecenter/formatter.h"
 #include "messagecenter/utility.h"
 #include "messagecenter/colortable.h"
+#include "messagecenter/theme.h"
 
 #include <sstream>
 
@@ -15,8 +16,9 @@ static const uint8_t col_light_secondary = 238;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Formatter::Formatter()
-{}
+Formatter::Formatter() {
+    theme_ = std::make_shared<Theme>();
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,25 +30,35 @@ void Formatter::setIndent( const uint8_t indent ) {
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::format( const Message& message ) const
 {
+    //  time
+
     std::stringstream ss;
-    ss << colorize( message.timestamp().timeInfo( DateTime::Microseconds ), col_secondary );
+    ss << colorize( 
+        message.timestamp().timeInfo( DateTime::Microseconds ), 
+        theme_->secondary().first 
+    );
+
+    //  message without quotes
 
     if ( ! message.content().empty() ) {
         ss << skip( 2 );
         const std::string msg = message.content().dump();
-        ss << colorize( msg.substr( 1, msg.size() - 2 ), col_text );
+        ss << colorize( msg.substr( 1, msg.size() - 2 ), theme_->primary().first );
     }
 
     ss << skip( 2 );
 
+    //  tags
     const std::string tinfo = tagInfo( message.tags() );
 
     if ( ! tinfo.empty() ) {
         ss << tinfo << skip( 2 );
     }
 
+    //  meta
+
     if ( message.isIndexed() ) {
-        ss << colorize( message.info(), col_light_secondary );
+        ss << colorize( message.info(), theme_->secondary().second );
     }
 
     return ss.str();
@@ -88,15 +100,16 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
             stream << skip( 1 );
         }
 
-        stream << colorize( "#", col_light_secondary );
-        stream << colorize( key, col_light_text );
+        const auto& colors = theme_->indices( key );
+        stream << colorize( "#", theme_->secondary().second );
+        stream << colorize( key, colors.first );
 
         if ( value.empty() ) {
             continue;
         }
 
-        stream << colorize( ":", col_light_secondary );
-        stream << colorize( value.dump(), col_secondary );
+        stream << colorize( ":", theme_->secondary().second );
+        stream << colorize( value.dump(), colors.second );
     }
 
     return stream.str();
