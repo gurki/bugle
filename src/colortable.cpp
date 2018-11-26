@@ -20,20 +20,49 @@ ColorTable ColorTable::instance_ = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 ColorTable::ColorTable() {
-    std::ifstream fin( MC_RESOURCE_DIR + "colors.json"s );
+    load( MC_RESOURCE_DIR + "colors.json"s );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void ColorTable::load( const std::string& path ) {
+    std::ifstream fin( path );
     assert( fin.is_open() );
     table_ = nlohmann::json::parse( fin );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string ColorTable::hexString( const uint8_t index )
+std::string ColorTable::hex( const uint8_t id ) {
+    return table_.at( id ).at( "hexString" );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string ColorTable::name( const uint8_t id )  {
+    return table_.at( id ).at( "name" );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+uint8_t ColorTable::findHex( const std::string& hex )
 {
     if ( table_.is_null() ) {
-        return "#000000";
+        return 0;
     }
 
-    return table_[ index ][ "hexString" ];
+    auto it = std::find_if( 
+        table_.begin(), table_.end(), 
+        [ &hex ]( const nlohmann::json& item ) {
+            return item[ "hexString" ] == hex;
+        }
+    );
+
+    if ( it == table_.end() ) {
+        return 0;
+    }
+    
+    return it->at( "colorId" );
 }
 
 
@@ -59,60 +88,6 @@ uint8_t ColorTable::findName( const std::string& name )
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-std::string ColorTable::colorName( const uint8_t id ) {
-    return table_[ id ][ "name" ];
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-uint8_t ColorTable::colorId( const std::string& hex )
-{
-    if ( hex.empty() ) {
-        return 0;
-    }
-
-    std::string_view hexstr( &hex[ 0 ], hex.size() );
-
-    if ( hexstr[ 0 ] == '#' ) {
-        hexstr.remove_prefix( 1 );
-    }
-
-    if ( hexstr.size() > 8 ) {
-        return 0;
-    }
-
-    std::stringstream ss;
-    ss << std::hex << hexstr;
-
-    uint32_t val;
-    ss >> val;
-
-    auto conv = []( const int v ) -> int {
-        return int( std::roundf( 5.f * v / 255.f ) );
-    };
-
-    const int r = conv( ( val >> 16 ) & 0xff );
-    const int g = conv( ( val >> 8 ) & 0xff );
-    const int b = conv( val & 0xff  );
-    const uint8_t index = 16 + 36 * r + 6 * g + b;
-
-    return index;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-std::string ColorTable::ansiEscapeCode( const std::string& hex ) {
-    return ansiEscapeCode( colorId( hex ) );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-std::string ColorTable::ansiEscapeCode( const uint8_t index ) {
-    return "\x1b[38;5;" + std::to_string( index ) + "m";
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////
 void ColorTable::printTestTable( const uint8_t numSteps )
 {
@@ -124,19 +99,23 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     std::cout << std::endl;
 
+    auto ansi = []( const Color& col ) -> std::string {
+       return "\x1b[38;5;" + std::to_string( col.id() ) + "m";
+    };
+
     for ( uint8_t i = 0; i < 8; i++ ) {
-        std::cout << mc::ColorTable::ansiEscapeCode( i ) << sym;
+        std::cout << ansi( i ) << sym;
     }
 
     std::cout << " ";
-    std::cout << mc::ColorTable::ansiEscapeCode( "#000000" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ff0000" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#00ff00" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ffff00" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#0000ff" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ff00ff" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#00ffff" ) << sym;
-    std::cout << mc::ColorTable::ansiEscapeCode( "#ffffff" ) << sym;
+    std::cout << ansi( "#000000"s ) << sym;
+    std::cout << ansi( "#ff0000"s ) << sym;
+    std::cout << ansi( "#00ff00"s ) << sym;
+    std::cout << ansi( "#ffff00"s ) << sym;
+    std::cout << ansi( "#0000ff"s ) << sym;
+    std::cout << ansi( "#ff00ff"s ) << sym;
+    std::cout << ansi( "#00ffff"s ) << sym;
+    std::cout << ansi( "#ffffff"s ) << sym;
     std::cout << std::endl;
     std::cout << std::endl;
 
@@ -157,7 +136,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
                 std::stringstream ss;
                 ss << "#" << std::hex << val;
-                std::cout << mc::ColorTable::ansiEscapeCode( ss.str() ) << sym;
+                std::cout << ansi( ss.str() ) << sym;
             }
 
             std::cout << " ";
@@ -170,7 +149,7 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     //  NOTE(tgurdan): uint8_t causes endless loop here
     for ( uint16_t i = 232; i <= 255; i++ ) {
-        std::cout << mc::ColorTable::ansiEscapeCode( uint8_t( i ) ) << sym;
+        std::cout << ansi( uint8_t( i ) ) << sym;
     }
 
     std::cout << std::endl << std::endl;
@@ -213,26 +192,38 @@ Color::Color( const std::string& hexOrName )
         ss << hexstr;
     }
 
-    uint32_t val;
-    ss >> val;
+    uint32_t rgba;
+    ss >> rgba;
 
-    auto conv = []( const int v ) -> int {
-        return int( std::roundf( 5.f * v / 255.f ) );
-    };
-
-    const int r = conv( ( val >> 16 ) & 0xff );
-    const int g = conv( ( val >> 8 ) & 0xff );
-    const int b = conv( val & 0xff  );
-    id_ = 16 + 36 * r + 6 * g + b;
+    id_ = fromRGBA( rgba );
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////
-std::string Color::hex() const { return {}; }
+std::string Color::hex() const { 
+    return ColorTable::hex( id_ ); 
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////
-std::string Color::name() const { return {}; }
+std::string Color::name() const { 
+    return ColorTable::name( id_ );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+uint8_t Color::fromRGBA( const uint32_t rgba ) 
+{ 
+    auto conv = []( const int v ) -> int {
+        return int( std::roundf( 5.f * v / 255.f ) );
+    };
+
+    const int r = conv( ( rgba >> 16 ) & 0xff );
+    const int g = conv( ( rgba >> 8 ) & 0xff );
+    const int b = conv( rgba & 0xff  );
+
+    return ( 16 + 36 * r + 6 * g + b );
+}
 
 
 }   //  mc

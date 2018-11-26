@@ -10,7 +10,10 @@ namespace mc {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Formatter::Formatter() {
+Formatter::Formatter( const std::string& space, const std::string& newline ) :
+    space_( space ),
+    newline_( newline )
+{
     theme_ = std::make_shared<Theme>();
 }
 
@@ -118,7 +121,7 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string AsciiFormatter::beginColor( const uint8_t index ) const {
-    return ColorTable::ansiEscapeCode( index );
+    return "\x1b[38;5;" + std::to_string( index ) + "m";
 }
 
 
@@ -130,7 +133,7 @@ std::string AsciiFormatter::endColor() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string HtmlFormatter::beginColor( const uint8_t index ) const {
-    const std::string hex = ColorTable::hexString( index );
+    const std::string hex = ColorTable::hex( index );
     return "<font color='" + hex + "'>";
 }
 

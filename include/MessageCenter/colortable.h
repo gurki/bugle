@@ -2,36 +2,37 @@
 
 #include <nlohmann/json.hpp>
 
-
-namespace mc {
-
-
 //  c.f.
 //    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 //    https://jonasjacek.github.io/colors/
 
 
+namespace mc {
+
+
+//  256 ansi colors
+//  indexed, with names and different representations
+//  requires 'colors.json' to be in the specified MC_RESOURCE_DIR directory
 class ColorTable
 {
     public:
 
-        ColorTable();
-
-        static std::string hexString( const uint8_t id );
-        static std::string colorName( const uint8_t id );
-        static std::string ansiEscapeCode( const uint8_t id );
-
-        static uint8_t colorId( const std::string& hex );
-        static std::string ansiEscapeCode( const std::string& hex );
-
+        static std::string hex( const uint8_t id );
+        static std::string name( const uint8_t id );
+        static uint8_t findHex( const std::string& hex );
         static uint8_t findName( const std::string& name );
-        
+
         static void printTestTable( const uint8_t numSteps = 6 );
 
     private:
 
+        ColorTable();
+        ~ColorTable() {}
+
+        static void load( const std::string& path );
+
         static nlohmann::json table_;
-        static ColorTable instance_;
+        static ColorTable instance_;    //  trigger population of table_
 };
 
 
@@ -46,6 +47,8 @@ class Color
         uint8_t id() const { return id_; }
         std::string hex() const;
         std::string name() const;
+
+        static uint8_t fromRGBA( const uint32_t rgba );
 
     private:
 

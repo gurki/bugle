@@ -17,7 +17,10 @@ class Formatter
 {
     public:
 
-        Formatter();
+        Formatter( 
+            const std::string& space = " ", 
+            const std::string& newline = "\n" 
+        );
 
         virtual std::string format( const Message& message ) const;
         virtual std::string beginColor( const uint8_t index ) const { return {}; }
@@ -35,10 +38,10 @@ class Formatter
         void setIndent( const uint8_t indent );
         void setTheme( const ThemePtr& theme );
 
-    protected:
+    private:
 
-        const std::string space_ = " ";             //  &nbsp;
-        const std::string newline_ = "\n";          //  <br>
+        const std::string space_;
+        const std::string newline_;
 
     private:
 
@@ -61,6 +64,8 @@ class AsciiFormatter : public Formatter
 class HtmlFormatter : public Formatter 
 {
     public:
+
+        HtmlFormatter() : Formatter( "&nbsp;", "<br>" ) {}
 
         virtual std::string beginColor( const uint8_t index ) const;
         virtual std::string endColor() const;

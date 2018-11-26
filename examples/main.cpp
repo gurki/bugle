@@ -130,16 +130,16 @@ int main( int argc, char* argv[] )
     Color col3( "gray" );
     Color col4 = "#1a2b3c";
     Color col5 = 17;
-
+    
 
     //  test theme
 
     auto theme = std::make_shared<DefaultTheme>();
-    // theme->set( "debug", ColorTable::colorId( "#ff98bc" ), ColorTable::colorId( "#ffdce8" ) );
-    // theme->set( "info", ColorTable::colorId( "#007aff" ), ColorTable::colorId( "#449dff" ) );
-    // theme->set( "success", ColorTable::colorId( "#20b684" ), ColorTable::colorId( "#3ddda8" ) );
-    // theme->set( "warning", ColorTable::colorId( "#c87b23" ), ColorTable::colorId( "#e09c4f" ) );
-    // theme->set( "error", ColorTable::colorId( "#d51f1a" ), ColorTable::colorId( "#e94e4a" ) );
+    // theme->set( "debug", ColorTable::findHex( "#ff98bc" ), ColorTable::findHex( "#ffdce8" ) );
+    // theme->set( "info", ColorTable::findHex( "#007aff" ), ColorTable::findHex( "#449dff" ) );
+    // theme->set( "success", ColorTable::findHex( "#20b684" ), ColorTable::findHex( "#3ddda8" ) );
+    // theme->set( "warning", ColorTable::findHex( "#c87b23" ), ColorTable::findHex( "#e09c4f" ) );
+    // theme->set( "error", ColorTable::findHex( "#d51f1a" ), ColorTable::findHex( "#e94e4a" ) );
     frmt->setTheme( theme );
 
     mci.addObserver( clog );
