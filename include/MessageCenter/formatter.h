@@ -56,8 +56,8 @@ class AsciiFormatter : public Formatter
 {
     public:
 
-        virtual std::string beginColor( const uint8_t index ) const;
-        virtual std::string endColor() const;
+        virtual std::string beginColor( const uint8_t index ) const override;
+        virtual std::string endColor() const override;
 };
 
 
@@ -67,8 +67,8 @@ class HtmlFormatter : public Formatter
 
         HtmlFormatter() : Formatter( "&nbsp;", "<br>" ) {}
 
-        virtual std::string beginColor( const uint8_t index ) const;
-        virtual std::string endColor() const;
+        virtual std::string beginColor( const uint8_t index ) const override;
+        virtual std::string endColor() const override;
 };
 
 

@@ -59,6 +59,26 @@ std::string Message::info() const
 
 
 //////////////////////////////////////////////////////////////////////////////////
+const std::vector<uint8_t>& Message::binary() const
+{
+    // std::lock_guard<std::mutex> lock( binaryMutex_ );
+
+    if ( ! binary_.empty() ) {
+        return binary_;
+    }
+
+    binary_ = nlohmann::json::to_msgpack( *this );
+    return binary_;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+size_t Message::binarySize() const {
+    return binary().size();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
 tags_t filterTags( const nlohmann::json& tags ) 
 {
     static auto insert = []( tags_t& jobj, const nlohmann::json& tag ) -> void
@@ -80,7 +100,6 @@ tags_t filterTags( const nlohmann::json& tags )
     //  ignores all numbers, bools and second-level non-convertible arrays
 
     tags_t jobj;
-    insert( jobj, tags );
     
     if ( tags.is_array() ) 
     {
@@ -96,8 +115,49 @@ tags_t filterTags( const nlohmann::json& tags )
             }
         }
     }
+    else {
+        insert( jobj, tags );
+    }
 
     return jobj;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void to_json( nlohmann::json& json, const Message& message )
+{
+    json[ "timestamp" ] = message.timestamp();
+    // json[ "thread_id" ] = message.threadId();
+
+    if ( message.isIndexed() ) 
+    {
+        json[ "file" ] = message.file();
+        json[ "function" ] = message.function();
+        json[ "line" ] = message.line();
+        json[ "level" ] = message.level();
+    }
+
+    json[ "content" ] = message.content();
+    json[ "tags" ] = message.tags();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void from_json( const nlohmann::json& json, Message& message )
+{
+    message.datetime_ = json[ "timestamp" ];
+    // message.threadId_ = json[ "thread_id" ];
+
+    if ( json.find( "file" ) != json.end() ) 
+    {
+        message.file_ = json[ "file" ];
+        message.function_ = json[ "function" ];
+        message.line_ = json[ "line" ];
+        message.level_ = json[ "level" ];
+    }
+
+    message.content_ = json[ "content" ];
+    message.tags_ = json[ "tags" ].get<tags_t>();
 }
 
 

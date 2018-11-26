@@ -32,13 +32,38 @@ using namespace mc;
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto frmt = std::make_shared<AsciiFormatter>();
-    auto clog = std::make_shared<ConsoleLogger>();
-    clog->setFormatter( frmt );
+    //  test color
 
-    mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+    Color cols[] = {
+        "#abc",
+        "#aabbcc",
+        "unknown",
+        "#1a2b3c",
+        17
+    };
+
+    for ( const auto& col : cols ) {
+        std::cout << col.name() << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    //  test datetime    
+
+    auto dt = DateTime::now();
+    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+
+    nlohmann::json jdt = dt;
+    DateTime dt2 = jdt;
+
+    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    std::cout << std::endl;
+
 
     //  test message post
+
+    auto clog = std::make_shared<ConsoleLogger>();
+    mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
 
     static const nlohmann::json obj = {
         { "pi", 3.141 },
@@ -71,6 +96,9 @@ int main( int argc, char* argv[] )
     mc_post( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
+
+    std::cout << std::endl;
+
 
     //  test json to tags_t conversion
 
@@ -123,25 +151,11 @@ int main( int argc, char* argv[] )
     filter.set( "debug priority>2 file=main.cpp, priority<4 network");
 
 
-    //  test color
+    //  test formatter
 
-    Color col1( "#abc" );
-    Color col2( "#aabbcc" );
-    Color col3( "gray" );
-    Color col4 = "#1a2b3c";
-    Color col5 = 17;
+    auto frmt = std::make_shared<AsciiFormatter>();
+    clog->setFormatter( frmt );
     
-
-    //  test theme
-
-    auto theme = std::make_shared<DefaultTheme>();
-    // theme->set( "debug", ColorTable::findHex( "#ff98bc" ), ColorTable::findHex( "#ffdce8" ) );
-    // theme->set( "info", ColorTable::findHex( "#007aff" ), ColorTable::findHex( "#449dff" ) );
-    // theme->set( "success", ColorTable::findHex( "#20b684" ), ColorTable::findHex( "#3ddda8" ) );
-    // theme->set( "warning", ColorTable::findHex( "#c87b23" ), ColorTable::findHex( "#e09c4f" ) );
-    // theme->set( "error", ColorTable::findHex( "#d51f1a" ), ColorTable::findHex( "#e94e4a" ) );
-    frmt->setTheme( theme );
-
     mci.addObserver( clog );
     mcp( "info message", {{ "info", "message" }} );
     mcp( "success message", {{ "success", "message" }} );
@@ -149,6 +163,23 @@ int main( int argc, char* argv[] )
     mcp( "error message", {{ "error", "message" }} );
     mcp( "debug message", {{ "debug", "message" }} );
 
+
+    //  test theme
+
+    auto theme = std::make_shared<DefaultTheme>();
+    frmt->setTheme( theme );
+
+    // theme->set( "debug", "#ff98bc", "#ffdce8" );
+    // theme->set( "info", "#007aff", "#449dff" );
+    // theme->set( "success", "#20b684", "#3ddda8" );
+    // theme->set( "warning", "#c87b23", "#e09c4f" );
+    // theme->set( "error", "#d51f1a", "#e94e4a" );
+    
+    mcp( "info message", {{ "info", "message" }} );
+    mcp( "success message", {{ "success", "message" }} );
+    mcp( "warning message", {{ "warning", "message" }} );
+    mcp( "error message", {{ "error", "message" }} );
+    mcp( "debug message", {{ "debug", "message" }} );
 
     // MCS();
     // MCS() << "simple scope";

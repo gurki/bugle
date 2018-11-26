@@ -90,8 +90,8 @@ DateTime DateTime::parse( const std::string& str )
     }
 
     std::tm t;
-    std::istringstream istr( match[1] );
-    istr >> std::get_time( &t, "%FT%T" );
+    std::istringstream istr( str );
+    istr >> std::get_time( &t, "%Y-%m-%dT%H:%M:%S" );
     std::time_t time = std::mktime( &t );
 
     DateTime dt;

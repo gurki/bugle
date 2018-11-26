@@ -14,7 +14,7 @@ Formatter::Formatter( const std::string& space, const std::string& newline ) :
     space_( space ),
     newline_( newline )
 {
-    theme_ = std::make_shared<Theme>();
+    theme_ = std::make_shared<DefaultTheme>();
 }
 
 

@@ -1,8 +1,6 @@
 #include "messagecenter/consolelogger.h"
-//#include "messagescope.h"
 #include "messagecenter/colortable.h"
-//#include "messagecenter.h"
-//#include "systeminfo.h"
+
 #include <iostream>
 #include <thread>
 
@@ -11,9 +9,8 @@ namespace mc {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-ConsoleLogger::ConsoleLogger()
-{
-//    formatter_ = new Formatter( this );
+ConsoleLogger::ConsoleLogger() {
+    formatter_ = std::make_shared<Formatter>();
     printSystemInfo();
 }
 
