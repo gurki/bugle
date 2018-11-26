@@ -9,6 +9,7 @@ namespace mc {
 
 
 using ThemePtr = std::shared_ptr<class Theme>;
+using DefaultThemePtr = std::shared_ptr<class DefaultTheme>;
 
 
 struct ColorPair {
@@ -39,21 +40,33 @@ class Theme
         const ColorPair get( const std::string& key ) const;
         const ColorPair operator[] ( const std::string& key ) const;
 
-    private:
+    protected:
 
-        std::unordered_map<std::string, ColorPair> colors_ = {
-            { "info", { 39, 45 } },
-            { "success", { 40, 46 } },
-            { "warning", { 220, 226 } },
-            { "error", { 196, 202 } },
-            { "debug", { 159, 195 } }
-        };
+        std::unordered_map<std::string, ColorPair> colors_ = {};
         
-        ColorPair primary_ = { 254, 246 };
-        ColorPair secondary_ = { 242, 238 };
+        ColorPair primary_ = { 15, 15 };
+        ColorPair secondary_ = { 15, 15 };
 };
 
 
+class DefaultTheme : public Theme 
+{
+    public:
+
+        DefaultTheme() : Theme()
+        {
+            colors_ = {
+                { "debug", { 123, 195 } },
+                { "info", { 39, 81 } },
+                { "success", { 40, 83 } },
+                { "warning", { 220, 221 } },
+                { "error", { 196, 203 } }
+            };
+            
+            primary_ = { 254, 246 };
+            secondary_ = { 242, 238 };
+        }
+};
 
 
 }   //  mc::

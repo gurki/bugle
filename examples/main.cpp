@@ -123,22 +123,32 @@ int main( int argc, char* argv[] )
     filter.set( "debug priority>2 file=main.cpp, priority<4 network");
 
 
+    //  test color
+
+    Color col1( "#abc" );
+    Color col2( "#aabbcc" );
+    Color col3( "gray" );
+    Color col4 = "#1a2b3c";
+    Color col5 = 17;
+
+
     //  test theme
 
-    auto theme = std::make_shared<Theme>();
-    theme->set( "debug", ColorTable::colorId( "#ff98bc" ), ColorTable::colorId( "#ffdce8" ) );
-    theme->set( "info", ColorTable::colorId( "#007aff" ), ColorTable::colorId( "#449dff" ) );
-    theme->set( "success", ColorTable::colorId( "#20b684" ), ColorTable::colorId( "#3ddda8" ) );
-    theme->set( "warning", ColorTable::colorId( "#c87b23" ), ColorTable::colorId( "#e09c4f" ) );
-    theme->set( "error", ColorTable::colorId( "#d51f1a" ), ColorTable::colorId( "#e94e4a" ) );
+    auto theme = std::make_shared<DefaultTheme>();
+    // theme->set( "debug", ColorTable::colorId( "#ff98bc" ), ColorTable::colorId( "#ffdce8" ) );
+    // theme->set( "info", ColorTable::colorId( "#007aff" ), ColorTable::colorId( "#449dff" ) );
+    // theme->set( "success", ColorTable::colorId( "#20b684" ), ColorTable::colorId( "#3ddda8" ) );
+    // theme->set( "warning", ColorTable::colorId( "#c87b23" ), ColorTable::colorId( "#e09c4f" ) );
+    // theme->set( "error", ColorTable::colorId( "#d51f1a" ), ColorTable::colorId( "#e94e4a" ) );
     frmt->setTheme( theme );
 
     mci.addObserver( clog );
-    mc_post( "debug message", {{ "debug", "message" }} );
-    mc_post( "info message", {{ "info", "message" }} );
-    mc_post( "success message", {{ "success", "message" }} );
-    mc_post( "warning message", {{ "warning", "message" }} );
-    mc_post( "error message", {{ "error", "message" }} );
+    mcp( "info message", {{ "info", "message" }} );
+    mcp( "success message", {{ "success", "message" }} );
+    mcp( "warning message", {{ "warning", "message" }} );
+    mcp( "error message", {{ "error", "message" }} );
+    mcp( "debug message", {{ "debug", "message" }} );
+
 
     // MCS();
     // MCS() << "simple scope";

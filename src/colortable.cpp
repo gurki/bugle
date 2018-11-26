@@ -5,6 +5,7 @@
 #include <sstream>
 #include <ios>  //  std::hex
 #include <string_view>
+#include <regex>
 
 
 namespace mc {
@@ -40,7 +41,7 @@ std::string ColorTable::hexString( const uint8_t index )
 uint8_t ColorTable::findName( const std::string& name )
 {
     if ( table_.is_null() ) {
-        return 15;  //  white
+        return 0;
     }
 
     auto it = std::find_if( 
@@ -51,7 +52,7 @@ uint8_t ColorTable::findName( const std::string& name )
     );
 
     if ( it == table_.end() ) {
-        return 15;  //  white
+        return 0;
     }
     
     return it->at( "colorId" );
@@ -68,7 +69,7 @@ std::string ColorTable::colorName( const uint8_t id ) {
 uint8_t ColorTable::colorId( const std::string& hex )
 {
     if ( hex.empty() ) {
-        return 15;  //  white
+        return 0;
     }
 
     std::string_view hexstr( &hex[ 0 ], hex.size() );
@@ -78,7 +79,7 @@ uint8_t ColorTable::colorId( const std::string& hex )
     }
 
     if ( hexstr.size() > 8 ) {
-        return 15;  //  white
+        return 0;
     }
 
     std::stringstream ss;
@@ -174,6 +175,64 @@ void ColorTable::printTestTable( const uint8_t numSteps )
 
     std::cout << std::endl << std::endl;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////
+Color::Color( const uint8_t index ) :
+    id_( index ) 
+{}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+Color::Color( const std::string& hexOrName )
+{
+    //  try hex
+    std::regex re( "^#((?:[0-9a-fA-F]{3}){1,2})$" );
+    std::smatch match;
+    std::regex_match( hexOrName, match, re );
+
+    //  revert to name
+    if ( match.empty() ) {
+        id_ = ColorTable::findName( hexOrName );
+        return;
+    }
+
+    //  parse hex 
+
+    std::stringstream ss;
+    const std::string& hexstr = match[ 1 ];
+
+    ss << std::hex;
+
+    if ( hexstr.size() == 3 )  {
+        //  unpack 3-digit hex
+        for ( const auto& c : hexstr ) {
+            ss << c << c;
+        }
+    } else {
+        ss << hexstr;
+    }
+
+    uint32_t val;
+    ss >> val;
+
+    auto conv = []( const int v ) -> int {
+        return int( std::roundf( 5.f * v / 255.f ) );
+    };
+
+    const int r = conv( ( val >> 16 ) & 0xff );
+    const int g = conv( ( val >> 8 ) & 0xff );
+    const int b = conv( val & 0xff  );
+    id_ = 16 + 36 * r + 6 * g + b;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+std::string Color::hex() const { return {}; }
+
+
+//////////////////////////////////////////////////////////////////////////////////
+std::string Color::name() const { return {}; }
 
 
 }   //  mc
