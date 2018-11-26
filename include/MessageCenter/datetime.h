@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
+
 #include <chrono>
 #include <string>
 
@@ -20,7 +22,7 @@ class DateTime
         DateTime();
 
         bool valid() const { return timestamp_.time_since_epoch().count() > 0; }
-        std::string info() const;
+        std::string info( const Resolution resolution = Seconds ) const;
         std::string timeInfo( const Resolution resolution = Seconds ) const;
         std::string dateInfo() const;
         uint16_t milliseconds() const;
@@ -28,6 +30,9 @@ class DateTime
 
         static DateTime now();
         static DateTime parse( const std::string& str );
+
+        friend void to_json( nlohmann::json& json, const DateTime& message );
+        friend void from_json( const nlohmann::json& json, DateTime& message );
 
     private:
 
