@@ -51,7 +51,7 @@ void MessageCenter::post(
         return;
     }
 
-    std::cout << DateTime::now().timeInfo() << " -- enter post " << std::this_thread::get_id() << std::endl;
+    std::cout << "  " << DateTime::now().timeInfo() << " -- enter post " << std::this_thread::get_id() << std::endl;
 
     //  thread::detach instead of async, to allow non-blocking continuation from caller thread
     //  arguments are copied to ensure thread-safety
@@ -59,8 +59,9 @@ void MessageCenter::post(
     //  TODO(tgurdan): 
     //    provide rvalue reference implementation to avoid copies if not necessary
     std::thread( &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags ).detach();
+    // std::future<void> f = std::async( std::launch::async, &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags );
     
-    std::cout << DateTime::now().timeInfo() << " -- exit post " << std::this_thread::get_id() << std::endl;
+    std::cout << "  " << DateTime::now().timeInfo() << " -- exit post " << std::this_thread::get_id() << std::endl;
 }
 
 
@@ -70,34 +71,40 @@ void MessageCenter::postAsync(
     MC_INFO_DECLARE,
     const nlohmann::json& tags )
 {
+    //  avoid observer insertion during iteration
+    //  ensure multiple postAsync calls run sequentially to keep chronological order
+    std::lock_guard<std::mutex> guard( observerMutex_ );
+    
     using namespace std::chrono_literals;
     std::this_thread::sleep_for( 1s );
-    
-    std::cout << DateTime::now().timeInfo() << " -- enter postAsync " << std::this_thread::get_id() << std::endl;
+
+    std::cout << "    " << DateTime::now().timeInfo() << " -- enter postAsync " << std::this_thread::get_id() << std::endl;
+    std::cout << "    " << content << std::endl;
     std::this_thread::sleep_for( 2s );
 
     const auto message = Message( MC_INFO_NAMES, content, tags );
 
-    std::lock_guard<std::mutex> guard( observerMutex_ );
 
-    for ( const auto& observer : observers_ )
+    for ( const auto& observerRef : observers_ )
     {
-        if ( observer.expired() ) {
-            observers_.erase( observer );
-            filter_.erase( observer );
+        if ( observerRef.expired() ) {
+            observers_.erase( observerRef );
+            filter_.erase( observerRef );
             continue;
         }
 
-        const auto& filter = filter_[ observer ];
+        const auto& filter = filter_[ observerRef ];
 
         if ( ! filter.passes( message.tags() ) ) {
             continue;
         }
 
-        observer.lock()->notify( message );
+        auto observer = observerRef.lock();
+        std::future<void> f = std::async( std::launch::async, [ &observer, &message ]{ observer->notify( message ); } );
+        // std::thread( [ &observer, &message ]{ observer->notify( message ); } ).detach();
     }
 
-    std::cout << DateTime::now().timeInfo() << " -- exit postAsync " << std::this_thread::get_id() << std::endl;
+    std::cout << "    " << DateTime::now().timeInfo() << " -- exit postAsync " << std::this_thread::get_id() << std::endl;
 }
 
 

@@ -106,8 +106,12 @@ int main( int argc, char* argv[] )
     std::cout << DateTime::now().timeInfo() << " -- posting original " << std::this_thread::get_id() << std::endl;
     
     nlohmann::json jmut = "mutable string";
+    auto clog2 = std::make_shared<ConsoleLogger>();
     mci.addObserver( clog );
+    mci.addObserver( clog2 );
+
     mcp( jmut, "mutable" );
+    mcp( "parallel post", "immutable" );
 
     std::cout << DateTime::now().timeInfo() << " -- changing original " << std::this_thread::get_id() << std::endl;
     

@@ -24,6 +24,8 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::notify( const Message& message )
 {
+    std::cout << "      " << DateTime::now().timeInfo() << " -- enter notify " << std::this_thread::get_id() << std::endl;
+
     if ( ! formatter_ ) {
         return;
     }
