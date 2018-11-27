@@ -31,9 +31,16 @@ MessageCenter::~MessageCenter() {
 void MessageCenter::terminate() 
 {
     std::cout << "terminate" << std::endl;
-    worker_.~thread();
-    // std::lock_guard<std::mutex> tguard( observerMutex_ );
+    alive_ = false;
+    std::lock_guard<std::mutex> guard( workerMutex_ );
+    std::lock_guard<std::mutex> fguard( futureMutex_ );
     std::cout << "locked" << std::endl;
+    worker_.~thread();
+
+    while ( ! futures_.empty() ) {
+        futures_.front().~future();
+        futures_.pop();
+    }
 }
 
 
@@ -82,32 +89,39 @@ void MessageCenter::post(
         this, content, MC_INFO_NAMES, tags, tid 
     );
     
-    {
-        std::lock_guard<std::mutex> guard( futureMutex_ );
-        futures_.push( std::move( f ) );
-    }
-
-    cv_.notify_one();
+    std::lock_guard<std::mutex> guard( futureMutex_ );
+    futures_.push( std::move( f ) );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::processQueue()
 {
+    std::shared_future<void> f;
+
     while ( true ) 
     {
-        std::unique_lock<std::mutex> lock( workerMutex_ );
-        
-        std::cout << "wait ..." << std::endl;
-        cv_.wait( lock );
-        std::cout << "process ..." << std::endl;
+        std::lock_guard<std::mutex> guard( workerMutex_ );
 
-        std::lock_guard<std::mutex> guard( futureMutex_ );
-        futures_.front().wait();
-        futures_.pop();
+        if ( ! alive_ ) {
+            std::cout << "not alive" << std::endl;
+            return;
+        }
+
+        if ( futures_.empty() ) {
+            std::this_thread::sleep_for( 10ms );
+            continue;
+        }
+
+        {
+            std::cout << "process ..." << std::endl;
+            std::lock_guard<std::mutex> guard( futureMutex_ );
+            f = futures_.front().share();
+            futures_.pop();
+        }
+
+        f.wait();
         std::cout << "done." << std::endl;
-
-        lock.unlock();
     }
 }
 
@@ -119,6 +133,7 @@ void MessageCenter::postAsync(
     const nlohmann::json& tags,
     const std::thread::id& threadId )
 {
+    std::lock_guard<std::mutex> guard( observerMutex_ );
     //  asynchronous construction of non-moveable Message. included in postAsync in case 
     //  of time-consuming tag parsing. allows partially parallel postAsync calls.
     const auto messagePtr = std::make_shared<Message>( MC_INFO_NAMES, content, tags );
@@ -126,7 +141,6 @@ void MessageCenter::postAsync(
     //  lock to avoid observer insertion from another thread during iteration.
     //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping
     //  chronological order.
-    std::lock_guard<std::mutex> guard( observerMutex_ );
 
     for ( auto it = observers_.begin(); it != observers_.end(); )
     {
