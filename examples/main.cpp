@@ -11,13 +11,13 @@
 //#include "formatter.h"
 //#include "htmllogger.h"
 
-
 #include <iostream>
 #include <thread>
 #include <future>
 #include <chrono>
 #include <variant>
 #include <utility>
+
 
 //void scopeTest();
 //void typeTest();
@@ -26,13 +26,15 @@
 //void timingTest();
 //void timingTestRandom();
 
+
 using namespace mc;
+using namespace std::chrono_literals;
 
 
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    mci.disable();
+    const auto pauseMs = 100ms;
 
     //  test color
 
@@ -49,6 +51,8 @@ int main( int argc, char* argv[] )
     }
 
     std::cout << std::endl;
+    std::this_thread::sleep_for( pauseMs );
+
 
     //  test datetime    
 
@@ -60,6 +64,7 @@ int main( int argc, char* argv[] )
 
     std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
     std::cout << std::endl;
+    std::this_thread::sleep_for( pauseMs );
 
 
     //  test message post
@@ -98,33 +103,19 @@ int main( int argc, char* argv[] )
     mc_post( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
-
+    
     //  parallelism and mutability
 
-    mci.enable();
+    // auto clog2 = std::make_shared<ConsoleLogger>();
+    // mci.addObserver( clog2 );
+    // mci.addObserver( clog );
 
-    std::cout << DateTime::now().timeInfo() << " -- posting original " << std::this_thread::get_id() << std::endl;
+    // nlohmann::json jmut = "mutable string";
+    // mcp( jmut, "mutable" );
+    // mcp( "parallel post", "immutable" );
     
-    nlohmann::json jmut = "mutable string";
-    auto clog2 = std::make_shared<ConsoleLogger>();
-    mci.addObserver( clog );
-    mci.addObserver( clog2 );
-
-    mcp( jmut, "mutable" );
-    mcp( "parallel post", "immutable" );
-
-    std::cout << DateTime::now().timeInfo() << " -- changing original " << std::this_thread::get_id() << std::endl;
-    
-    jmut = "muted string!";
-    std::cout << DateTime::now().timeInfo() << " -- changed original" << std::endl;
-    
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for( 5s );
-
-    std::cout << DateTime::now().timeInfo() << " -- continue" << std::endl;
-    std::cout << std::endl;
-
-    mci.disable();
+    // jmut = "muted string!";
+    // std::cout << std::endl;
 
 
     //  test json to tags_t conversion
@@ -191,6 +182,7 @@ int main( int argc, char* argv[] )
     mcp( "debug message", {{ "debug", "message" }} );
 
     std::cout << std::endl;
+    std::this_thread::sleep_for( pauseMs );
 
 
     //  test theme

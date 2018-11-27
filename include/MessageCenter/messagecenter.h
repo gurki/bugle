@@ -27,7 +27,7 @@ class MessageCenter
     public:
 
         MessageCenter();
-        ~MessageCenter() {}
+        ~MessageCenter();
 
         void enable() { enabled_ = true; }
         void disable() { enabled_ = false; }
@@ -43,14 +43,17 @@ class MessageCenter
             const nlohmann::json& tags = {}
         );
 
+        void terminate();
+
         static MessageCenter& instance() { return *instance_; }
 
     private:
 
         void postAsync(
             const nlohmann::json& content,
-            MC_INFO_DECLARE_DEFAULT,
-            const nlohmann::json& tags = {}
+            MC_INFO_DECLARE,
+            const nlohmann::json& tags,
+            const std::thread::id& threadId
         );
         
         std::atomic_bool enabled_ = true;
@@ -69,6 +72,8 @@ class MessageCenter
         > filter_;
 
         std::mutex observerMutex_;
+        std::mutex threadMutex_;
+        std::unordered_map<std::thread::id, std::thread> activeThreads_;
 
         static MessageCenterPtr instance_;
 };
