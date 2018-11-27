@@ -16,6 +16,7 @@ namespace mc {
 
 
 using MessageUPtr = std::unique_ptr<class Message>;
+using MessagePtr = std::shared_ptr<class Message>;
     
 typedef nlohmann::json::object_t tags_t;
 tags_t filterTags( const nlohmann::json& tags );

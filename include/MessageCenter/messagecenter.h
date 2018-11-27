@@ -10,6 +10,9 @@
 #include <mutex>    //  observerMutex_, ...
 #include <unordered_set>    //  observers_, ...
 #include <atomic>   //  enabled_, ...
+#include <queue>
+#include <condition_variable>
+#include <future>
 
 
 namespace mc {
@@ -55,8 +58,11 @@ class MessageCenter
             const nlohmann::json& tags,
             const std::thread::id& threadId
         );
+
+        void processQueue();
         
         std::atomic_bool enabled_ = true;
+        std::atomic_bool alive_ = true;
 
         std::unordered_set<
             ObserverRef,
@@ -72,8 +78,10 @@ class MessageCenter
         > filter_;
 
         std::mutex observerMutex_;
-        std::mutex threadMutex_;
-        std::unordered_map<std::thread::id, std::thread> activeThreads_;
+        std::mutex futureMutex_, workerMutex_;
+        std::queue< std::future<void> > futures_;
+        std::thread worker_;
+        std::condition_variable cv_;
 
         static MessageCenterPtr instance_;
 };

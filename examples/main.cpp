@@ -34,8 +34,6 @@ using namespace std::chrono_literals;
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    const auto pauseMs = 100ms;
-
     //  test color
 
     Color cols[] = {
@@ -51,7 +49,6 @@ int main( int argc, char* argv[] )
     }
 
     std::cout << std::endl;
-    std::this_thread::sleep_for( pauseMs );
 
 
     //  test datetime    
@@ -64,7 +61,6 @@ int main( int argc, char* argv[] )
 
     std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
     std::cout << std::endl;
-    std::this_thread::sleep_for( pauseMs );
 
 
     //  test message post
@@ -182,7 +178,6 @@ int main( int argc, char* argv[] )
     mcp( "debug message", {{ "debug", "message" }} );
 
     std::cout << std::endl;
-    std::this_thread::sleep_for( pauseMs );
 
 
     //  test theme
@@ -238,6 +233,9 @@ int main( int argc, char* argv[] )
 //    colorTest();
 //    timingTest();
 
+    // std::cout << "wait main ..." << std::endl;
+    // std::this_thread::sleep_for( 200ms );
+    std::cout << "exit main" << std::endl;
     return EXIT_SUCCESS;
 }
 

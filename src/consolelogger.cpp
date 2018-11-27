@@ -22,13 +22,13 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::notify( const Message& message )
+void ConsoleLogger::notify( const MessagePtr& messagePtr )
 {
-    if ( ! formatter_ ) {
+    if ( ! formatter_  ) {
         return;
     }
 
-    std::cout << formatter_->format( message ) << std::endl;
+    std::cout << formatter_->format( *messagePtr ) << std::endl;
 }
 
 
