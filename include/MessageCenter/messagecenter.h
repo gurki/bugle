@@ -48,9 +48,9 @@ class MessageCenter
     private:
 
         void postAsync(
-            nlohmann::json content,
+            const nlohmann::json& content,
             MC_INFO_DECLARE_DEFAULT,
-            nlohmann::json tags = {}
+            const nlohmann::json& tags = {}
         );
         
         std::atomic_bool enabled_ = true;

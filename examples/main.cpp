@@ -103,16 +103,21 @@ int main( int argc, char* argv[] )
 
     mci.enable();
 
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- posting original " << std::this_thread::get_id() << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- posting original " << std::this_thread::get_id() << std::endl;
     
     nlohmann::json jmut = "mutable string";
+    mci.addObserver( clog );
     mcp( jmut, "mutable" );
 
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- changing original " << std::this_thread::get_id() << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- changing original " << std::this_thread::get_id() << std::endl;
     
     jmut = "muted string!";
+    std::cout << DateTime::now().timeInfo() << " -- changed original" << std::endl;
+    
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for( 5s );
 
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- changed original" << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- continue" << std::endl;
     std::cout << std::endl;
 
     mci.disable();

@@ -51,24 +51,29 @@ void MessageCenter::post(
         return;
     }
 
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- enter post " << std::this_thread::get_id() << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- enter post " << std::this_thread::get_id() << std::endl;
 
-    auto f = std::async( std::launch::async, &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags );
-    // std::thread( std::launch::async, &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags );
+    //  thread::detach instead of async, to allow non-blocking continuation from caller thread
+    //  arguments are copied to ensure thread-safety
+    //
+    //  TODO(tgurdan): 
+    //    provide rvalue reference implementation to avoid copies if not necessary
+    std::thread( &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags ).detach();
     
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- exit post " << std::this_thread::get_id() << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- exit post " << std::this_thread::get_id() << std::endl;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::postAsync(
-    nlohmann::json content,
+    const nlohmann::json& content,
     MC_INFO_DECLARE,
-    nlohmann::json tags )
+    const nlohmann::json& tags )
 {
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- enter postAsync " << std::this_thread::get_id() << std::endl;
-
     using namespace std::chrono_literals;
+    std::this_thread::sleep_for( 1s );
+    
+    std::cout << DateTime::now().timeInfo() << " -- enter postAsync " << std::this_thread::get_id() << std::endl;
     std::this_thread::sleep_for( 2s );
 
     const auto message = Message( MC_INFO_NAMES, content, tags );
@@ -92,7 +97,7 @@ void MessageCenter::postAsync(
         observer.lock()->notify( message );
     }
 
-    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- exit postAsync " << std::this_thread::get_id() << std::endl;
+    std::cout << DateTime::now().timeInfo() << " -- exit postAsync " << std::this_thread::get_id() << std::endl;
 }
 
 
