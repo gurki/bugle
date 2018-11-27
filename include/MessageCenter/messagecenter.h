@@ -1,14 +1,15 @@
 #pragma once
 
-#include "messagecenter/defines.h"  //  MC_INFO...
+#include "messagecenter/defines.h"  //  MC_INFO, ...
 #include "messagecenter/utility.h"  //  WeakPtrHash, WeakPtrEqual
 #include "messagecenter/booleanfilter.h"
 
 #include <nlohmann/json.hpp>
 
-#include <memory>
-#include <mutex>
-#include <unordered_set>    
+#include <memory>   //  MessageCenterPtr, ...
+#include <mutex>    //  observerMutex_, ...
+#include <unordered_set>    //  observers_, ...
+#include <atomic>   //  enabled_, ...
 
 
 namespace mc {
@@ -42,13 +43,17 @@ class MessageCenter
             const nlohmann::json& tags = {}
         );
 
-        void postMessage( const Message& message );
-
         static MessageCenter& instance() { return *instance_; }
 
     private:
 
-        bool enabled_ = true;
+        void postAsync(
+            nlohmann::json content,
+            MC_INFO_DECLARE_DEFAULT,
+            nlohmann::json tags = {}
+        );
+        
+        std::atomic_bool enabled_ = true;
 
         std::unordered_set<
             ObserverRef,

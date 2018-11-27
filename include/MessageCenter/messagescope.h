@@ -34,7 +34,7 @@ class MessageScope
     private:
 
         MessageScope() {}
-        Message message_;
+        // Message message_;
 
         bool dirty_ = true;
 };

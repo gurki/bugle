@@ -4,13 +4,13 @@
 #include "messagecenter/colortable.h"
 #include "messagecenter/formatter.h"
 #include "messagecenter/theme.h"
+#include "messagecenter/filteritem.h"
+#include "messagecenter/datetime.h"
 //#include "consolelogger.h"
 //#include "jsonlogger.h"
 //#include "formatter.h"
 //#include "htmllogger.h"
 
-#include "messagecenter/filteritem.h"
-#include "messagecenter/datetime.h"
 
 #include <iostream>
 #include <thread>
@@ -32,6 +32,8 @@ using namespace mc;
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
+    mci.disable();
+
     //  test color
 
     Color cols[] = {
@@ -97,7 +99,23 @@ int main( int argc, char* argv[] )
     mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
 
+    //  parallelism and mutability
+
+    mci.enable();
+
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- posting original " << std::this_thread::get_id() << std::endl;
+    
+    nlohmann::json jmut = "mutable string";
+    mcp( jmut, "mutable" );
+
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- changing original " << std::this_thread::get_id() << std::endl;
+    
+    jmut = "muted string!";
+
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- changed original" << std::endl;
     std::cout << std::endl;
+
+    mci.disable();
 
 
     //  test json to tags_t conversion
@@ -163,6 +181,8 @@ int main( int argc, char* argv[] )
     mcp( "error message", {{ "error", "message" }} );
     mcp( "debug message", {{ "debug", "message" }} );
 
+    std::cout << std::endl;
+
 
     //  test theme
 
@@ -174,12 +194,13 @@ int main( int argc, char* argv[] )
     // theme->set( "success", "#20b684", "#3ddda8" );
     // theme->set( "warning", "#c87b23", "#e09c4f" );
     // theme->set( "error", "#d51f1a", "#e94e4a" );
-    
-    mcp( "info message", {{ "info", "message" }} );
-    mcp( "success message", {{ "success", "message" }} );
-    mcp( "warning message", {{ "warning", "message" }} );
-    mcp( "error message", {{ "error", "message" }} );
-    mcp( "debug message", {{ "debug", "message" }} );
+
+    // mcp( "info message", {{ "info", "message" }} );
+    // mcp( "success message", {{ "success", "message" }} );
+    // mcp( "warning message", {{ "warning", "message" }} );
+    // mcp( "error message", {{ "error", "message" }} );
+    // mcp( "debug message", {{ "debug", "message" }} );
+
 
     // MCS();
     // MCS() << "simple scope";

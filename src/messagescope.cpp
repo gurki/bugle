@@ -16,7 +16,7 @@ MessageScope::MessageScope( MC_INFO_DECLARE ) :
 
 ////////////////////////////////////////////////////////////////////////////////
 MessageScope::MessageScope( const nlohmann::json& tags, MC_INFO_DECLARE ) {
-    message_ = Message( MC_INFO_NAMES, nlohmann::json::array(), tags );
+    // message_ = Message( MC_INFO_NAMES, nlohmann::json::array(), tags );
 }
 
 
@@ -33,7 +33,7 @@ void MessageScope::emit()
         return;
     }
 
-    MC.postMessage( message_ );
+    // MC.postMessage( message_ );
     dirty_ = false;
 }
 

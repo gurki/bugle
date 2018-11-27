@@ -47,21 +47,31 @@ void MessageCenter::post(
     return;
 #endif
 
-    Message message( MC_INFO_NAMES, content, tags );
-    auto f = std::async( &MessageCenter::postMessage, this, std::move( message ) );
+    if ( ! enabled_ ) {
+        return;
+    }
+
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- enter post " << std::this_thread::get_id() << std::endl;
+
+    auto f = std::async( std::launch::async, &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags );
+    // std::thread( std::launch::async, &MessageCenter::postAsync, this, content, MC_INFO_NAMES, tags );
+    
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- exit post " << std::this_thread::get_id() << std::endl;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::postMessage( const Message& message )
+void MessageCenter::postAsync(
+    nlohmann::json content,
+    MC_INFO_DECLARE,
+    nlohmann::json tags )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- enter postAsync " << std::this_thread::get_id() << std::endl;
 
-    if ( ! enabled_ ) {
-        return;
-    }
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for( 2s );
+
+    const auto message = Message( MC_INFO_NAMES, content, tags );
 
     std::lock_guard<std::mutex> guard( observerMutex_ );
 
@@ -79,8 +89,10 @@ void MessageCenter::postMessage( const Message& message )
             continue;
         }
 
-        observer.lock()->notify(message);
+        observer.lock()->notify( message );
     }
+
+    std::cout << DateTime::now().timeInfo( DateTime::Microseconds ) << " -- exit postAsync " << std::this_thread::get_id() << std::endl;
 }
 
 

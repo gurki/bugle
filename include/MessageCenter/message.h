@@ -9,10 +9,13 @@
 #include <chrono>
 #include <iostream>
 #include <mutex>
+#include <memory>
 
 
 namespace mc {
-    
+
+
+using MessageUPtr = std::unique_ptr<class Message>;
     
 typedef nlohmann::json::object_t tags_t;
 tags_t filterTags( const nlohmann::json& tags );
@@ -31,6 +34,9 @@ class Message
             const nlohmann::json& object,
             const nlohmann::json& tags = {}
         );
+
+        // Message( const Message& ) = delete;
+        // Message& operator = ( const Message& ) = delete;
 
         const DateTime& timestamp() const { return datetime_; }
         const std::thread::id& threadId() const { return threadId_; }
@@ -65,7 +71,7 @@ class Message
         tags_t tags_ = {};
 
         mutable std::vector<uint8_t> binary_ = {}; //  mutable for lazy evaluation
-        // mutable std::mutex binaryMutex_;
+        mutable std::mutex binaryMutex_;
 };
 
 

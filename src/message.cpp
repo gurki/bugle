@@ -146,7 +146,7 @@ void to_json( nlohmann::json& json, const Message& message )
 void from_json( const nlohmann::json& json, Message& message )
 {
     message.datetime_ = json[ "timestamp" ];
-    // message.threadId_ = json[ "thread_id" ];
+    // message.threadId_ = json[ "threadId" ];
 
     if ( json.find( "file" ) != json.end() ) 
     {
