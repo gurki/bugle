@@ -15,8 +15,8 @@
 #include <thread>
 #include <future>
 #include <chrono>
-#include <variant>
 #include <utility>
+#include <string>
 
 
 //void scopeTest();
@@ -29,6 +29,7 @@
 
 using namespace mc;
 using namespace std::chrono_literals;
+using namespace std::string_literals;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,10 +38,10 @@ int main( int argc, char* argv[] )
     //  test color
 
     Color cols[] = {
-        "#abc",
-        "#aabbcc",
-        "unknown",
-        "#1a2b3c",
+        "#abc"s,
+        "#aabbcc"s,
+        "unknown"s,
+        "#1a2b3c"s,
         17
     };
 
@@ -100,18 +101,27 @@ int main( int argc, char* argv[] )
     mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
     
-    //  parallelism and mutability
-
-    // auto clog2 = std::make_shared<ConsoleLogger>();
-    // mci.addObserver( clog2 );
-    // mci.addObserver( clog );
-
-    // nlohmann::json jmut = "mutable string";
-    // mcp( jmut, "mutable" );
-    // mcp( "parallel post", "immutable" );
+    std::cout << std::endl;
     
-    // jmut = "muted string!";
-    // std::cout << std::endl;
+    
+    //  test parallelism and mutability
+
+    auto frmt2 = std::make_shared<AsciiFormatter>();
+    auto them2 = std::make_shared<Theme>();
+    auto clog2 = std::make_shared<ConsoleLogger>();
+    frmt2->setTheme( them2 );
+    clog2->setFormatter( frmt2 );
+    mci.addObserver( clog2 );
+    mci.addObserver( clog );
+
+    nlohmann::json jmut = "mutable string";
+    mcp( jmut, "mutable" );
+    mcp( "parallel post", "immutable" );
+    
+    jmut = "muted string!";
+    
+    mci.removeObserver( clog2 );
+    std::cout << std::endl;
 
 
     //  test json to tags_t conversion
@@ -185,17 +195,17 @@ int main( int argc, char* argv[] )
     auto theme = std::make_shared<DefaultTheme>();
     frmt->setTheme( theme );
 
-    // theme->set( "debug", "#ff98bc", "#ffdce8" );
-    // theme->set( "info", "#007aff", "#449dff" );
-    // theme->set( "success", "#20b684", "#3ddda8" );
-    // theme->set( "warning", "#c87b23", "#e09c4f" );
-    // theme->set( "error", "#d51f1a", "#e94e4a" );
+    // theme->set( "debug", "#ff98bc"s, "#ffdce8"s );
+    // theme->set( "info", "#007aff"s, "#449dff"s );
+    // theme->set( "success", "#20b684"s, "#3ddda8"s );
+    // theme->set( "warning", "#c87b23"s, "#e09c4f"s );
+    // theme->set( "error", "#d51f1a"s, "#e94e4a"s );
 
-    // mcp( "info message", {{ "info", "message" }} );
-    // mcp( "success message", {{ "success", "message" }} );
-    // mcp( "warning message", {{ "warning", "message" }} );
-    // mcp( "error message", {{ "error", "message" }} );
-    // mcp( "debug message", {{ "debug", "message" }} );
+    mcp( "info message", {{ "info", "message" }} );
+    mcp( "success message", {{ "success", "message" }} );
+    mcp( "warning message", {{ "warning", "message" }} );
+    mcp( "error message", {{ "error", "message" }} );
+    mcp( "debug message", {{ "debug", "message" }} );
 
 
     // MCS();
@@ -233,9 +243,6 @@ int main( int argc, char* argv[] )
 //    colorTest();
 //    timingTest();
 
-    // std::cout << "wait main ..." << std::endl;
-    // std::this_thread::sleep_for( 200ms );
-    std::cout << "exit main" << std::endl;
     return EXIT_SUCCESS;
 }
 

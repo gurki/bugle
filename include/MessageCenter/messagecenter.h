@@ -40,13 +40,15 @@ class MessageCenter
             const std::string& filter = {}
         );
 
+        void removeObserver( const ObserverRef& observer );
+
         void post(
             const nlohmann::json& content,
             MC_INFO_DECLARE_DEFAULT,
             const nlohmann::json& tags = {}
         );
 
-        void terminate();
+        void join();
 
         static MessageCenter& instance() { return *instance_; }
 
@@ -59,8 +61,6 @@ class MessageCenter
             const std::thread::id& threadId
         );
 
-        void processQueue();
-        
         std::atomic_bool enabled_ = true;
         std::atomic_bool alive_ = true;
 
@@ -78,10 +78,6 @@ class MessageCenter
         > filter_;
 
         std::mutex observerMutex_;
-        std::mutex futureMutex_, workerMutex_;
-        std::queue< std::future<void> > futures_;
-        std::thread worker_;
-        std::condition_variable cv_;
 
         static MessageCenterPtr instance_;
 };

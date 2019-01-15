@@ -8,6 +8,9 @@
 namespace mc {
 
 
+std::mutex ConsoleLogger::ostreamMutex_ = {};
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleLogger::ConsoleLogger() {
     formatter_ = std::make_shared<Formatter>();
@@ -28,6 +31,7 @@ void ConsoleLogger::notify( const MessagePtr& messagePtr )
         return;
     }
 
+    std::lock_guard<std::mutex> guard( ostreamMutex_ );
     std::cout << formatter_->format( *messagePtr ) << std::endl;
 }
 

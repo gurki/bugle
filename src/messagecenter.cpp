@@ -3,7 +3,7 @@
 #include "messagecenter/observer.h"
 
 #include <future>   //  std::async
-#include <execution>    //  std::execution::par
+// #include <execution>    //  std::execution::par
 #include <algorithm>    //  std::for_each
 
 using namespace std::chrono_literals;
@@ -16,31 +16,19 @@ MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::MessageCenter() {
-    worker_ = std::thread( &MessageCenter::processQueue, this );
-}
+MessageCenter::MessageCenter() 
+{}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 MessageCenter::~MessageCenter() {
-    terminate();
+    join();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::terminate() 
-{
-    std::cout << "terminate" << std::endl;
+void MessageCenter::join() {
     alive_ = false;
-    std::lock_guard<std::mutex> guard( workerMutex_ );
-    std::lock_guard<std::mutex> fguard( futureMutex_ );
-    std::cout << "locked" << std::endl;
-    worker_.~thread();
-
-    while ( ! futures_.empty() ) {
-        futures_.front().~future();
-        futures_.pop();
-    }
 }
 
 
@@ -64,6 +52,19 @@ void MessageCenter::addObserver(
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void MessageCenter::removeObserver( const ObserverRef& observer )
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
+    std::lock_guard<std::mutex> guard( observerMutex_ );
+
+    observers_.erase( observer );
+    filter_.erase( observer );
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::post(
@@ -84,45 +85,10 @@ void MessageCenter::post(
     auto tid = std::this_thread::get_id();
 
     auto f = std::async( 
-        std::launch::deferred,
+        std::launch::async,
         &MessageCenter::postAsync, 
         this, content, MC_INFO_NAMES, tags, tid 
     );
-    
-    std::lock_guard<std::mutex> guard( futureMutex_ );
-    futures_.push( std::move( f ) );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::processQueue()
-{
-    std::shared_future<void> f;
-
-    while ( true ) 
-    {
-        std::lock_guard<std::mutex> guard( workerMutex_ );
-
-        if ( ! alive_ ) {
-            std::cout << "not alive" << std::endl;
-            return;
-        }
-
-        if ( futures_.empty() ) {
-            std::this_thread::sleep_for( 10ms );
-            continue;
-        }
-
-        {
-            std::cout << "process ..." << std::endl;
-            std::lock_guard<std::mutex> guard( futureMutex_ );
-            f = futures_.front().share();
-            futures_.pop();
-        }
-
-        f.wait();
-        std::cout << "done." << std::endl;
-    }
 }
 
 
@@ -133,7 +99,6 @@ void MessageCenter::postAsync(
     const nlohmann::json& tags,
     const std::thread::id& threadId )
 {
-    std::lock_guard<std::mutex> guard( observerMutex_ );
     //  asynchronous construction of non-moveable Message. included in postAsync in case 
     //  of time-consuming tag parsing. allows partially parallel postAsync calls.
     const auto messagePtr = std::make_shared<Message>( MC_INFO_NAMES, content, tags );
@@ -141,6 +106,7 @@ void MessageCenter::postAsync(
     //  lock to avoid observer insertion from another thread during iteration.
     //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping
     //  chronological order.
+    std::lock_guard<std::mutex> guard( observerMutex_ );
 
     for ( auto it = observers_.begin(); it != observers_.end(); )
     {
@@ -155,22 +121,17 @@ void MessageCenter::postAsync(
 
     const auto& filters = filter_;
     
-    std::for_each( 
-        std::execution::par, 
-        observers_.begin(), observers_.end(), 
-        [ &messagePtr, &filters ]( const auto& observerRef ) 
-        {
-            const auto& filter = filters.at( observerRef );
+    for ( auto& observerRef : observers_ )
+    {
+        const auto& filter = filters.at( observerRef );
 
-            if ( ! filter.passes( messagePtr->tags() ) ) {
-                return;
-            }
-
-            auto observer = observerRef.lock();
-            std::this_thread::sleep_for( 500ms );
-            observer->notify( messagePtr ); 
+        if ( ! filter.passes( messagePtr->tags() ) ) {
+            return;
         }
-    );
+
+        auto observer = observerRef.lock();
+        observer->notify( messagePtr ); 
+    };
 }
 
 
