@@ -10,8 +10,12 @@ namespace mc {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Formatter::Formatter( const std::string& space, const std::string& newline ) :
+Formatter::Formatter( 
+    const std::string& space, 
+    const std::string& spacer, 
+    const std::string& newline ) :
     space_( space ),
+    spacer_( spacer ),
     newline_( newline )
 {
     theme_ = std::make_shared<DefaultTheme>();
@@ -38,13 +42,16 @@ std::string Formatter::format( const Message& message ) const
     std::stringstream ss;
     ss << colorize( 
         message.timestamp().timeInfo( DateTime::Microseconds ), 
-        theme_->secondary().color 
+        theme_->primary().variant 
     );
 
     //  message without quotes
 
-    if ( ! message.content().empty() ) {
+    if ( ! message.content().empty() ) 
+    {
         ss << skip( 2 );
+        ss << indent( message.level() );
+    
         const std::string msg = message.content().dump();
         ss << colorize( msg.substr( 1, msg.size() - 2 ), theme_->primary().color );
     }
@@ -52,6 +59,7 @@ std::string Formatter::format( const Message& message ) const
     ss << skip( 2 );
 
     //  tags
+
     const std::string tinfo = tagInfo( message.tags() );
 
     if ( ! tinfo.empty() ) {
@@ -79,7 +87,21 @@ std::string Formatter::colorize(
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::skip( const uint8_t count ) const  {
-    return repeat( space(), count );
+    return mc::repeat( space(), count );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::indent( const int level ) const 
+{
+    if ( level <= 0 || indent_ == 0 ) {
+        return {};
+    }
+
+    return colorize( 
+        mc::repeat( spacer(), indent_ * level ), 
+        theme_->secondary().variant 
+    );
 }
 
 
@@ -107,12 +129,12 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         stream << colorize( "#", theme_->secondary().variant );
         stream << colorize( key, pair.color );
 
-        if ( value.empty() ) {
-            continue;
-        }
+        // if ( value.empty() ) {
+            // continue;
+        // }
 
-        stream << colorize( ":", theme_->secondary().variant );
-        stream << colorize( value.dump(), pair.variant );
+        // stream << colorize( ":", theme_->secondary().variant );
+        // stream << colorize( value.dump(), pair.variant );
     }
 
     return stream.str();

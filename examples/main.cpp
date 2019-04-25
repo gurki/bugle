@@ -19,7 +19,7 @@
 #include <string>
 
 
-//void scopeTest();
+void scopeTest();
 //void typeTest();
 //void negationTest();
 //void colorTest();
@@ -178,6 +178,7 @@ int main( int argc, char* argv[] )
     //  test formatter
 
     auto frmt = std::make_shared<AsciiFormatter>();
+    frmt->setIndent( 2 );
     clog->setFormatter( frmt );
     
     mci.addObserver( clog );
@@ -206,6 +207,14 @@ int main( int argc, char* argv[] )
     mcp( "warning message", {{ "warning", "message" }} );
     mcp( "error message", {{ "error", "message" }} );
     mcp( "debug message", {{ "debug", "message" }} );
+
+    mcp( "simple message" );
+    mcp( "uncategorized tags", { "untagged", "nocategory", { "thuglife", "muchsad" } } );
+
+
+    //  indent
+
+    scopeTest();
 
 
     // MCS();
@@ -247,11 +256,11 @@ int main( int argc, char* argv[] )
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-//void scopeTest() {
+////////////////////////////////////////////////////////////////////////////////
+void scopeTest() {
 //    MC_ENTER;
-//    MC_P( "i am a fuuunctiioooooonnn *pflätsch*" );
-//}
+   mcp( "i am a fuuunctiioooooonnn *pflätsch*" );
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////

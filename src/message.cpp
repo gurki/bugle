@@ -38,6 +38,10 @@ Message::Message(
     }
 
     std::replace( file_.begin(), file_.end(), '\\', '/' );
+
+    if ( size_t boundary = file_.find_last_of( '/' ) ) {
+        file_ = file_.substr( boundary + 1 );
+    }
 }
 
 

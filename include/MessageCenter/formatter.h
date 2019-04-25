@@ -16,19 +16,22 @@ using FormatterPtr = std::shared_ptr<class Formatter>;
 class Formatter
 {
     public:
-
-        Formatter( 
-            const std::string& space = " ", 
-            const std::string& newline = "\n" 
+      
+        Formatter(
+            const std::string& space = u8"\u0020",
+            const std::string& spacer = u8"\u00b7\u202f",
+            const std::string& newline = "\n"
         );
 
         virtual std::string format( const Message& message ) const;
         virtual std::string beginColor( const uint8_t index ) const { return {}; }
         virtual std::string endColor() const { return {}; }
 
-        std::string space() const { return space_; }
-        std::string newline() const { return newline_; }
+        const std::string& space() const { return space_; }
+        const std::string& spacer() const { return spacer_; }
+        const std::string& newline() const { return newline_; }
         std::string skip( const uint8_t count ) const;
+        std::string indent( const int level ) const;
 
         std::string colorize(
             const std::string& text,
@@ -41,13 +44,14 @@ class Formatter
     private:
 
         const std::string space_;
+        const std::string spacer_;
         const std::string newline_;
 
     private:
 
         std::string tagInfo( const tags_t& tags ) const;
 
-        uint8_t indent_ = 0;
+        uint8_t indent_ = 1;
         ThemePtr theme_ = nullptr;
 };
 
@@ -65,7 +69,7 @@ class HtmlFormatter : public Formatter
 {
     public:
 
-        HtmlFormatter() : Formatter( "&nbsp;", "<br>" ) {}
+        HtmlFormatter() : Formatter( "&nbsp;", "<br>", "&middot;" ) {}
 
         virtual std::string beginColor( const uint8_t index ) const override;
         virtual std::string endColor() const override;
