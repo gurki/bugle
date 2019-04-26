@@ -125,9 +125,11 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
             stream << skip( 1 );
         }
 
-        const auto& pair = theme_->get( key );
+        const auto pair = theme_->get( key );
+        const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
+
         stream << colorize( "#", theme_->secondary().variant );
-        stream << colorize( key, pair.color );
+        stream << colorize( key, cols.color );
 
         if ( value.empty() ) {
             continue;
@@ -136,9 +138,9 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         stream << colorize( ":", theme_->secondary().variant );
 
         if ( value.is_primitive() ) {
-            stream << colorize( value.dump(), pair.variant );
+            stream << colorize( value.dump(), cols.variant );
         } else {
-            stream << colorize( u8"\u2026", pair.variant );
+            stream << colorize( u8"\u2026", cols.variant );
         }
     }
 
