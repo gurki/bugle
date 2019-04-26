@@ -52,34 +52,7 @@ void parallelMessages()
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    // //  test color
-
-    // Color cols[] = {
-    //     "#abc"s,
-    //     "#aabbcc"s,
-    //     "unknown"s,
-    //     "#1a2b3c"s,
-    //     17
-    // };
-
-    // for ( const auto& col : cols ) {
-    //     std::cout << col.name() << std::endl;
-    // }
-
-    // std::cout << std::endl;
-
-
-    // //  test datetime    
-
-    // auto dt = DateTime::now();
-    // std::cout << dt.info( DateTime::Microseconds ) << std::endl;
-
-    // nlohmann::json jdt = dt;
-    // DateTime dt2 = jdt;
-
-    // std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
-    // std::cout << std::endl;
-
+    mc::ColorTable::printTestTable();
 
     //  test message post
 
@@ -91,15 +64,15 @@ int main( int argc, char* argv[] )
     static const nlohmann::json obj = {
         { "pi", 3.141 },
         { "happy", true },
-        { "name", "Niels" },
         { "nothing", nullptr },
-        { "answer", {
-            { "everything", 42 }
-        }},
         { "list", { 1, 0, 2 } },
         { "object", {
+            { "name", "Niels" },
+            { "value", 42.99 },
             { "currency", "USD" },
-            { "value", 42.99 }
+            { "answer", {
+                { "everything", 42 }
+            }}
         }}
     };
 
@@ -120,30 +93,135 @@ int main( int argc, char* argv[] )
     mcp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mcp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     
-    // std::cout << std::endl;
-        
-    //  test parallelism and mutability
-
-    // auto frmt2 = std::make_shared<AsciiFormatter>();
-    // auto them2 = std::make_shared<Theme>();
-    // auto clog2 = std::make_shared<ConsoleLogger>();
-    // frmt2->setTheme( them2 );
-    // clog2->setFormatter( frmt2 );
-    // mci.addObserver( clog2 );
-    // mci.addObserver( clog );
-
-    // nlohmann::json jmut = "mutable string";
-    // mcp( jmut, "mutable" );
-    // mcp( "cause some delay" );
-    
-    // jmut = "muted string!";
-    
-    // mci.removeObserver( clog2 );
-    // std::cout << std::endl;
-
     //  start threaded messages
 
     std::thread worker( &parallelMessages );
+
+    //  test formatter
+
+    auto frmt = std::make_shared<AsciiFormatter>();
+    frmt->setIndent( 2 );
+    clog->setFormatter( frmt );
+    
+    mcp( "info message", {{ "info", "message" }} );
+    mcp( "success message", {{ "success", "message" }} );
+    mcp( "warning message", {{ "warning", "message" }} );
+    mcp( "error message", {{ "error", "message" }} );
+    mcp( "debug message", {{ "debug", "message" }} );
+
+    // std::cout << std::endl;
+
+
+    //  test theme
+
+    std::this_thread::sleep_for( 100ms );
+
+    auto theme = std::make_shared<DefaultTheme>();
+    frmt->setTheme( theme );
+
+    theme->set( "debug", "#ff98bc"s, "#ffdce8"s );
+    theme->set( "info", "#007aff"s, "#449dff"s );
+    theme->set( "success", "#20b684"s, "#3ddda8"s );
+    theme->set( "warning", "#c87b23"s, "#e09c4f"s );
+    theme->set( "error", "#d51f1a"s, "#e94e4a"s );
+
+    mcp( "info message", {{ "info", "message" }} );
+    mcp( "success message", {{ "success", "message" }} );
+    mcp( "warning message", {{ "warning", "message" }} );
+    mcp( "error message", {{ "error", "message" }} );
+    mcp( "debug message", {{ "debug", "message" }} );
+
+    mcp( "uncategorized tags", { "untagged", "nocategory", { "thuglife", "muchsad" } } );
+    mcp( "simple message" );
+
+
+    //  indent
+
+    scopeTest();
+    mc::st::simpleEnter();
+    mc::st::taggedEnter();
+    mc::st::nestedEnter();
+    mc::st::deeperNesting();
+
+
+    // MCS();
+    // MCS() << "simple scope";
+    // MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
+    // MCS() << obj;
+    // MCS( "debug" ) << "lala";
+    // MCS( "a", { "b", "c", 4, true } ) << "was geht?";
+    // MCS( "a", { "b", "c", 4, true } ) << obj;
+
+//    Formatter formatter;
+//    formatter.setTagColor( "status", 213, 219 );
+//    formatter.setIndent( 2 );
+
+//    HtmlLogger htmlLogger;
+//    htmlLogger.setFormatter( &formatter );
+//    htmlLogger.createDefaultFile();
+//    MC.addObserver( &htmlLogger );
+
+//    ConsoleLogger clog2;
+//    clog2.setFormatter( &formatter );
+//    MC.addObserver( &clog2 );
+
+//    JsonLogger jlog1;
+//    jlog1.createDefaultFile();
+//    MC.addObserver( &jlog1 );
+
+//    MC_PS( "welcome to the world of tomorrow!", "intro" );
+
+//    scopeTest();
+//    typeTest();
+//    negationTest();
+//    colorTest();
+//    timingTest();
+
+    worker.join();
+    std::this_thread::sleep_for( 100ms );
+
+    return EXIT_SUCCESS;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void scopeTest() {
+    mcs();
+    mcp( "i am a fuuunctiioooooonnn *pflätsch*" );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void unitTests() 
+{
+    //  color
+
+    Color cols[] = {
+        "#abc"s,
+        "#aabbcc"s,
+        "unknown"s,
+        "#1a2b3c"s,
+        17
+    };
+
+    for ( const auto& col : cols ) {
+        std::cout << col.name() << std::endl;
+    }
+
+    std::cout << std::endl;
+
+
+    //  datetime    
+
+    auto dt = DateTime::now();
+    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+
+    nlohmann::json jdt = dt;
+    DateTime dt2 = jdt;
+
+    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    std::cout << std::endl;
+
 
     //  test json to tags_t conversion
 
@@ -195,99 +273,6 @@ int main( int argc, char* argv[] )
     filter.set( "priority>2");
     filter.set( "debug priority>2 file=main.cpp, priority<4 network");
 
-
-    //  test formatter
-
-    auto frmt = std::make_shared<AsciiFormatter>();
-    frmt->setIndent( 2 );
-    clog->setFormatter( frmt );
-    
-    mci.addObserver( clog );
-    mcp( "info message", {{ "info", "message" }} );
-    mcp( "success message", {{ "success", "message" }} );
-    mcp( "warning message", {{ "warning", "message" }} );
-    mcp( "error message", {{ "error", "message" }} );
-    mcp( "debug message", {{ "debug", "message" }} );
-
-    // std::cout << std::endl;
-
-
-    //  test theme
-
-    auto theme = std::make_shared<DefaultTheme>();
-    frmt->setTheme( theme );
-
-    // theme->set( "debug", "#ff98bc"s, "#ffdce8"s );
-    // theme->set( "info", "#007aff"s, "#449dff"s );
-    // theme->set( "success", "#20b684"s, "#3ddda8"s );
-    // theme->set( "warning", "#c87b23"s, "#e09c4f"s );
-    // theme->set( "error", "#d51f1a"s, "#e94e4a"s );
-
-    mcp( "info message", {{ "info", "message" }} );
-    mcp( "success message", {{ "success", "message" }} );
-    mcp( "warning message", {{ "warning", "message" }} );
-    mcp( "error message", {{ "error", "message" }} );
-    mcp( "debug message", {{ "debug", "message" }} );
-
-    mcp( "simple message" );
-    mcp( "uncategorized tags", { "untagged", "nocategory", { "thuglife", "muchsad" } } );
-
-
-    //  indent
-
-    scopeTest();
-    mc::st::simpleEnter();
-    mc::st::taggedEnter();
-    mc::st::nestedEnter();
-    mc::st::deeperNesting();
-
-
-    // MCS();
-    // MCS() << "simple scope";
-    // MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
-    // MCS() << obj;
-    // MCS( "debug" ) << "lala";
-    // MCS( "a", { "b", "c", 4, true } ) << "was geht?";
-    // MCS( "a", { "b", "c", 4, true } ) << obj;
-
-    // mc::ColorTable::printTestTable();
-
-//    Formatter formatter;
-//    formatter.setTagColor( "status", 213, 219 );
-//    formatter.setIndent( 2 );
-
-//    HtmlLogger htmlLogger;
-//    htmlLogger.setFormatter( &formatter );
-//    htmlLogger.createDefaultFile();
-//    MC.addObserver( &htmlLogger );
-
-//    ConsoleLogger clog2;
-//    clog2.setFormatter( &formatter );
-//    MC.addObserver( &clog2 );
-
-//    JsonLogger jlog1;
-//    jlog1.createDefaultFile();
-//    MC.addObserver( &jlog1 );
-
-//    MC_PS( "welcome to the world of tomorrow!", "intro" );
-
-//    scopeTest();
-//    typeTest();
-//    negationTest();
-//    colorTest();
-//    timingTest();
-
-    worker.join();
-    // std::this_thread::sleep_for( 1s );
-
-    return EXIT_SUCCESS;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void scopeTest() {
-//    MC_ENTER;
-   mcp( "i am a fuuunctiioooooonnn *pflätsch*" );
 }
 
 

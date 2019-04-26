@@ -1,4 +1,6 @@
 #include "messagecenter/theme.h"
+#include "messagecenter/colortable.h"
+
 #include <iostream>
 #include <string>
 
@@ -36,6 +38,16 @@ void Theme::set(
     const uint8_t variantId ) 
 {
     colors_[ key ] = { colorId, variantId };
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void Theme::set( 
+    const std::string& key, 
+    const std::string& color, 
+    const std::string& variant ) 
+{
+    colors_[ key ] = { Color( color ).id(), Color( variant ).id() };
 }
 
 

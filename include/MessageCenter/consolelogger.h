@@ -13,18 +13,15 @@ class ConsoleLogger : public Observer
     public:
 
         ConsoleLogger();
-
+        
         void setFormatter( const FormatterPtr& formatter );
-
+        void printSystemInfo() const;
         virtual void notify( const Message& messagePtr );
 
     private:
 
-        void printSystemInfo() const;
-
+        std::mutex mutex_;
         FormatterPtr formatter_ = nullptr;
-
-        static std::mutex ostreamMutex_;
 };
 
 

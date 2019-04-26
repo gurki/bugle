@@ -34,6 +34,11 @@ class Theme
             const uint8_t colorId, 
             const uint8_t variantId 
         );
+        void set( 
+            const std::string& key, 
+            const std::string& color, 
+            const std::string& variant
+        );
 
         const ColorPair& primary() const { return primary_; }
         const ColorPair& secondary() const { return secondary_; }

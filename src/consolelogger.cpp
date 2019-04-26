@@ -8,18 +8,15 @@
 namespace mc {
 
 
-std::mutex ConsoleLogger::ostreamMutex_ = {};
-
-
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleLogger::ConsoleLogger() {
     formatter_ = std::make_shared<AsciiFormatter>();
-    printSystemInfo();
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
+    std::unique_lock lock( mutex_ );
     formatter_ = formatter;
 }
 
@@ -27,11 +24,12 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::notify( const Message& message )
 {
+    std::unique_lock lock( mutex_ );
+    
     if ( ! formatter_  ) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard( ostreamMutex_ );
     std::cout << formatter_->format( message ) << std::endl;
 }
 
