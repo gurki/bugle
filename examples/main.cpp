@@ -35,8 +35,10 @@ using namespace std::string_literals;
 void parallelMessages()
 {
     mcp( "parallel message", "parallel" );
+
     std::this_thread::sleep_for( 100ms );
     mcp( "later one", { "parallel", "#2" } );
+    
     std::this_thread::sleep_for( 100ms );
     mcp( "another one", { "parallel", "#3" } );
 }
@@ -55,23 +57,23 @@ int main( int argc, char* argv[] )
         17
     };
 
-    // for ( const auto& col : cols ) {
-    //     std::cout << col.name() << std::endl;
-    // }
+    for ( const auto& col : cols ) {
+        std::cout << col.name() << std::endl;
+    }
 
-    // std::cout << std::endl;
+    std::cout << std::endl;
 
 
-    // //  test datetime    
+    //  test datetime    
 
-    // auto dt = DateTime::now();
-    // std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+    auto dt = DateTime::now();
+    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
 
-    // nlohmann::json jdt = dt;
-    // DateTime dt2 = jdt;
+    nlohmann::json jdt = dt;
+    DateTime dt2 = jdt;
 
-    // std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
-    // std::cout << std::endl;
+    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    std::cout << std::endl;
 
 
     //  test message post

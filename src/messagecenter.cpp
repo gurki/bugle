@@ -13,13 +13,23 @@ MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::MessageCenter()  {
+MessageCenter::MessageCenter()  
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
     workerThread_ = std::thread( &MessageCenter::processQueue, this );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::~MessageCenter() {
+MessageCenter::~MessageCenter() 
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
     shouldExit_ = true;
     queueReady_.notify_one();
     workerThread_.join();
@@ -117,6 +127,7 @@ void MessageCenter::processQueue()
             //  chronological order.
             std::shared_lock lock( observerMutex_ );
 
+            //  remove expired observers
             for ( auto it = observers_.begin(); it != observers_.end(); )
             {
                 if ( ! it->expired() ) {
