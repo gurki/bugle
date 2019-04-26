@@ -22,18 +22,14 @@ Message::Message(
     const nlohmann::json& tags ) :
     Message()
 {
-    if ( file ) {
-        file_ = file;
-    }
-
-    if ( function ) {
-        function_ = function;
-    }
-
+    file_ = file;
+    function_ = function;
     line_ = line;
     threadId_ = threadId;
     content_ = object;
     tags_ = filterTags( tags );
+
+    //  convert absolute to single node relative path 
 
     if ( file_.find( "..\\" ) == 0 ) {
         file_ = file_.substr( 3 );
@@ -41,8 +37,13 @@ Message::Message(
 
     std::replace( file_.begin(), file_.end(), '\\', '/' );
 
-    if ( size_t boundary = file_.find_last_of( '/' ) ) {
-        file_ = file_.substr( boundary + 1 );
+    //  file name boundary
+    if ( size_t boundary = file_.find_last_of( '/' ) )  
+    {
+        //  node boundary
+        if ( boundary = file_.find_last_of( '/', boundary - 1 ) ) {
+            file_ = file_.substr( boundary + 1 );
+        }
     }
 }
 
@@ -67,8 +68,6 @@ std::string Message::info() const
 //////////////////////////////////////////////////////////////////////////////////
 const std::vector<uint8_t>& Message::binary() const
 {
-    // std::lock_guard<std::mutex> lock( binaryMutex_ );
-
     if ( ! binary_.empty() ) {
         return binary_;
     }
@@ -81,51 +80,6 @@ const std::vector<uint8_t>& Message::binary() const
 //////////////////////////////////////////////////////////////////////////////////
 size_t Message::binarySize() const {
     return binary().size();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-tags_t filterTags( const nlohmann::json& tags ) 
-{
-    static auto insert = []( tags_t& jobj, const nlohmann::json& tag ) -> void
-    {
-        //  ignores arrays, numbers and bool
-
-        if ( tag.is_string() ) {
-            jobj[ tag.get<std::string>() ] = {};
-        }
-
-        if ( tag.is_object() ) {
-            for ( auto it = tag.begin(); it != tag.end(); ++it ) {
-                jobj[ it.key() ] = it.value();
-            }
-        }            
-    };
-    
-    //  only considers first level strings, objects and convertible arrays
-    //  ignores all numbers, bools and second-level non-convertible arrays
-
-    tags_t jobj;
-    
-    if ( tags.is_array() ) 
-    {
-        for ( const auto& tag : tags ) 
-        {
-            if ( tag.is_array() && tag.size() == 2 ) {
-                if ( tag[0].is_string() ) {
-                    jobj[ tag[0].get<std::string>() ] = tag[1];
-                }
-            }
-            else {
-                insert( jobj, tag );
-            }
-        }
-    }
-    else {
-        insert( jobj, tags );
-    }
-
-    return jobj;
 }
 
 
@@ -151,20 +105,27 @@ void to_json( nlohmann::json& json, const Message& message )
 //////////////////////////////////////////////////////////////////////////////////
 void from_json( const nlohmann::json& json, Message& message )
 {
-    message.datetime_ = json[ "timestamp" ];
-    // message.threadId_ = json[ "threadId" ];
-
-    if ( json.find( "file" ) != json.end() ) 
+    try 
     {
-        message.file_ = json[ "file" ];
-        message.function_ = json[ "function" ];
-        message.line_ = json[ "line" ];
-        message.level_ = json[ "level" ];
-    }
+        message.datetime_ = json[ "timestamp" ];
+        // message.threadId_ = json[ "threadId" ];
 
-    message.content_ = json[ "content" ];
-    message.tags_ = json[ "tags" ].get<tags_t>();
+        if ( json.find( "file" ) != json.end() ) 
+        {
+            message.file_ = json[ "file" ].get<std::string>();
+            message.function_ = json[ "function" ].get<std::string>();
+            message.line_ = json[ "line" ];
+            message.level_ = json[ "level" ];
+        }
+
+        message.content_ = json[ "content" ];
+        message.tags_ = json[ "tags" ].get<tags_t>();
+    }
+    catch ( const std::exception& ) {
+        message = {};
+        std::cerr << "couldn't parse message from json" << std::endl;
+    }
 }
 
 
-}   //  mc::
+}   //  ::mc

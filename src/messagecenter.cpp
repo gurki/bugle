@@ -37,6 +37,22 @@ MessageCenter::~MessageCenter()
 
 
 ////////////////////////////////////////////////////////////////////////////////
+void MessageCenter::pushScope( Scope& scope ) {
+    auto& stack = scopes_[ scope.threadId() ];
+    scope.setLevel( stack.size() );
+    std::cout << "enter " << scope.level() << std::endl;
+    scopes_[ scope.threadId() ].push( scope );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void MessageCenter::popScope( const Scope& scope ) {
+    std::cout << "leave " << scope.level() << ", " << scope.timestamp().elapsedMicros() << std::endl;
+    scopes_[ scope.threadId() ].pop();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::addObserver(
     const ObserverRef& observer,
     const std::string& filter )
@@ -118,8 +134,9 @@ void MessageCenter::processQueue()
                 finished = messages_.empty();
             }
 
-            const auto messagePtr = std::make_shared<Message>( 
-                data.file, data.func, data.line, data.threadId, data.content, data.tags 
+            Message message( 
+                data.file, data.func, data.line, 
+                data.threadId, data.content, data.tags 
             );
 
             //  lock to avoid observer insertion from another thread during iteration.
@@ -145,12 +162,12 @@ void MessageCenter::processQueue()
             {
                 const auto& filter = filters.at( observerRef );
 
-                if ( ! filter.passes( messagePtr->tags() ) ) {
+                if ( ! filter.passes( message.tags() ) ) {
                     continue;
                 }
 
                 auto observer = observerRef.lock();
-                observer->notify( messagePtr ); 
+                observer->notify( message ); 
             };
         }
     }

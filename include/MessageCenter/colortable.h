@@ -56,4 +56,4 @@ class Color
 };
 
 
-}   //  mc::
+}   //  ::mc

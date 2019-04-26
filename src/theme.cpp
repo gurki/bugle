@@ -56,4 +56,4 @@ const ColorPair Theme::operator[] ( const std::string& key ) const {
 }
 
 
-}   //  mc::
+}   //  ::mc

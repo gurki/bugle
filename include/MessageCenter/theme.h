@@ -69,4 +69,4 @@ class DefaultTheme : public Theme
 };
 
 
-}   //  mc::
+}   //  ::mc

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "messagecenter/datetime.h"
-
-#include <nlohmann/json.hpp>
+#include "messagecenter/tags.h"
 
 #include <string>
 #include <thread>
@@ -18,9 +17,6 @@ namespace mc {
 using MessageUPtr = std::unique_ptr<class Message>;
 using MessagePtr = std::shared_ptr<class Message>;
     
-typedef nlohmann::json::object_t tags_t;
-tags_t filterTags( const nlohmann::json& tags );
-
 
 class Message
 {
@@ -36,9 +32,6 @@ class Message
             const nlohmann::json& object,
             const nlohmann::json& tags = {}
         );
-
-        // Message( const Message& ) = delete;
-        // Message& operator = ( const Message& ) = delete;
 
         const DateTime& timestamp() const { return datetime_; }
         const std::thread::id& threadId() const { return threadId_; }
@@ -63,18 +56,15 @@ class Message
 
         DateTime datetime_ = {};
         std::thread::id threadId_ = {};
-        
         std::string file_ = {};
         std::string function_ = {};
         int line_ = -1;
         int level_ = -1;
-
         nlohmann::json content_ = {};
         tags_t tags_ = {};
 
         mutable std::vector<uint8_t> binary_ = {}; //  mutable for lazy evaluation
-        mutable std::mutex binaryMutex_;
 };
 
 
-}   //  mc::
+}   //  ::mc

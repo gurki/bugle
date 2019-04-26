@@ -27,6 +27,8 @@ class DateTime
         std::string dateInfo() const;
         uint16_t milliseconds() const;
         uint32_t microseconds() const;
+        double elapsed() const;
+        uint32_t elapsedMicros() const;
 
         static DateTime now();
         static DateTime parse( const std::string& str );
@@ -40,4 +42,4 @@ class DateTime
 };
 
 
-}   //  mc::
+}   //  ::mc

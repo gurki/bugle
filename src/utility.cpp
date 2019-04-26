@@ -6,4 +6,4 @@ namespace mc {
 
 
 
-}   //  mc::
+}   //  ::mc

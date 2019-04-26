@@ -1,15 +1,19 @@
-#include "messagecenter/messagecenter.h"
-#include "messagecenter/consolelogger.h"
-#include "messagecenter/messagescope.h"
-#include "messagecenter/colortable.h"
-#include "messagecenter/formatter.h"
-#include "messagecenter/theme.h"
-#include "messagecenter/filteritem.h"
-#include "messagecenter/datetime.h"
-//#include "consolelogger.h"
-//#include "jsonlogger.h"
-//#include "formatter.h"
-//#include "htmllogger.h"
+#include "scopetest.h"
+
+#include <messagecenter/tags.h>
+#include <messagecenter/messagecenter.h>
+#include <messagecenter/consolelogger.h>
+#include <messagecenter/scope.h>
+#include <messagecenter/message.h>
+#include <messagecenter/colortable.h>
+#include <messagecenter/formatter.h>
+#include <messagecenter/theme.h>
+#include <messagecenter/filteritem.h>
+#include <messagecenter/datetime.h>
+//#include <consolelogger.h>
+//#include <jsonlogger.h>
+//#include <formatter.h>
+//#include <htmllogger.h>
 
 #include <iostream>
 #include <thread>
@@ -32,15 +36,16 @@ using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 
+////////////////////////////////////////////////////////////////////////////////
 void parallelMessages()
 {
     mcp( "parallel message", "parallel" );
 
-    std::this_thread::sleep_for( 100ms );
-    mcp( "later one", { "parallel", "#2" } );
+    std::this_thread::sleep_for( 200ms );
+    mcp( "later one", { "parallel", "no2" } );
     
-    std::this_thread::sleep_for( 100ms );
-    mcp( "another one", { "parallel", "#3" } );
+    std::this_thread::sleep_for( 200ms );
+    mcp( "another one", { "parallel", "no3" } );
 }
 
 
@@ -79,7 +84,8 @@ int main( int argc, char* argv[] )
     //  test message post
 
     auto clog = std::make_shared<ConsoleLogger>();
-    mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+    // mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+    mci.addObserver( clog );
 
 
     static const nlohmann::json obj = {
@@ -98,20 +104,21 @@ int main( int argc, char* argv[] )
     };
 
     //  different parameters
-    mc_post( "message only" );
-    mc_post( "single tag", "awesometag" );
-    mc_post( "multiple tags", { "imatag", "metoo" } );
-    mc_post( "array", { "a", 4 } );
-    mc_post( "object", {{ "a", 4 }} );
-    mc_post( "object in array", { "a", {{ "b", 4 }} });
-    mc_post( "array value", { "a", { "b", { "c", 4, true } }});
-    mc_post( "large object", obj );
+    mcp( "message only" );
+    mcp( "single tag", "awesometag" );
+    mcp( "multiple tags", { "imatag", "metoo" } );
+    mcp( "array", { "a", 4 } );
+    mcp( "object", {{ "a", 4 }} );
+    mcp( "object in array", { "a", {{ "b", 4 }} });
+    mcp( "array value", { "a", { "b", { "c", 4, true } }});
+    mcp( "large object", obj );
+    mcp( "emojis", { "⭐⭐⭐", "🚩", "🙈" } );
 
     //  filtering
-    mc_post( "debug message", "debug" );
-    mc_post( "radio message", "radio" );
-    mc_post( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
-    mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
+    mcp( "debug message", "debug" );
+    mcp( "radio message", "radio" );
+    mcp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
+    mcp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     
     std::cout << std::endl;
     
@@ -230,6 +237,10 @@ int main( int argc, char* argv[] )
     //  indent
 
     scopeTest();
+    mc::st::simpleEnter();
+    mc::st::taggedEnter();
+    mc::st::nestedEnter();
+    mc::st::deeperNesting();
 
 
     // MCS();

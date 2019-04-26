@@ -3,6 +3,7 @@
 #include "messagecenter/defines.h"  //  MC_INFO, ...
 #include "messagecenter/utility.h"  //  WeakPtrHash, WeakPtrEqual
 #include "messagecenter/booleanfilter.h"
+#include "messagecenter/scope.h"
 
 #include <nlohmann/json.hpp>
 
@@ -14,6 +15,8 @@
 #include <atomic>   //  enabled_, ...
 #include <deque>
 #include <condition_variable>
+#include <stack>
+#include <unordered_map>
 
 
 namespace mc {
@@ -22,6 +25,7 @@ namespace mc {
 class Message;
 class BooleanFilter;
 
+using ScopeWrp = std::reference_wrapper<Scope>;
 using ObserverRef = std::weak_ptr<class Observer>;
 using MessageCenterPtr = std::shared_ptr<class MessageCenter>;
 
@@ -35,6 +39,9 @@ class MessageCenter
 
         void enable() { enabled_ = true; }
         void disable() { enabled_ = false; }
+
+        void pushScope( Scope& scope );
+        void popScope( const Scope& scope );
         
         void addObserver(
             const ObserverRef& observer,
@@ -79,6 +86,11 @@ class MessageCenter
             WeakPtrHash<Observer>,
             WeakPtrEqual<Observer> 
         > filter_;
+
+        std::unordered_map< 
+            std::thread::id, 
+            std::stack<ScopeWrp> 
+        > scopes_;
 
         std::thread workerThread_;
         std::shared_mutex observerMutex_;

@@ -25,14 +25,14 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::notify( const MessagePtr& messagePtr )
+void ConsoleLogger::notify( const Message& message )
 {
     if ( ! formatter_  ) {
         return;
     }
 
     std::lock_guard<std::mutex> guard( ostreamMutex_ );
-    std::cout << formatter_->format( *messagePtr ) << std::endl;
+    std::cout << formatter_->format( message ) << std::endl;
 }
 
 
@@ -82,4 +82,4 @@ void ConsoleLogger::printSystemInfo() const
 }
 
 
-}   //  mc::
+}   //  ::mc

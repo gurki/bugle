@@ -45,4 +45,4 @@ struct WeakPtrEqual {
 };
 
 
-}   //  mc::
+}   //  ::mc

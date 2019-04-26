@@ -8,7 +8,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/")
 
 add_subdirectory("dependencies/json")
 
-include_directories(include)
+include_directories(include examples)
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(messagecenter examples/main.cpp ${SOURCES})
@@ -19,5 +19,5 @@ add_compile_definitions(MC_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/data/" DESTINATION "${EXECUTABLE_OUTPUT_PATH}/data/")
 
 #  message center options
-# add_compile_definitions(MC_DISABLE_POST)
-# add_compile_definitions(MC_DISABLE_LOWERCASE_DEFINES)
+add_compile_definitions( MC_ENABLE )
+add_compile_definitions( MC_LOWERCASE_DEFINES )

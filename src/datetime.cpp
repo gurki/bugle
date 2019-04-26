@@ -71,6 +71,20 @@ uint32_t DateTime::microseconds() const {
 
 
 //////////////////////////////////////////////////////////////////////////////////
+uint32_t DateTime::elapsedMicros() const {
+    using Us = std::chrono::microseconds;
+    auto durationUs = std::chrono::duration_cast<Us>( system_clock::now() - timestamp_ );
+    return durationUs.count();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+double DateTime::elapsed() const {
+    return elapsedMicros() / 1000000.0;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
 DateTime DateTime::now() {
     DateTime dt = {};
     dt.timestamp_ = system_clock::now();
@@ -124,4 +138,4 @@ void from_json( const nlohmann::json& json, DateTime& datetime ) {
 }
 
 
-}   //  mc::
+}   //  ::mc

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "messagecenter/message.h"
-
-#include <nlohmann/json.hpp>
+#include "messagecenter/tags.h"
 
 #include <string>
 #include <functional>

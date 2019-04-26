@@ -166,4 +166,4 @@ std::string HtmlFormatter::endColor() const {
 }
 
 
-}   //  mc::
+}   //  ::mc
