@@ -2,9 +2,6 @@
 #include "messagecenter/message.h"
 #include "messagecenter/observer.h"
 
-#include <future>   //  std::async
-// #include <execution>    //  std::execution::par
-#include <algorithm>    //  std::for_each
 
 using namespace std::chrono_literals;
 
@@ -16,19 +13,16 @@ MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::MessageCenter() 
-{}
-
-
-////////////////////////////////////////////////////////////////////////////////
-MessageCenter::~MessageCenter() {
-    join();
+MessageCenter::MessageCenter()  {
+    workerThread_ = std::thread( &MessageCenter::processQueue, this );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::join() {
-    alive_ = false;
+MessageCenter::~MessageCenter() {
+    shouldExit_ = true;
+    queueReady_.notify_one();
+    workerThread_.join();
 }
 
 
@@ -41,7 +35,7 @@ void MessageCenter::addObserver(
     return;
 #endif
 
-    std::lock_guard<std::mutex> guard( observerMutex_ );
+    std::unique_lock lock( observerMutex_ );
 
     observers_.insert( observer );
 
@@ -59,7 +53,7 @@ void MessageCenter::removeObserver( const ObserverRef& observer )
     return;
 #endif
 
-    std::lock_guard<std::mutex> guard( observerMutex_ );
+    std::unique_lock lock( observerMutex_ );
 
     observers_.erase( observer );
     filter_.erase( observer );
@@ -80,58 +74,75 @@ void MessageCenter::post(
         return;
     }
 
-    //  TODO(tgurdan): 
-    //    provide rvalue reference implementation to avoid copies if not necessary
     auto tid = std::this_thread::get_id();
 
-    auto f = std::async( 
-        std::launch::async,
-        &MessageCenter::postAsync, 
-        this, content, MC_INFO_NAMES, tags, tid 
-    );
+    {
+        std::unique_lock lock( queueMutex_ );
+        messages_.push_back( { content, file, func, line, tags, tid } );
+    }
+
+    queueReady_.notify_one();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::postAsync(
-    const nlohmann::json& content,
-    MC_INFO_DECLARE,
-    const nlohmann::json& tags,
-    const std::thread::id& threadId )
+void MessageCenter::processQueue()
 {
-    //  asynchronous construction of non-moveable Message. included in postAsync in case 
-    //  of time-consuming tag parsing. allows partially parallel postAsync calls.
-    const auto messagePtr = std::make_shared<Message>( MC_INFO_NAMES, content, tags );
-
-    //  lock to avoid observer insertion from another thread during iteration.
-    //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping
-    //  chronological order.
-    std::lock_guard<std::mutex> guard( observerMutex_ );
-
-    for ( auto it = observers_.begin(); it != observers_.end(); )
+    while ( ! shouldExit_ ) 
     {
-        if ( ! it->expired() ) {
-            ++it;
-            continue;
+        {
+            std::unique_lock lock( queueMutex_ );
+            queueReady_.wait( lock );
         }
 
-        filter_.erase( *it );
-        it = observers_.erase( it );
+        MessageData data;
+        bool finished = messages_.empty();
+
+        while ( ! finished )
+        {
+            {
+                std::unique_lock lock( queueMutex_ );
+                data = std::move( messages_.front() );
+                
+                messages_.pop_front();
+                finished = messages_.empty();
+            }
+
+            const auto messagePtr = std::make_shared<Message>( 
+                data.file, data.func, data.line, data.threadId, data.content, data.tags 
+            );
+
+            //  lock to avoid observer insertion from another thread during iteration.
+            //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping
+            //  chronological order.
+            std::shared_lock lock( observerMutex_ );
+
+            for ( auto it = observers_.begin(); it != observers_.end(); )
+            {
+                if ( ! it->expired() ) {
+                    ++it;
+                    continue;
+                }
+
+                filter_.erase( *it );
+                it = observers_.erase( it );
+            }
+
+            const auto& filters = filter_;
+            
+            for ( auto& observerRef : observers_ )
+            {
+                const auto& filter = filters.at( observerRef );
+
+                if ( ! filter.passes( messagePtr->tags() ) ) {
+                    continue;
+                }
+
+                auto observer = observerRef.lock();
+                observer->notify( messagePtr ); 
+            };
+        }
     }
-
-    const auto& filters = filter_;
-    
-    for ( auto& observerRef : observers_ )
-    {
-        const auto& filter = filters.at( observerRef );
-
-        if ( ! filter.passes( messagePtr->tags() ) ) {
-            return;
-        }
-
-        auto observer = observerRef.lock();
-        observer->notify( messagePtr ); 
-    };
 }
 
 

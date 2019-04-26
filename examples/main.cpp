@@ -32,6 +32,16 @@ using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 
+void parallelMessages()
+{
+    mcp( "parallel message", "parallel" );
+    std::this_thread::sleep_for( 100ms );
+    mcp( "later one", { "parallel", "#2" } );
+    std::this_thread::sleep_for( 100ms );
+    mcp( "another one", { "parallel", "#3" } );
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
@@ -45,29 +55,30 @@ int main( int argc, char* argv[] )
         17
     };
 
-    for ( const auto& col : cols ) {
-        std::cout << col.name() << std::endl;
-    }
+    // for ( const auto& col : cols ) {
+    //     std::cout << col.name() << std::endl;
+    // }
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
 
-    //  test datetime    
+    // //  test datetime    
 
-    auto dt = DateTime::now();
-    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+    // auto dt = DateTime::now();
+    // std::cout << dt.info( DateTime::Microseconds ) << std::endl;
 
-    nlohmann::json jdt = dt;
-    DateTime dt2 = jdt;
+    // nlohmann::json jdt = dt;
+    // DateTime dt2 = jdt;
 
-    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
-    std::cout << std::endl;
+    // std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    // std::cout << std::endl;
 
 
     //  test message post
 
     auto clog = std::make_shared<ConsoleLogger>();
     mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+
 
     static const nlohmann::json obj = {
         { "pi", 3.141 },
@@ -99,7 +110,6 @@ int main( int argc, char* argv[] )
     mc_post( "radio message", "radio" );
     mc_post( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mc_post( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
-    mc_post( "multiple tags", { "radio", { "voltage", 3.14 }, { "debug", 14 } });
     
     std::cout << std::endl;
     
@@ -116,13 +126,16 @@ int main( int argc, char* argv[] )
 
     nlohmann::json jmut = "mutable string";
     mcp( jmut, "mutable" );
-    mcp( "parallel post", "immutable" );
+    mcp( "cause some delay" );
     
     jmut = "muted string!";
     
     mci.removeObserver( clog2 );
     std::cout << std::endl;
 
+    //  start threaded messages
+
+    std::thread worker( &parallelMessages );
 
     //  test json to tags_t conversion
 
@@ -251,6 +264,9 @@ int main( int argc, char* argv[] )
 //    negationTest();
 //    colorTest();
 //    timingTest();
+
+    worker.join();
+    // std::this_thread::sleep_for( 1s );
 
     return EXIT_SUCCESS;
 }

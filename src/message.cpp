@@ -17,6 +17,7 @@ Message::Message(
     const char* file,
     const char* function,
     const int line,
+    const std::thread::id threadId,
     const nlohmann::json& object,
     const nlohmann::json& tags ) :
     Message()
@@ -30,6 +31,7 @@ Message::Message(
     }
 
     line_ = line;
+    threadId_ = threadId;
     content_ = object;
     tags_ = filterTags( tags );
 

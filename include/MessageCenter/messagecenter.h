@@ -6,13 +6,14 @@
 
 #include <nlohmann/json.hpp>
 
+#include <thread>
 #include <memory>   //  MessageCenterPtr, ...
 #include <mutex>    //  observerMutex_, ...
+#include <shared_mutex>
 #include <unordered_set>    //  observers_, ...
 #include <atomic>   //  enabled_, ...
-#include <queue>
+#include <deque>
 #include <condition_variable>
-#include <future>
 
 
 namespace mc {
@@ -48,21 +49,23 @@ class MessageCenter
             const nlohmann::json& tags = {}
         );
 
-        void join();
-
         static MessageCenter& instance() { return *instance_; }
 
     private:
 
-        void postAsync(
-            const nlohmann::json& content,
-            MC_INFO_DECLARE,
-            const nlohmann::json& tags,
-            const std::thread::id& threadId
-        );
+        struct MessageData 
+        {    
+            nlohmann::json content = {};
+            const char* file = nullptr;
+            const char* func = nullptr;
+            int line = -1;
+            nlohmann::json tags = {};
+            std::thread::id threadId = {};
+        };
+
+        [[ noreturn ]] void processQueue();
 
         std::atomic_bool enabled_ = true;
-        std::atomic_bool alive_ = true;
 
         std::unordered_set<
             ObserverRef,
@@ -77,7 +80,12 @@ class MessageCenter
             WeakPtrEqual<Observer> 
         > filter_;
 
-        std::mutex observerMutex_;
+        std::thread workerThread_;
+        std::shared_mutex observerMutex_;
+        std::mutex queueMutex_;
+        std::deque<MessageData> messages_;
+        std::condition_variable queueReady_;
+        std::atomic_bool shouldExit_ = false;
 
         static MessageCenterPtr instance_;
 };
