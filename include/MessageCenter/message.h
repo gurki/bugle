@@ -28,6 +28,7 @@ class Message
             const char* file,
             const char* function,
             const int line,
+            const int level,
             const std::thread::id threadId,
             const nlohmann::json& object,
             const nlohmann::json& tags = {}

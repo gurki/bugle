@@ -17,6 +17,7 @@ Message::Message(
     const char* file,
     const char* function,
     const int line,
+    const int level,
     const std::thread::id threadId,
     const nlohmann::json& object,
     const nlohmann::json& tags ) :
@@ -25,6 +26,7 @@ Message::Message(
     file_ = file;
     function_ = function;
     line_ = line;
+    level_ = level;
     threadId_ = threadId;
     content_ = object;
     tags_ = filterTags( tags );

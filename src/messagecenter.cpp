@@ -40,14 +40,12 @@ MessageCenter::~MessageCenter()
 void MessageCenter::pushScope( Scope& scope ) {
     auto& stack = scopes_[ scope.threadId() ];
     scope.setLevel( stack.size() );
-    std::cout << "enter " << scope.level() << std::endl;
     scopes_[ scope.threadId() ].push( scope );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::popScope( const Scope& scope ) {
-    std::cout << "leave " << scope.level() << ", " << scope.timestamp().elapsedMicros() << std::endl;
     scopes_[ scope.threadId() ].pop();
 }
 
@@ -101,10 +99,15 @@ void MessageCenter::post(
     }
 
     auto tid = std::this_thread::get_id();
+    auto level = -1;
+
+    if ( scopes_.find( tid ) != scopes_.end() ) {
+        level = scopes_[ tid ].size();
+    }
 
     {
         std::unique_lock lock( queueMutex_ );
-        messages_.push_back( { content, file, func, line, tags, tid } );
+        messages_.push_back( { content, file, func, line, level, tags, tid } );
     }
 
     queueReady_.notify_one();
@@ -136,7 +139,7 @@ void MessageCenter::processQueue()
 
             Message message( 
                 data.file, data.func, data.line, 
-                data.threadId, data.content, data.tags 
+                data.level, data.threadId, data.content, data.tags 
             );
 
             //  lock to avoid observer insertion from another thread during iteration.

@@ -52,33 +52,33 @@ void parallelMessages()
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    //  test color
+    // //  test color
 
-    Color cols[] = {
-        "#abc"s,
-        "#aabbcc"s,
-        "unknown"s,
-        "#1a2b3c"s,
-        17
-    };
+    // Color cols[] = {
+    //     "#abc"s,
+    //     "#aabbcc"s,
+    //     "unknown"s,
+    //     "#1a2b3c"s,
+    //     17
+    // };
 
-    for ( const auto& col : cols ) {
-        std::cout << col.name() << std::endl;
-    }
+    // for ( const auto& col : cols ) {
+    //     std::cout << col.name() << std::endl;
+    // }
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
 
-    //  test datetime    
+    // //  test datetime    
 
-    auto dt = DateTime::now();
-    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+    // auto dt = DateTime::now();
+    // std::cout << dt.info( DateTime::Microseconds ) << std::endl;
 
-    nlohmann::json jdt = dt;
-    DateTime dt2 = jdt;
+    // nlohmann::json jdt = dt;
+    // DateTime dt2 = jdt;
 
-    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
-    std::cout << std::endl;
+    // std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    // std::cout << std::endl;
 
 
     //  test message post
@@ -120,27 +120,26 @@ int main( int argc, char* argv[] )
     mcp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mcp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
     
-    std::cout << std::endl;
-    
-    
+    // std::cout << std::endl;
+        
     //  test parallelism and mutability
 
-    auto frmt2 = std::make_shared<AsciiFormatter>();
-    auto them2 = std::make_shared<Theme>();
-    auto clog2 = std::make_shared<ConsoleLogger>();
-    frmt2->setTheme( them2 );
-    clog2->setFormatter( frmt2 );
-    mci.addObserver( clog2 );
-    mci.addObserver( clog );
+    // auto frmt2 = std::make_shared<AsciiFormatter>();
+    // auto them2 = std::make_shared<Theme>();
+    // auto clog2 = std::make_shared<ConsoleLogger>();
+    // frmt2->setTheme( them2 );
+    // clog2->setFormatter( frmt2 );
+    // mci.addObserver( clog2 );
+    // mci.addObserver( clog );
 
-    nlohmann::json jmut = "mutable string";
-    mcp( jmut, "mutable" );
-    mcp( "cause some delay" );
+    // nlohmann::json jmut = "mutable string";
+    // mcp( jmut, "mutable" );
+    // mcp( "cause some delay" );
     
-    jmut = "muted string!";
+    // jmut = "muted string!";
     
-    mci.removeObserver( clog2 );
-    std::cout << std::endl;
+    // mci.removeObserver( clog2 );
+    // std::cout << std::endl;
 
     //  start threaded messages
 
@@ -210,7 +209,7 @@ int main( int argc, char* argv[] )
     mcp( "error message", {{ "error", "message" }} );
     mcp( "debug message", {{ "debug", "message" }} );
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
 
     //  test theme

@@ -56,6 +56,8 @@ class MessageCenter
             const nlohmann::json& tags = {}
         );
 
+        void lineskip();
+
         static MessageCenter& instance() { return *instance_; }
 
     private:
@@ -66,6 +68,7 @@ class MessageCenter
             const char* file = nullptr;
             const char* func = nullptr;
             int line = -1;
+            int level = -1;
             nlohmann::json tags = {};
             std::thread::id threadId = {};
         };

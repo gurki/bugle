@@ -13,7 +13,7 @@ std::mutex ConsoleLogger::ostreamMutex_ = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 ConsoleLogger::ConsoleLogger() {
-    formatter_ = std::make_shared<Formatter>();
+    formatter_ = std::make_shared<AsciiFormatter>();
     printSystemInfo();
 }
 

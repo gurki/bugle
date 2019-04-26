@@ -129,12 +129,17 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         stream << colorize( "#", theme_->secondary().variant );
         stream << colorize( key, pair.color );
 
-        // if ( value.empty() ) {
-            // continue;
-        // }
+        if ( value.empty() ) {
+            continue;
+        }
 
-        // stream << colorize( ":", theme_->secondary().variant );
-        // stream << colorize( value.dump(), pair.variant );
+        stream << colorize( ":", theme_->secondary().variant );
+
+        if ( value.is_primitive() ) {
+            stream << colorize( value.dump(), pair.variant );
+        } else {
+            stream << colorize( u8"\u2026", pair.variant );
+        }
     }
 
     return stream.str();
