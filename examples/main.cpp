@@ -1,26 +1,22 @@
 #include "scopetest.h"
 
-#include <messagecenter/tags.h>
-#include <messagecenter/messagecenter.h>
-#include <messagecenter/consolelogger.h>
-#include <messagecenter/scope.h>
-#include <messagecenter/message.h>
-#include <messagecenter/colortable.h>
-#include <messagecenter/formatter.h>
-#include <messagecenter/theme.h>
-#include <messagecenter/filteritem.h>
-#include <messagecenter/datetime.h>
-//#include <consolelogger.h>
-//#include <jsonlogger.h>
-//#include <formatter.h>
-//#include <htmllogger.h>
+#include <bugle/core/filteritem.h>
+#include <bugle/core/message.h>
+#include <bugle/core/messagecenter.h>
+#include <bugle/core/scope.h>
+#include <bugle/core/tags.h>
+#include <bugle/format/colortable.h>
+#include <bugle/format/formatter.h>
+#include <bugle/format/theme.h>
+#include <bugle/sinks/consolelogger.h>
+#include <bugle/utility/datetime.h>
 
-#include <iostream>
-#include <thread>
-#include <future>
 #include <chrono>
-#include <utility>
+#include <future>
+#include <iostream>
 #include <string>
+#include <thread>
+#include <utility>
 
 
 void scopeTest();
@@ -31,7 +27,7 @@ void scopeTest();
 //void timingTestRandom();
 
 
-using namespace mc;
+using namespace bugle;
 using namespace std::chrono_literals;
 using namespace std::string_literals;
 
@@ -43,7 +39,7 @@ void parallelMessages()
 
     std::this_thread::sleep_for( 200ms );
     mcp( "later one", { "parallel", "no2" } );
-    
+
     std::this_thread::sleep_for( 200ms );
     mcp( "another one", { "parallel", "no3" } );
 }
@@ -52,7 +48,7 @@ void parallelMessages()
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    mc::ColorTable::printTestTable();
+    bugle::ColorTable::printTestTable();
 
     //  test message post
 
@@ -92,7 +88,7 @@ int main( int argc, char* argv[] )
     mcp( "radio message", "radio" );
     mcp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
     mcp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
-    
+
     //  start threaded messages
 
     std::thread worker( &parallelMessages );
@@ -102,7 +98,7 @@ int main( int argc, char* argv[] )
     auto frmt = std::make_shared<AsciiFormatter>();
     frmt->setIndent( 2 );
     clog->setFormatter( frmt );
-    
+
     mcp( "info message", {{ "info", "message" }} );
     mcp( "success message", {{ "success", "message" }} );
     mcp( "warning message", {{ "warning", "message" }} );
@@ -138,10 +134,10 @@ int main( int argc, char* argv[] )
     //  indent
 
     scopeTest();
-    mc::st::simpleEnter();
-    mc::st::taggedEnter();
-    mc::st::nestedEnter();
-    mc::st::deeperNesting();
+    bugle::st::simpleEnter();
+    bugle::st::taggedEnter();
+    bugle::st::nestedEnter();
+    bugle::st::deeperNesting();
 
 
     // MCS();
@@ -192,7 +188,7 @@ void scopeTest() {
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void unitTests() 
+void unitTests()
 {
     //  color
 
@@ -211,7 +207,7 @@ void unitTests()
     std::cout << std::endl;
 
 
-    //  datetime    
+    //  datetime
 
     auto dt = DateTime::now();
     std::cout << dt.info( DateTime::Microseconds ) << std::endl;
@@ -232,9 +228,9 @@ void unitTests()
     jmap = filterTags( { "debug", { "priority", 3.14 } });  //  convenience conversion of array<string,json> to tag:value
     jmap = filterTags( { "debug", { 3.14, "priority" } });  //  invalid array<json,string>
     jmap = filterTags( {{ "debug" }} );   //  invalid array<array<>>
-    
 
-    //  test filter item 
+
+    //  test filter item
 
     FilterItem item;
 

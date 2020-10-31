@@ -1,10 +1,10 @@
 #pragma once
 
-#include <messagecenter/messagecenter.h>
-#include <messagecenter/scope.h>
+#include <bugle/core/messagecenter.h>
+#include <bugle/core/scope.h>
 #include <iostream>
 
-namespace mc::st {
+namespace bugle::st {
 
 
 void simpleEnter() {
@@ -37,4 +37,4 @@ void deeperNesting() {
 }
 
 
-}   //  ::mc::st
+}   //  ::bugle::st

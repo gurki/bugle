@@ -1,17 +1,15 @@
-#  Message Center
+# bugle 📯
 
-The Message Center (MC) is a flexible, tagged logging framework.
+A tag-based colorful logging library
 
+
+## Content
+
+- [Content](#content)
 - [Motivation](#motivation)
 - [Design Goals](#design-goals)
 - [Integration](#integration)
 - [Examples](#examples)
-    - [Messages](#messages)
-    - [Tags](#tags)
-    - [Observers](#observers)
-    - [Colors](#colors)
-    - [Filters](#filters)
-    - [QML](#qml)
 - [Discussion](#discussion)
 
 ## Motivation
@@ -31,7 +29,7 @@ Enjoy and let me know what you think!
 
 ## Integration
 
-Include ```messagecenter.pri``` in your project file and add ```<MessageCenter/messagecenter.h``` to the files where you want to use it.
+Include ```messagecenter.pri``` in your project file and add ```<bugle/messagecenter.h``` to the files where you want to use it.
 
 To register a custom message observer, instantiate it from the ```Observer``` interface and add it to the MC.
 
@@ -89,13 +87,13 @@ They can be hooked to a specific set of tags, which can even be boolean combinat
 ConsoleLogger log1, log2, log3;
 
 //  log1 will output every message
-MC.addObserver( &log1 );   
+MC.addObserver( &log1 );
 //  log2 outputs all messages that are tagged radio but not debug (message can have more tags)
-MC.addObserver( &log2, { "radio", "!debug" } );  
+MC.addObserver( &log2, { "radio", "!debug" } );
 //  log3 listens to exactly the network messages with priority = 2.
-MC.addObserver( &log3, {{ "priority", 2 }, { "network", {} }} );   
+MC.addObserver( &log3, {{ "priority", 2 }, { "network", {} }} );
 //  log3 now _also_ listens to debug messages
-MC.addObserver( &log3, { "debug" } )    
+MC.addObserver( &log3, { "debug" } )
 ```
 
 #### Colors
@@ -113,9 +111,9 @@ For example, one might want disable all but some messages. Similar to observers,
 
 ```cpp
 //  only notifies of debug messages
-MC.addFilter( { "debug" } );    
+MC.addFilter( { "debug" } );
 //  now only notifies of debug message with priority=2, that do not come from the radio module
-MC.addFilter( {{ "priority", 2 }, { "!radio", {} }} );    
+MC.addFilter( {{ "priority", 2 }, { "!radio", {} }} );
 ```
 
 **Note:** Not implemented yet.
