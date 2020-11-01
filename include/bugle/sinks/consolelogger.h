@@ -4,7 +4,6 @@
 #include "bugle/format/formatter.h"
 #include <mutex>
 
-
 namespace bugle {
 
 
@@ -15,7 +14,6 @@ class ConsoleLogger : public Observer
         ConsoleLogger();
 
         void setFormatter( const FormatterPtr& formatter );
-        void printSystemInfo() const;
         virtual void notify( const Message& messagePtr );
 
     private:

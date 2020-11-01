@@ -2,14 +2,25 @@
 #include "bugle/core/message.h"
 #include "bugle/core/observer.h"
 
+#include <fmt/format.h>
 
 using namespace std::chrono_literals;
-
 
 namespace bugle {
 
 
-MessageCenterPtr MessageCenter::instance_ = std::make_shared<MessageCenter>();
+MessageCenterUPtr MessageCenter::instance_ = nullptr;
+
+
+////////////////////////////////////////////////////////////////////////////////
+MessageCenter& MessageCenter::instance()
+{
+    if ( ! instance_ ) {
+        instance_ = std::make_unique<MessageCenter>();
+    }
+
+    return *instance_;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +41,10 @@ MessageCenter::~MessageCenter()
     return;
 #endif
 
+    if ( ! workerThread_.joinable() ) {
+        return;
+    }
+
     shouldExit_ = true;
     queueReady_.notify_one();
     workerThread_.join();
@@ -37,7 +52,23 @@ MessageCenter::~MessageCenter()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::pushScope( Scope& scope ) {
+void MessageCenter::flush()
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
+    queueReady_.notify_one();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void MessageCenter::pushScope( Scope& scope )
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
     auto& stack = scopes_[ scope.threadId() ];
     scope.setLevel( int( stack.size() ));
     scopes_[ scope.threadId() ].push( scope );
@@ -45,7 +76,12 @@ void MessageCenter::pushScope( Scope& scope ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::popScope( const Scope& scope ) {
+void MessageCenter::popScope( const Scope& scope )
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
     scopes_[ scope.threadId() ].pop();
 }
 
@@ -85,62 +121,27 @@ void MessageCenter::removeObserver( const ObserverRef& observer )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::post(
-    const nlohmann::json& content,
-    MC_INFO_DECLARE,
-    const nlohmann::json& tags )
-{
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
-    if ( ! enabled_ ) {
-        return;
-    }
-
-    auto tid = std::this_thread::get_id();
-    auto level = -1;
-
-    if ( scopes_.find( tid ) != scopes_.end() ) {
-        level = int( scopes_[ tid ].size() );
-    }
-
-    {
-        std::unique_lock lock( queueMutex_ );
-        messages_.push_back( { content, file, func, line, level, tags, tid } );
-    }
-
-    queueReady_.notify_one();
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::processQueue()
 {
     while ( ! shouldExit_ )
     {
         {
             std::unique_lock lock( queueMutex_ );
-            queueReady_.wait( lock );
+
+            queueReady_.wait( lock, [=](){
+                return ! messages_.empty() || shouldExit_ ;
+            });
         }
 
-        MessageData data;
-        bool finished = messages_.empty();
+        Message message {};
 
-        while ( ! finished )
+        while ( ! messages_.empty() )
         {
             {
                 std::unique_lock lock( queueMutex_ );
-                data = std::move( messages_.front() );
-
+                message = std::move( messages_.front() );
                 messages_.pop_front();
-                finished = messages_.empty();
             }
-
-            Message message(
-                data.file, data.func, data.line,
-                data.level, data.threadId, data.content, data.tags
-            );
 
             //  lock to avoid observer insertion from another thread during iteration.
             //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping

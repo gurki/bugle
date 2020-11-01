@@ -13,8 +13,8 @@ class Scope
 {
     public:
 
-        Scope( MC_INFO_DECLARE_DEFAULT );
-        Scope( const nlohmann::json& tags, MC_INFO_DECLARE_DEFAULT );
+        Scope( BUGLE_INFO_DECLARE_DEFAULT );
+        Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE_DEFAULT );
         ~Scope();
 
         void setLevel( const int level ) { level_ = level; };

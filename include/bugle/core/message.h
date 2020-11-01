@@ -10,7 +10,6 @@
 #include <mutex>
 #include <memory>
 
-
 namespace bugle {
 
 
@@ -29,13 +28,13 @@ class Message
             const char* function,
             const int line,
             const int level,
-            const std::thread::id threadId,
+            const std::thread::id& threadId,
             const nlohmann::json& object,
             const nlohmann::json& tags = {}
         );
 
         const DateTime& timestamp() const { return datetime_; }
-        const std::thread::id& threadId() const { return threadId_; }
+        const uint64_t& threadId() const { return threadId_; }
         const std::string& file() const { return file_; }
         const std::string& function() const { return function_; }
         int line() const { return line_; }
@@ -56,7 +55,7 @@ class Message
    private:
 
         DateTime datetime_ = {};
-        std::thread::id threadId_ = {};
+        uint64_t threadId_ = {};
         std::string file_ = {};
         std::string function_ = {};
         int line_ = -1;

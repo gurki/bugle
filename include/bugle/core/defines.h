@@ -2,61 +2,73 @@
 
 //  register module; convenience for checking mc availability
 
-#define MODULE_MESSAGE_CENTER
+#define MODULE_BUGLE
 
 //  __va__opt__ support; supported by clang, workaround implemented for msvc
 
-#define MC_PP_THIRD_ARG(a,b,c,...) c
-#define MC_VA_OPT_SUPPORTED_I(...) MC_PP_THIRD_ARG(__VA_OPT__(,),true,false,)
-#define MC_VA_OPT_SUPPORTED MC_VA_OPT_SUPPORTED_I(?)
+#define BUGLE_PP_THIRD_ARG(a,b,c,...) c
+#define BUGLE_VA_OPT_SUPPORTED_I(...) BUGLE_PP_THIRD_ARG(__VA_OPT__(,),true,false,)
+#define BUGLE_VA_OPT_SUPPORTED BUGLE_VA_OPT_SUPPORTED_I(?)
 
 //  message meta info
 
-#define MC_INFO_VALUES __FILE__, __func__, __LINE__
-#define MC_INFO_NAMES file, func, line
-#define MC_INFO_DECLARE const char* file, const char* func, const int line
-#define MC_INFO_DECLARE_DEFAULT const char* file = nullptr, const char* func = nullptr, const int line = -1
+#define BUGLE_INFO_VALUES __FILE__, __func__, __LINE__
+#define BUGLE_INFO_NAMES file, func, line
+#define BUGLE_INFO_DECLARE const char* file, const char* func, const int line
+#define BUGLE_INFO_DECLARE_DEFAULT const char* file = nullptr, const char* func = nullptr, const int line = -1
 
-//  conveniance mc global instance getter
+//  conveniance bgl global instance getter
 
-#define MC ( bugle::MessageCenter::instance() )
+#define BUGLE_INSTANCE ( bugle::MessageCenter::instance() )
 
-#ifdef MC_LOWERCASE_DEFINES
-    #define mci MC
+#ifdef BUGLE_LOWERCASE_DEFINES
+    #define bgli BUGLE_INSTANCE
 #endif
 
-//  post calls for automatic meta info insertion
+// //  post calls for automatic meta info insertion
 
-#ifdef MC_ENABLE
-    #if MC_VA_OPT_SUPPORTED
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES __VA_OPT__(, __VA_ARGS__) ))
-    #else
-        #define MC_POST( text, ... ) ( MC.post( text, MC_INFO_VALUES, __VA_ARGS__ ) )
-    #endif
-#else
-    #define MC_POST( text, ... )
-#endif
+// #ifdef BUGLE_ENABLE
+//     #if BUGLE_VA_OPT_SUPPORTED
+//         #define BUGLE_POST( text, ... ) ( BUGLE_INSTANCE.post( text, BUGLE_INFO_VALUES __VA_OPT__(, __VA_ARGS__) ))
+//     #else
+//         #define BUGLE_POST( text, ... ) ( BUGLE_INSTANCE.post( text, BUGLE_INFO_VALUES, __VA_ARGS__ ) )
+//     #endif
+// #else
+//     #define BUGLE_POST( text, ... )
+// #endif
 
-//  post shorthands
+// #define BGLP BUGLE_POST
 
-#define MCP MC_POST
-
-#ifdef MC_LOWERCASE_DEFINES
-    #define mcp MC_POST
-#endif
+// #ifdef BUGLE_LOWERCASE_DEFINES
+//     #define bglp BUGLE_POST
+// #endif
 
 //  scope
 
-#ifdef MC_ENABLE
-    #define MC_SCOPE(...) bugle::Scope _mc_scope( { __VA_ARGS__ }, MC_INFO_VALUES )
+#ifdef BUGLE_ENABLE
+    #define BUGLE_SCOPE(...) bugle::Scope _bugle_scope( { __VA_ARGS__ }, BUGLE_INFO_VALUES )
 #else
-    #define MC_SCOPE(...)
+    #define BUGLE_SCOPE(...)
 #endif
 
-//  scope shorthands
+#ifdef BUGLE_LOWERCASE_DEFINES
+    #define bgls BUGLE_SCOPE
+#endif
 
-#define MCS MC_SCOPE
+//  fmt with variadic arguments
 
-#ifdef MC_LOWERCASE_DEFINES
-    #define mcs MC_SCOPE
+#ifdef BUGLE_ENABLE
+    #define BUGLE_POST( message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, { __VA_ARGS__ } ) )
+    #define BUGLE_POST_FORMAT( tags, message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, tags, __VA_ARGS__ ) )
+    #define BUGLE_POST_FORMAT_NOTAG( message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, {}, __VA_ARGS__ ) )
+#else
+    #define BUGLE_POST( message, ... )
+    #define BUGLE_POST_FORMAT( tags, message, ... )
+    #define BUGLE_POST_FORMAT_NOTAG( message, ... )
+#endif
+
+#ifdef BUGLE_LOWERCASE_DEFINES
+    #define bglp BUGLE_POST
+    #define bglf BUGLE_POST_FORMAT
+    #define bgln BUGLE_POST_FORMAT_NOTAG
 #endif

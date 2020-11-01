@@ -8,32 +8,32 @@ namespace bugle::st {
 
 
 void simpleEnter() {
-    MC_SCOPE();
+    BUGLE_SCOPE();
     using namespace std::chrono_literals;
     // std::this_thread::sleep_for( 1s );
-    mcp( "much text, such wow" );
+    bglp( "much text, such wow" );
 }
 
 
 void taggedEnter()  {
-    mcs( "⭐" );
+    bgls( "⭐" );
     using namespace std::chrono_literals;
     // std::this_thread::sleep_for( 1s );
-    mcp( "a message" );
+    bglp( "a message" );
 }
 
 
 void nestedEnter()  {
-    mcs( "🚩" );
+    bgls( "🚩" );
     simpleEnter();
-    mcp( "i love tags", "seriously" );
+    bglp( "i love tags", "seriously" );
 }
 
 
 void deeperNesting() {
-    mcs();
+    bgls();
     nestedEnter();
-    mcp( "overkill", { "triplekill", "quadrakill" } );
+    bglp( "overkill", { "triplekill", "quadrakill" } );
 }
 
 

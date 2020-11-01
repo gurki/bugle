@@ -1,14 +1,13 @@
 #include "bugle/core/message.h"
 #include <sstream>
 
-
 namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
 Message::Message() :
     datetime_( DateTime::now() ),
-    threadId_( std::this_thread::get_id() )
+    threadId_( std::hash<std::thread::id>{}( std::this_thread::get_id() ))
 {}
 
 
@@ -18,7 +17,7 @@ Message::Message(
     const char* function,
     const int line,
     const int level,
-    const std::thread::id threadId,
+    const std::thread::id& threadId,
     const nlohmann::json& object,
     const nlohmann::json& tags ) :
     Message()
@@ -27,7 +26,7 @@ Message::Message(
     function_ = function;
     line_ = line;
     level_ = level;
-    threadId_ = threadId;
+    threadId_ = std::hash<std::thread::id>{}( threadId );
     content_ = object;
     tags_ = filterTags( tags );
 
@@ -89,7 +88,7 @@ size_t Message::binarySize() const {
 void to_json( nlohmann::json& json, const Message& message )
 {
     json[ "timestamp" ] = message.timestamp();
-    // json[ "thread_id" ] = message.threadId();
+    json[ "thread" ] = uint64_t( message.threadId() );
 
     if ( message.isIndexed() )
     {
@@ -109,19 +108,19 @@ void from_json( const nlohmann::json& json, Message& message )
 {
     try
     {
-        message.datetime_ = json[ "timestamp" ];
-        // message.threadId_ = json[ "threadId" ];
+        message.datetime_ = json.at( "timestamp" ).get<DateTime>();
+        message.threadId_ = json.at( "thread" ).get<uint64_t>();
 
         if ( json.find( "file" ) != json.end() )
         {
-            message.file_ = json[ "file" ].get<std::string>();
-            message.function_ = json[ "function" ].get<std::string>();
-            message.line_ = json[ "line" ];
-            message.level_ = json[ "level" ];
+            message.file_ = json.at( "file" ).get<std::string>();
+            message.function_ = json.at( "function" ).get<std::string>();
+            message.line_ = json.at( "line" ).get<int>();
+            message.level_ = json.at( "level" ).get<int>();
         }
 
-        message.content_ = json[ "content" ];
-        message.tags_ = json[ "tags" ].get<tags_t>();
+        message.content_ = json.at( "content" ).get<nlohmann::json>();
+        message.tags_ = json.at( "tags" ).get<tags_t>();
     }
     catch ( const std::exception& ) {
         message = {};

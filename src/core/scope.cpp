@@ -5,14 +5,14 @@ namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Scope::Scope( MC_INFO_DECLARE ) :
-    Scope( {}, MC_INFO_NAMES )
+Scope::Scope( BUGLE_INFO_DECLARE ) :
+    Scope( {}, BUGLE_INFO_NAMES )
 {}
 
 
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef MC_ENABLE
-Scope::Scope( const nlohmann::json& tags, MC_INFO_DECLARE ) :
+#ifdef BUGLE_ENABLE
+Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE ) :
     file_( file ),
     func_( func ),
     line_( line ),
@@ -20,18 +20,18 @@ Scope::Scope( const nlohmann::json& tags, MC_INFO_DECLARE ) :
     timestamp_( DateTime::now() ),
     threadId_( std::this_thread::get_id() )
 {
-    mci.pushScope( *this );
+    bgli.pushScope( *this );
 }
 #else
-Scope::Scope( const nlohmann::json& tags, MC_INFO_DECLARE )
+Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE )
 {}
 #endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef MC_ENABLE
+#ifdef BUGLE_ENABLE
 Scope::~Scope() {
-    mci.popScope( *this );
+    bgli.popScope( *this );
 }
 #else
 Scope::~Scope()

@@ -76,15 +76,14 @@ install(
 
 #-------------------------------------------------------------------------------
 
+add_compile_definitions( BUGLE_ENABLE )
+add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
+
 add_executable( ${PROJECT_NAME}-examples
-    examples/main.cpp
+    examples/dev.cpp
 )
 
 target_link_libraries( ${PROJECT_NAME}-examples
     PRIVATE
         ${PROJECT_NAME}::${PROJECT_NAME}
 )
-
-#  message center options
-add_compile_definitions( MC_ENABLE )
-add_compile_definitions( MC_LOWERCASE_DEFINES )

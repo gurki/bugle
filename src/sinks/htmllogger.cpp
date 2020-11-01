@@ -63,7 +63,7 @@
 
 //     if ( ! fout_.open( QFile::WriteOnly | QFile::Truncate ) )
 //     {
-//         MC.postm( "couldn't open file", {
+//         BUGLE_INSTANCE.postm( "couldn't open file", {
 //             { "warning", {} },
 //             { "detail", name }
 //         });
@@ -83,7 +83,7 @@
 
 //     if ( ! finStyle.open( QFile::ReadOnly ) )
 //     {
-//         MC.postm( "couldn't find stylesheet", {
+//         BUGLE_INSTANCE.postm( "couldn't find stylesheet", {
 //             { "warning", {} },
 //             { "detail", styleSource }
 //         });

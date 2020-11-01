@@ -35,13 +35,13 @@ using namespace std::string_literals;
 ////////////////////////////////////////////////////////////////////////////////
 void parallelMessages()
 {
-    mcp( "parallel message", "parallel" );
+    bglp( "parallel message", "parallel" );
 
     std::this_thread::sleep_for( 200ms );
-    mcp( "later one", { "parallel", "no2" } );
+    bglp( "later one", { "parallel", "no2" } );
 
     std::this_thread::sleep_for( 200ms );
-    mcp( "another one", { "parallel", "no3" } );
+    bglp( "another one", { "parallel", "no3" } );
 }
 
 
@@ -53,8 +53,8 @@ int main( int argc, char* argv[] )
     //  test message post
 
     auto clog = std::make_shared<ConsoleLogger>();
-    // mci.addObserver( clog, "debug voltage>3,a, !  awesometag" );
-    mci.addObserver( clog );
+    // bgli.addObserver( clog, "debug voltage>3,a, !  awesometag" );
+    bgli.addObserver( clog );
 
 
     static const nlohmann::json obj = {
@@ -73,21 +73,21 @@ int main( int argc, char* argv[] )
     };
 
     //  different parameters
-    mcp( "message only" );
-    mcp( "single tag", "awesometag" );
-    mcp( "multiple tags", { "imatag", "metoo" } );
-    mcp( "array", { "a", 4 } );
-    mcp( "object", {{ "a", 4 }} );
-    mcp( "object in array", { "a", {{ "b", 4 }} });
-    mcp( "array value", { "a", { "b", { "c", 4, true } }});
-    mcp( "large object", obj );
-    mcp( "emojis", { "⭐⭐⭐", "🚩", "🙈" } );
+    bglp( "message only" );
+    bglp( "single tag", "awesometag" );
+    bglp( "multiple tags", { "imatag", "metoo" } );
+    bglp( "array", { "a", 4 } );
+    bglp( "object", {{ "a", 4 }} );
+    bglp( "object in array", { "a", {{ "b", 4 }} });
+    bglp( "array value", { "a", { "b", { "c", 4, true } }});
+    bglp( "large object", obj );
+    bglp( "emojis", { "⭐⭐⭐", "🚩", "🙈" } );
 
     //  filtering
-    mcp( "debug message", "debug" );
-    mcp( "radio message", "radio" );
-    mcp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
-    mcp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
+    bglp( "debug message", "debug" );
+    bglp( "radio message", "radio" );
+    bglp( "trick message", "!debug" );   //  likely non-intended behaviour, can't filter for '!debug'
+    bglp( "multiple tags", { "radio", { "voltage", 2.41 }, { "debug", 14 } });
 
     //  start threaded messages
 
@@ -99,11 +99,11 @@ int main( int argc, char* argv[] )
     frmt->setIndent( 2 );
     clog->setFormatter( frmt );
 
-    mcp( "info message", {{ "info", "message" }} );
-    mcp( "success message", {{ "success", "message" }} );
-    mcp( "warning message", {{ "warning", "message" }} );
-    mcp( "error message", {{ "error", "message" }} );
-    mcp( "debug message", {{ "debug", "message" }} );
+    bglp( "info message", {{ "info", "message" }} );
+    bglp( "success message", {{ "success", "message" }} );
+    bglp( "warning message", {{ "warning", "message" }} );
+    bglp( "error message", {{ "error", "message" }} );
+    bglp( "debug message", {{ "debug", "message" }} );
 
     // std::cout << std::endl;
 
@@ -121,14 +121,14 @@ int main( int argc, char* argv[] )
     theme->set( "warning", "#c87b23"s, "#e09c4f"s );
     theme->set( "error", "#d51f1a"s, "#e94e4a"s );
 
-    mcp( "info message", {{ "info", "message" }} );
-    mcp( "success message", {{ "success", "message" }} );
-    mcp( "warning message", {{ "warning", "message" }} );
-    mcp( "error message", {{ "error", "message" }} );
-    mcp( "debug message", {{ "debug", "message" }} );
+    bglp( "info message", {{ "info", "message" }} );
+    bglp( "success message", {{ "success", "message" }} );
+    bglp( "warning message", {{ "warning", "message" }} );
+    bglp( "error message", {{ "error", "message" }} );
+    bglp( "debug message", {{ "debug", "message" }} );
 
-    mcp( "uncategorized tags", { "untagged", "nocategory", { "thuglife", "muchsad" } } );
-    mcp( "simple message" );
+    bglp( "uncategorized tags", { "untagged", "nocategory", { "thuglife", "muchsad" } } );
+    bglp( "simple message" );
 
 
     //  indent
@@ -140,13 +140,13 @@ int main( int argc, char* argv[] )
     bugle::st::deeperNesting();
 
 
-    // MCS();
-    // MCS() << "simple scope";
-    // MCS() << "woah" << 4.2 << 3.14159265f << true << 1;
-    // MCS() << obj;
-    // MCS( "debug" ) << "lala";
-    // MCS( "a", { "b", "c", 4, true } ) << "was geht?";
-    // MCS( "a", { "b", "c", 4, true } ) << obj;
+    // bgls();
+    // bgls() << "simple scope";
+    // bgls() << "woah" << 4.2 << 3.14159265f << true << 1;
+    // bgls() << obj;
+    // bgls( "debug" ) << "lala";
+    // bgls( "a", { "b", "c", 4, true } ) << "was geht?";
+    // bgls( "a", { "b", "c", 4, true } ) << obj;
 
 //    Formatter formatter;
 //    formatter.setTagColor( "status", 213, 219 );
@@ -155,15 +155,15 @@ int main( int argc, char* argv[] )
 //    HtmlLogger htmlLogger;
 //    htmlLogger.setFormatter( &formatter );
 //    htmlLogger.createDefaultFile();
-//    MC.addObserver( &htmlLogger );
+//    BUGLE_INSTANCE.addObserver( &htmlLogger );
 
 //    ConsoleLogger clog2;
 //    clog2.setFormatter( &formatter );
-//    MC.addObserver( &clog2 );
+//    BUGLE_INSTANCE.addObserver( &clog2 );
 
 //    JsonLogger jlog1;
 //    jlog1.createDefaultFile();
-//    MC.addObserver( &jlog1 );
+//    BUGLE_INSTANCE.addObserver( &jlog1 );
 
 //    MC_PS( "welcome to the world of tomorrow!", "intro" );
 
@@ -182,8 +182,8 @@ int main( int argc, char* argv[] )
 
 ////////////////////////////////////////////////////////////////////////////////
 void scopeTest() {
-    mcs();
-    mcp( "i am a fuuunctiioooooonnn *pflätsch*" );
+    bgls();
+    bglp( "i am a fuuunctiioooooonnn *pflätsch*" );
 }
 
 
