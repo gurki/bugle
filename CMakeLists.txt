@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.14 )
+cmake_minimum_required( VERSION 3.28 )
 
 project(
     bugle
@@ -32,18 +32,7 @@ add_library( ${PROJECT_NAME} STATIC
 
 add_library( ${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
 
-target_compile_features( ${PROJECT_NAME}
-    PUBLIC
-        cxx_std_17  #  std::optional, nested namespaces
-    PRIVATE
-        cxx_auto_type
-        cxx_defaulted_functions
-        cxx_lambdas
-        cxx_range_for
-        cxx_trailing_return_types
-        cxx_unicode_literals
-        cxx_inline_namespaces
-)
+target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_23 )
 
 target_include_directories( ${PROJECT_NAME}
     PUBLIC
@@ -53,10 +42,10 @@ target_include_directories( ${PROJECT_NAME}
 
 target_link_libraries( ${PROJECT_NAME}
     PUBLIC
-        nlohmann_json::nlohmann_json
-        fmt::fmt
-        vivid::vivid
-        Catch2::Catch2
+        nlohmann_json
+        fmt
+        vivid
+        Catch2
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
@@ -80,7 +69,7 @@ add_compile_definitions( BUGLE_ENABLE )
 add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
 
 add_executable( ${PROJECT_NAME}-examples
-    examples/dev.cpp
+    examples/main.cpp
 )
 
 target_link_libraries( ${PROJECT_NAME}-examples

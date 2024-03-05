@@ -3,6 +3,7 @@
 
 # Products
 build/
+.build/
 .vscode/
 
 # Prerequisites
