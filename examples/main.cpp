@@ -11,6 +11,8 @@
 #include <bugle/sinks/consolelogger.h>
 #include <bugle/utility/datetime.h>
 
+#include <nlohmann/json.hpp>
+
 #include <chrono>
 #include <future>
 #include <iostream>
@@ -56,7 +58,6 @@ int main( int argc, char* argv[] )
     auto clog = std::make_shared<ConsoleLogger>();
     // bgli.addObserver( clog, "debug voltage>3,a, !  awesometag" );
     bgli.addObserver( clog );
-
 
     static const nlohmann::json obj = {
         { "pi", 3.141 },
@@ -117,11 +118,11 @@ int main( int argc, char* argv[] )
     auto theme = std::make_shared<DefaultTheme>();
     frmt->setTheme( theme );
 
-    theme->set( "debug", "#ff98bc"s, "#ffdce8"s );
-    theme->set( "info", "#007aff"s, "#449dff"s );
-    theme->set( "success", "#20b684"s, "#3ddda8"s );
-    theme->set( "warning", "#c87b23"s, "#e09c4f"s );
-    theme->set( "error", "#d51f1a"s, "#e94e4a"s );
+    theme->set( "debug", "#ff98bc", "#ffdce8" );
+    theme->set( "info", "#007aff", "#449dff" );
+    theme->set( "success", "#20b684", "#3ddda8" );
+    theme->set( "warning", "#c87b23", "#e09c4f" );
+    theme->set( "error", "#d51f1a", "#e94e4a" );
 
     bglp( "info message", {{ "info", "message" }} );
     bglp( "success message", {{ "success", "message" }} );

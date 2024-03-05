@@ -2,10 +2,6 @@
 #include "bugle/core/message.h"
 #include "bugle/core/observer.h"
 
-#include <fmt/format.h>
-
-using namespace std::chrono_literals;
-
 namespace bugle {
 
 

@@ -7,11 +7,11 @@
 #include "bugle/utility/utility.h"  //  WeakPtrHash, WeakPtrEqual
 
 #include <nlohmann/json.hpp>
-#include <fmt/format.h>
 
 #include <atomic>   //  enabled_, ...
 #include <condition_variable>
 #include <deque>
+#include <format>
 #include <memory>   //  MessageCenterPtr, ...
 #include <mutex>    //  observerMutex_, ...
 #include <shared_mutex>
@@ -61,7 +61,7 @@ class PostOffice
         template<typename... Args>
         void post(
             BUGLE_INFO_DECLARE,
-            fmt::format_string<Args...> message,
+            std::format_string<Args...> message,
             const nlohmann::json& tags = {},
             Args... args
         );
@@ -107,7 +107,7 @@ class PostOffice
 template<typename... Args>
 void PostOffice::post(
     BUGLE_INFO_DECLARE,
-    fmt::format_string<Args...> message,
+    std::format_string<Args...> message,
     const nlohmann::json& tags,
     Args... args )
 {
@@ -127,7 +127,7 @@ void PostOffice::post(
     }
 
     {
-        const std::string content = fmt::format( message, std::forward<Args>(args)... );
+        const std::string content = std::format( message, std::forward<Args>(args)... );
         std::unique_lock lock( queueMutex_ );
         messages_.push_back( { file, func, line, level, tid, content, tags } );
     }

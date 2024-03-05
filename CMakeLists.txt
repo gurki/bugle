@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 3.28 )
 project(
     bugle
     VERSION 0.0.0
-    DESCRIPTION "A tag-based colorful logging library"
+    DESCRIPTION "A tag-based, filterable, colorful and thread-safe cpp logging library"
     HOMEPAGE_URL "https://github.com/gurki/bugle"
     LANGUAGES CXX
 )
@@ -43,9 +43,7 @@ target_include_directories( ${PROJECT_NAME}
 target_link_libraries( ${PROJECT_NAME}
     PUBLIC
         nlohmann_json
-        fmt
         vivid
-        Catch2
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )

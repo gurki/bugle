@@ -30,11 +30,16 @@ tags_t filterTags( const nlohmann::json& tags )
     {
         for ( const auto& tag : tags )
         {
-            if ( tag.is_array() && tag.size() == 2 ) {
-                if ( tag[0].is_string() ) {
-                    jobj[ tag[0].get<std::string>() ] = tag[1];
+            if ( tag.is_array() && tags.size() == 1 ) {
+                for ( const auto& sub : tag ) {
+                    insert( jobj, sub );
                 }
             }
+            // else if ( tag.is_array() && tag.size() == 2 ) {
+            //     if ( tag[0].is_string() ) {
+            //         jobj[ tag[0].get<std::string>() ] = tag[1];
+            //     }
+            // }
             else {
                 insert( jobj, tag );
             }

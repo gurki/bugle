@@ -1,7 +1,7 @@
 #include "bugle/sinks/consolelogger.h"
 #include "bugle/format/colortable.h"
 
-#include <fmt/format.h>
+#include <print>
 #include <iostream>
 #include <thread>
 
@@ -30,7 +30,7 @@ void ConsoleLogger::notify( const Message& message )
         return;
     }
 
-    fmt::print( "{} \n", formatter_->format( message ) );
+    std::println( "{}", formatter_->format( message ) );
 }
 
 
