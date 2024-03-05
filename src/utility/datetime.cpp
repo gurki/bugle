@@ -27,18 +27,23 @@ std::string DateTime::info( const Resolution resolution ) const {
 //////////////////////////////////////////////////////////////////////////////////
 std::string DateTime::timeInfo( const Resolution resolution ) const
 {
-    const auto time = system_clock::to_time_t( timestamp_ );
-
-    std::stringstream ss;
-    ss << std::put_time( std::localtime( &time ), "%T" );
-
-    if ( resolution == Microseconds ) {
-        ss << "." << microseconds();
-    } else if ( resolution == Milliseconds ) {
-        ss << "." << milliseconds();
+    switch ( resolution )
+    {
+        case Resolution::Seconds: {
+            const auto time = std::chrono::time_point_cast<std::chrono::seconds>( timestamp_ );
+            return std::format( "{0:%T}", time );
+        }
+        case Resolution::Milliseconds: {
+            const auto time = std::chrono::time_point_cast<std::chrono::milliseconds>( timestamp_ );
+            return std::format( "{0:%T}", time );
+        }
+        case Resolution::Microseconds: {
+            const auto time = std::chrono::time_point_cast<std::chrono::microseconds>( timestamp_ );
+            return std::format( "{0:%T}", time );
+        }
     }
 
-    return ss.str();
+    return {};
 }
 
 
