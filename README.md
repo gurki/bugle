@@ -1,6 +1,10 @@
 # bugle 📯
+A tag-based, filterable, colorful and thread-safe cpp logging library
 
-A tag-based colorful logging library
+```
+This document is out of date and based on old Qt/Qml version.
+Will rewrite soon™.
+```
 
 
 ## Content
@@ -12,12 +16,13 @@ A tag-based colorful logging library
 - [Examples](#examples)
 - [Discussion](#discussion)
 
-## Motivation
 
+## Motivation
 Why another logging framework? Well, I looked around, and I found none whatsoever that provides the capability and ease of use I imagine. So I set out and built my own.
 
 Enjoy and let me know what you think!
-\\\ Gurki
+\- Gurki
+
 
 ## Design Goals
 
@@ -26,6 +31,7 @@ Enjoy and let me know what you think!
 - **Colors.** Colorized output makes reading and understanding console messages easier, which gives you the ability to spot relevant messages faster.
 - **Customizable.** Create your own message observers by simply implementing the slick interface and whatever you want with your messages.
 - **Threaded.** All messages are sent via signals / slots. Eventually, these should be completely thread safe. Not just there yet ;).
+
 
 ## Integration
 
@@ -53,6 +59,7 @@ ConsoleLogger radioConsoleLogger;
 MC.addObserver( &radioConsoleLogger, { "radio", "!debug" } );
 MC_POST( "new radio module connected", { "radio", "info" } );
 ```
+
 
 ## Examples
 
@@ -137,6 +144,7 @@ messageCenter.post( "rich tags", { priority:2, detail:"badass" } )
 ```
 
 However, message indexing is not available from QML.
+
 
 ## Discussion
 
