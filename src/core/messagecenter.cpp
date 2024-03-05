@@ -106,6 +106,7 @@ void MessageCenter::addObserver(
     }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 void MessageCenter::removeObserver( const ObserverRef& observer )
 {

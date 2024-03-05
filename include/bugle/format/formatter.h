@@ -18,7 +18,7 @@ class Formatter
     public:
 
         Formatter(
-            const std::string& space = u8"\u0020",
+            const std::string& space = " ",
             const std::string& spacer = "·",
             const std::string& newline = "\n"
         );

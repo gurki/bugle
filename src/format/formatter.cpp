@@ -140,7 +140,7 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         if ( value.is_primitive() ) {
             stream << colorize( value.dump(), cols.variant );
         } else {
-            stream << colorize( u8"\u2026", cols.variant );
+            stream << colorize( "…", cols.variant );
         }
     }
 

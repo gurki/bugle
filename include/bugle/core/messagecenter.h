@@ -61,7 +61,7 @@ class MessageCenter
         template<typename... Args>
         void post(
             BUGLE_INFO_DECLARE,
-            const std::string& message,
+            fmt::format_string<Args...> message,
             const nlohmann::json& tags = {},
             Args... args
         );
@@ -107,7 +107,7 @@ class MessageCenter
 template<typename... Args>
 void MessageCenter::post(
     BUGLE_INFO_DECLARE,
-    const std::string& message,
+    fmt::format_string<Args...> message,
     const nlohmann::json& tags,
     Args... args )
 {
@@ -127,8 +127,8 @@ void MessageCenter::post(
     }
 
     {
+        const std::string content = fmt::format( message, std::forward<Args>(args)... );
         std::unique_lock lock( queueMutex_ );
-        const std::string content = fmt::format( message, args... );
         messages_.push_back( { file, func, line, level, tid, content, tags } );
     }
 
