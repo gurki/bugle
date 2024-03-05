@@ -82,6 +82,7 @@ int main( int argc, char* argv[] )
     bglp( "object in array", { "a", {{ "b", 4 }} });
     bglp( "array value", { "a", { "b", { "c", 4, true } }});
     bglp( "large object", obj );
+    bglp( "emoji", "⭐⭐⭐" );
     bglp( "emojis", { "⭐⭐⭐", "🚩", "🙈" } );
 
     //  filtering
