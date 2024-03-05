@@ -1,4 +1,5 @@
 #include "bugle/core/message.h"
+#include <fmt/format.h>
 #include <sstream>
 
 namespace bugle {
@@ -60,7 +61,7 @@ std::string Message::info() const
    info << function_;
    info << " - " << file_;
    info << " l." << line_;
-   info << " [" << threadId_ << "]";
+   info << " [" << fmt::format( "{:x}", threadId_ & 0x0fffffff ) << "]";
 
    return info.str();
 }
