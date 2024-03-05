@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bugle/core/messagecenter.h>
+#include <bugle/core/postoffice.h>
 #include <bugle/core/scope.h>
 #include <iostream>
 

@@ -27,16 +27,16 @@ class BooleanFilter;
 
 using ScopeWrp = std::reference_wrapper<Scope>;
 using ObserverRef = std::weak_ptr<class Observer>;
-using MessageCenterPtr = std::shared_ptr<class MessageCenter>;
-using MessageCenterUPtr = std::unique_ptr<class MessageCenter>;
+using PostOfficePtr = std::shared_ptr<class PostOffice>;
+using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
 
 
-class MessageCenter
+class PostOffice
 {
     public:
 
-        MessageCenter();
-        ~MessageCenter();
+        PostOffice();
+        ~PostOffice();
 
         void enable() { enabled_ = true; }
         void disable() { enabled_ = false; }
@@ -66,7 +66,7 @@ class MessageCenter
             Args... args
         );
 
-        static MessageCenter& instance();
+        static PostOffice& instance();
 
     private:
 
@@ -99,13 +99,13 @@ class MessageCenter
         std::condition_variable queueReady_;
         std::atomic_bool shouldExit_ = false;
 
-        static MessageCenterUPtr instance_;
+        static PostOfficeUPtr instance_;
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////
 template<typename... Args>
-void MessageCenter::post(
+void PostOffice::post(
     BUGLE_INFO_DECLARE,
     fmt::format_string<Args...> message,
     const nlohmann::json& tags,

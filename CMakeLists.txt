@@ -17,15 +17,15 @@ add_library( ${PROJECT_NAME} STATIC
     src/core/booleanfilter.cpp
     src/core/filteritem.cpp
     src/core/message.cpp
-    src/core/messagecenter.cpp
+    src/core/postoffice.cpp
     src/core/scope.cpp
     src/core/tags.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
     src/format/theme.cpp
     src/sinks/consolelogger.cpp
-    src/sinks/htmllogger.cpp
-    src/sinks/jsonlogger.cpp
+    # src/sinks/htmllogger.cpp
+    # src/sinks/jsonlogger.cpp
     src/utility/datetime.cpp
     src/utility/utility.cpp
 )

@@ -1,5 +1,5 @@
 #include "bugle/core/scope.h"
-#include "bugle/core/messagecenter.h"
+#include "bugle/core/postoffice.h"
 
 namespace bugle {
 

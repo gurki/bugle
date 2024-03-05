@@ -1,4 +1,4 @@
-#include "bugle/core/messagecenter.h"
+#include "bugle/core/postoffice.h"
 #include "bugle/core/message.h"
 #include "bugle/core/observer.h"
 
@@ -9,14 +9,14 @@ using namespace std::chrono_literals;
 namespace bugle {
 
 
-MessageCenterUPtr MessageCenter::instance_ = nullptr;
+PostOfficeUPtr PostOffice::instance_ = nullptr;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter& MessageCenter::instance()
+PostOffice& PostOffice::instance()
 {
     if ( ! instance_ ) {
-        instance_ = std::make_unique<MessageCenter>();
+        instance_ = std::make_unique<PostOffice>();
     }
 
     return *instance_;
@@ -24,18 +24,18 @@ MessageCenter& MessageCenter::instance()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::MessageCenter()
+PostOffice::PostOffice()
 {
 #ifdef MC_DISABLE_POST
     return;
 #endif
 
-    workerThread_ = std::thread( &MessageCenter::processQueue, this );
+    workerThread_ = std::thread( &PostOffice::processQueue, this );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-MessageCenter::~MessageCenter()
+PostOffice::~PostOffice()
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -52,7 +52,7 @@ MessageCenter::~MessageCenter()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::flush()
+void PostOffice::flush()
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -63,7 +63,7 @@ void MessageCenter::flush()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::pushScope( Scope& scope )
+void PostOffice::pushScope( Scope& scope )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -76,7 +76,7 @@ void MessageCenter::pushScope( Scope& scope )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::popScope( const Scope& scope )
+void PostOffice::popScope( const Scope& scope )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -87,7 +87,7 @@ void MessageCenter::popScope( const Scope& scope )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::addObserver(
+void PostOffice::addObserver(
     const ObserverRef& observer,
     const std::string& filter )
 {
@@ -108,7 +108,7 @@ void MessageCenter::addObserver(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::removeObserver( const ObserverRef& observer )
+void PostOffice::removeObserver( const ObserverRef& observer )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -122,7 +122,7 @@ void MessageCenter::removeObserver( const ObserverRef& observer )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void MessageCenter::processQueue()
+void PostOffice::processQueue()
 {
     while ( ! shouldExit_ )
     {

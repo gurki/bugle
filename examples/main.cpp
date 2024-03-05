@@ -2,7 +2,7 @@
 
 #include <bugle/core/filteritem.h>
 #include <bugle/core/message.h>
-#include <bugle/core/messagecenter.h>
+#include <bugle/core/postoffice.h>
 #include <bugle/core/scope.h>
 #include <bugle/core/tags.h>
 #include <bugle/format/colortable.h>

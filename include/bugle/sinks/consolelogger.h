@@ -18,7 +18,7 @@ class ConsoleLogger : public Observer
 
     private:
 
-        std::mutex mutex_;
+        std::mutex mutex_;  //  avoid mingling text by writing from multiple threads
         FormatterPtr formatter_ = nullptr;
 };
 

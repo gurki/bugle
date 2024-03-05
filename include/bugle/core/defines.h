@@ -19,7 +19,7 @@
 
 //  conveniance bgl global instance getter
 
-#define BUGLE_INSTANCE ( bugle::MessageCenter::instance() )
+#define BUGLE_INSTANCE ( bugle::PostOffice::instance() )
 
 #ifdef BUGLE_LOWERCASE_DEFINES
     #define bgli BUGLE_INSTANCE
