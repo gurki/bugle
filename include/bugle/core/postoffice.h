@@ -62,7 +62,7 @@ class PostOffice
         void post(
             BUGLE_INFO_DECLARE,
             std::format_string<Args...> message,
-            const nlohmann::json& tags = {},
+            const tags_t& tags = {},
             Args... args
         );
 
@@ -108,7 +108,7 @@ template<typename... Args>
 void PostOffice::post(
     BUGLE_INFO_DECLARE,
     std::format_string<Args...> message,
-    const nlohmann::json& tags,
+    const tags_t& tags,
     Args... args )
 {
 #ifdef MC_DISABLE_POST

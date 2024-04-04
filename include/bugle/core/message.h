@@ -29,8 +29,8 @@ class Message
             const int line,
             const int level,
             const std::thread::id& threadId,
-            const nlohmann::json& object,
-            const nlohmann::json& tags = {}
+            const std::string& content,
+            const tags_t& tags = {}
         );
 
         const DateTime& timestamp() const { return datetime_; }
@@ -39,7 +39,7 @@ class Message
         const std::string& function() const { return function_; }
         int line() const { return line_; }
         int level() const { return level_; }
-        const nlohmann::json& content() const { return content_; }
+        const std::string& content() const { return content_; }
         const tags_t& tags() const { return tags_; }
 
         std::string info() const;
@@ -60,7 +60,7 @@ class Message
         std::string function_ = {};
         int line_ = -1;
         int level_ = -1;
-        nlohmann::json content_ = {};
+        std::string content_ = {};
         tags_t tags_ = {};
 
         mutable std::vector<uint8_t> binary_ = {}; //  mutable for lazy evaluation

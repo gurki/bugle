@@ -47,13 +47,10 @@ std::string Formatter::format( const Message& message ) const
 
     //  message without quotes
 
-    if ( ! message.content().empty() )
-    {
+    if ( ! message.content().empty() ) {
         ss << skip( 2 );
         ss << indent( message.level() );
-
-        const std::string msg = message.content().dump();
-        ss << colorize( msg.substr( 1, msg.size() - 2 ), theme_->primary().color );
+        ss << colorize( message.content(), theme_->primary().color );
     }
 
     ss << skip( 2 );
@@ -106,42 +103,82 @@ std::string Formatter::indent( const int level ) const
 
 
 ////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::prettyPrimitive( const nlohmann::json& primitive )
+{
+    const auto cols = theme_->get( primitive );
+
+    return std::format( "{}{}",
+        colorize( "#", theme_->secondary().variant ),
+        colorize( primitive, cols.color )
+    );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::prettyArray( const nlohmann::json::array_t& array )
+{
+    for ( const auto& item : array ) {
+        const auto cols = theme_->get( item );
+
+    }
+
+
+    return std::format( "{}{}",
+        colorize( "#", theme_->secondary().variant ),
+        colorize( primitive, cols.color )
+    );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::tagInfo( const tags_t& tags ) const
 {
     static const size_t maxSize = 24;
 
+    if ( tags.empty() ) {
+        return {};
+    }
+
     std::stringstream stream;
+
+    if ( tags.is_primitive() )
+    {
+        const auto cols = theme_->get( tags );
+        stream << colorize( "#", theme_->secondary().variant );
+        stream << colorize( tags, cols.color );
+        return stream.str();
+    }
 
     bool firstItem = true;
 
     for ( const auto& tag : tags )
     {
-        const auto& key = tag.first;
-        const auto& value = tag.second;
+        // const auto& key = tag.first;
+        // const auto& value = tag.second;
 
-        if ( firstItem ) {
-            firstItem = false;
-        } else {
-            stream << skip( 1 );
-        }
+        // if ( firstItem ) {
+        //     firstItem = false;
+        // } else {
+        //     stream << skip( 1 );
+        // }
 
-        const auto pair = theme_->get( key );
-        const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
+        // const auto pair = theme_->get( key );
+        // const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
 
-        stream << colorize( "#", theme_->secondary().variant );
-        stream << colorize( key, cols.color );
+        // stream << colorize( "#", theme_->secondary().variant );
+        // stream << colorize( key, cols.color );
 
-        if ( value.empty() ) {
-            continue;
-        }
+        // if ( value.empty() ) {
+        //     continue;
+        // }
 
-        stream << colorize( ":", theme_->secondary().variant );
+        // stream << colorize( ":", theme_->secondary().variant );
 
-        if ( value.is_primitive() ) {
-            stream << colorize( value.dump(), cols.variant );
-        } else {
-            stream << colorize( "…", cols.variant );
-        }
+        // if ( value.is_primitive() ) {
+        //     stream << colorize( value.dump(), cols.variant );
+        // } else {
+        //     stream << colorize( "…", cols.variant );
+        // }
     }
 
     return stream.str();

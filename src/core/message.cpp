@@ -19,8 +19,8 @@ Message::Message(
     const int line,
     const int level,
     const std::thread::id& threadId,
-    const nlohmann::json& object,
-    const nlohmann::json& tags ) :
+    const std::string& content,
+    const tags_t& tags ) :
     Message()
 {
     file_ = file;
@@ -28,8 +28,8 @@ Message::Message(
     line_ = line;
     level_ = level;
     threadId_ = std::hash<std::thread::id>{}( threadId );
-    content_ = object;
-    tags_ = filterTags( tags );
+    content_ = content;
+    tags_ = tags;
 
     //  convert absolute to single node relative path
 
@@ -58,10 +58,10 @@ std::string Message::info() const
    }
 
    std::stringstream info;
-   info << function_;
-   info << " - " << file_;
-   info << " l." << line_;
-   info << " [" << std::format( "{:x}", threadId_ & 0x0fffffff ) << "]";
+   info << "[" << function_;
+   info << "@" << file_;
+   info << ":" << line_;
+   info << "]  [" << std::format( "{:x}", threadId_ & 0x0fffffff ) << "]";
 
    return info.str();
 }
@@ -74,7 +74,7 @@ const std::vector<uint8_t>& Message::binary() const
         return binary_;
     }
 
-    binary_ = nlohmann::json::to_msgpack( *this );
+    binary_ = nlohmann::json::to_cbor( *this );
     return binary_;
 }
 
@@ -120,7 +120,7 @@ void from_json( const nlohmann::json& json, Message& message )
             message.level_ = json.at( "level" ).get<int>();
         }
 
-        message.content_ = json.at( "content" ).get<nlohmann::json>();
+        message.content_ = json.at( "content" ).get<std::string>();
         message.tags_ = json.at( "tags" ).get<tags_t>();
     }
     catch ( const std::exception& ) {

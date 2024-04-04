@@ -50,6 +50,9 @@ class Formatter
     private:
 
         std::string tagInfo( const tags_t& tags ) const;
+        std::string prettyPrimitive( const nlohmann::json& primitive );
+        std::string prettyArray( const nlohmann::json::array_t& array );
+        std::string prettyObject( const nlohmann::json::object_t& object );
 
         uint8_t indent_ = 1;
         ThemePtr theme_ = nullptr;

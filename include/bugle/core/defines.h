@@ -58,7 +58,7 @@
 //  fmt with variadic arguments
 
 #ifdef BUGLE_ENABLE
-    #define BUGLE_POST( message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, { __VA_ARGS__ } ) )
+    #define BUGLE_POST( message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, __VA_ARGS__ ) )
     #define BUGLE_POST_FORMAT( tags, message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, tags, __VA_ARGS__ ) )
     #define BUGLE_POST_FORMAT_NOTAG( message, ... ) ( BUGLE_INSTANCE.post( BUGLE_INFO_VALUES, message, {}, __VA_ARGS__ ) )
 #else

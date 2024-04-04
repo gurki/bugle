@@ -151,3 +151,20 @@ However, message indexing is not available from QML.
 Logging frameworks should of course be designed to be efficient and light-weight. The MC tries to do that, but also aims to provide a very flexible and powerful logging mechanism. As such, there is a tradeoff to be made.
 
 For data intensive logging tasks, consider writing a custom system independent of the MC.
+
+
+## Grammar
+https://www.bottlecaps.de/rr/ui
+
+```
+Letter ::= Timestamp Message Tags Location
+Timestamp ::= (Date 'T')? Time
+Message ::= string
+Tags ::= ('#' Key ( ':' ( Primitive | '...' ) )?)*
+Location ::= Source Thread
+Key ::= [a-zA-Z0-9_.]*
+Primitive ::= boolean | string | number
+Source ::= '[' Function '@' File ':' Line ']'
+Thread ::= '[' Hex Hex Hex Hex Hex Hex Hex ']'
+Hex ::= [0-9a-fA-F]
+```

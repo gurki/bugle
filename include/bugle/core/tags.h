@@ -5,7 +5,7 @@
 namespace bugle {
 
 
-typedef nlohmann::json::object_t tags_t;
+typedef nlohmann::json tags_t;
 tags_t filterTags( const nlohmann::json& tags );
 
 
