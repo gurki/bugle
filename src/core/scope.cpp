@@ -20,7 +20,7 @@ Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE ) :
     timestamp_( DateTime::now() ),
     threadId_( std::this_thread::get_id() )
 {
-    bgli.pushScope( *this );
+    BUGLE_INSTANCE.pushScope( *this );
 }
 #else
 Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE )
@@ -31,7 +31,7 @@ Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE )
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef BUGLE_ENABLE
 Scope::~Scope() {
-    bgli.popScope( *this );
+    BUGLE_INSTANCE.popScope( *this );
 }
 #else
 Scope::~Scope()

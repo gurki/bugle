@@ -12,6 +12,17 @@ add_subdirectory( dependencies )
 add_compile_definitions( BUGLE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/" )
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/" )
 
+option( BUGLE_ENABLE "" ON )
+option( BUGLE_LOWERCASE_DEFINES "" ON )
+
+if ( BUGLE_ENABLE )
+    add_compile_definitions( BUGLE_ENABLE )
+endif()
+
+if ( BUGLE_LOWERCASE_DEFINES )
+    add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
+endif()
+
 
 add_library( ${PROJECT_NAME} STATIC
     src/core/booleanfilter.cpp
@@ -24,6 +35,7 @@ add_library( ${PROJECT_NAME} STATIC
     src/format/formatter.cpp
     src/format/theme.cpp
     src/sinks/consolelogger.cpp
+    src/sinks/profiler.cpp
     # src/sinks/htmllogger.cpp
     # src/sinks/jsonlogger.cpp
     src/utility/datetime.cpp

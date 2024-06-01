@@ -6,17 +6,14 @@
 namespace bugle {
 
 
-class ConsoleLogger : public Observer
+struct Profiler : public Observer
 {
-    public:
-
-        ConsoleLogger();
-
-        virtual void notify( const Message& message );
+    virtual void notify( const Message& message ) override;
 
     private:
 
         std::mutex mutex_;  //  avoid mingling text by writing from multiple threads
+
 };
 
 

@@ -223,6 +223,8 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
 
         return stream.str();
     }
+
+    return {};
 }
 
 

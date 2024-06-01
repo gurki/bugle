@@ -8,11 +8,8 @@ project(
     LANGUAGES CXX
 )
 
-add_compile_definitions( BUGLE_ENABLE )
-add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
-
 add_executable( ${PROJECT_NAME}
-    main.cpp
+    profiling.cpp
 )
 
 target_include_directories( ${PROJECT_NAME} PUBLIC 
