@@ -7,7 +7,7 @@ namespace bugle {
 
 ////////////////////////////////////////////////////////////////////////////////
 Message::Message() :
-    datetime_( DateTime::now() ),
+    timestamp_( DateTime::now() ),
     threadId_( std::hash<std::thread::id>{}( std::this_thread::get_id() ))
 {}
 
@@ -53,17 +53,26 @@ Message::Message(
 ////////////////////////////////////////////////////////////////////////////////
 std::string Message::info() const
 {
-   if ( ! isIndexed() ) {
-       return {};
-   }
+    if ( ! isIndexed() ) {
+        return {};
+    }
 
-   std::stringstream info;
-   info << "[" << function_;
-   info << "@" << file_;
-   info << ":" << line_;
-   info << "]  [" << std::format( "{:x}", threadId_ & 0x0fffffff ) << "]";
+    static const bool useEmojis = false;
+    static const std::string locOpen = ( useEmojis ? "📁 " : "[" );
+    static const std::string locClose = ( useEmojis ? "" : "]" );
+    static const std::string thrOpen = ( useEmojis ? "🧵 " : "[" );
+    static const std::string thrClose = ( useEmojis ? "" : "]" );
 
-   return info.str();
+    std::stringstream info;
+    info << locOpen;
+    info << function_ << "@" << file_ << ":" << line_;
+    info << locClose;
+    info << " ";
+    info << thrOpen;
+    info << std::format( "{:x}", threadId_ & 0x0fffffff );
+    info << thrClose;
+
+    return info.str();
 }
 
 
@@ -109,7 +118,7 @@ void from_json( const nlohmann::json& json, Message& message )
 {
     try
     {
-        message.datetime_ = json.at( "timestamp" ).get<DateTime>();
+        message.timestamp_ = json.at( "timestamp" ).get<DateTime>();
         message.threadId_ = json.at( "thread" ).get<uint64_t>();
 
         if ( json.find( "file" ) != json.end() )

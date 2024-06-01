@@ -10,7 +10,7 @@ project(
 
 add_subdirectory( dependencies )
 add_compile_definitions( BUGLE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/" )
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/")
+set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/" )
 
 
 add_library( ${PROJECT_NAME} STATIC
@@ -61,16 +61,4 @@ install(
 )
 
 
-#-------------------------------------------------------------------------------
-
-add_compile_definitions( BUGLE_ENABLE )
-add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
-
-add_executable( ${PROJECT_NAME}-examples
-    examples/main.cpp
-)
-
-target_link_libraries( ${PROJECT_NAME}-examples
-    PRIVATE
-        ${PROJECT_NAME}::${PROJECT_NAME}
-)
+add_subdirectory( examples )

@@ -33,7 +33,7 @@ class Message
             const tags_t& tags = {}
         );
 
-        const DateTime& timestamp() const { return datetime_; }
+        const DateTime& timestamp() const { return timestamp_; }
         const uint64_t& threadId() const { return threadId_; }
         const std::string& file() const { return file_; }
         const std::string& function() const { return function_; }
@@ -54,7 +54,7 @@ class Message
 
    private:
 
-        DateTime datetime_ = {};
+        DateTime timestamp_ = {};
         uint64_t threadId_ = {};
         std::string file_ = {};
         std::string function_ = {};

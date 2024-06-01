@@ -4,6 +4,7 @@
 #include "bugle/format/theme.h"
 
 #include <sstream>
+#include <format>
 
 
 namespace bugle {
@@ -103,30 +104,56 @@ std::string Formatter::indent( const int level ) const
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::prettyPrimitive( const nlohmann::json& primitive )
+std::string Formatter::pretty( const nlohmann::json& tag ) const
 {
-    const auto cols = theme_->get( primitive );
+    if ( tag.is_string() ) 
+    {
+        const auto cols = theme_->get( tag );
 
-    return std::format( "{}{}",
-        colorize( "#", theme_->secondary().variant ),
-        colorize( primitive, cols.color )
-    );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::prettyArray( const nlohmann::json::array_t& array )
-{
-    for ( const auto& item : array ) {
-        const auto cols = theme_->get( item );
-
+        return std::format( "{}{}",
+            colorize( "#", theme_->secondary().variant ),
+            colorize( tag.get<std::string>(), cols.color )
+        );
     }
 
+    if ( tag.is_primitive() ) {
+        return {};
+    }
 
-    return std::format( "{}{}",
-        colorize( "#", theme_->secondary().variant ),
-        colorize( primitive, cols.color )
-    );
+    if ( tag.size() > 1 ) {
+        return colorize( "#…", theme_->secondary().variant );
+    }
+
+    if ( tag.is_object() ) 
+    {
+        std::stringstream stream;
+
+        const auto iter = tag.items().begin();
+        const auto& key = iter.key();
+        const auto& value = iter.value();
+
+        const auto pair = theme_->get( key );
+        const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
+
+        stream << colorize( "#", theme_->secondary().variant );
+        stream << colorize( key, cols.color );
+
+        if ( value.empty() ) {
+            return stream.str();
+        }
+
+        stream << colorize( ":", theme_->secondary().variant );
+
+        if ( value.is_primitive() ) {
+            stream << colorize( value.dump(), cols.variant );
+        } else {
+            stream << colorize( "…", cols.variant );
+        }
+
+        return stream.str();
+    }
+
+    return {};
 }
 
 
@@ -139,49 +166,63 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         return {};
     }
 
+    if ( tags.is_primitive() ) {
+        return pretty( tags );
+    }
+    
     std::stringstream stream;
+    bool firstItem = true;
+    
+    if ( tags.is_array() ) 
+    {        
+        for ( const auto& tag : tags )
+        {
+            if ( firstItem ) {
+                firstItem = false;
+            } else {
+                stream << skip( 1 );
+            }
 
-    if ( tags.is_primitive() )
-    {
-        const auto cols = theme_->get( tags );
-        stream << colorize( "#", theme_->secondary().variant );
-        stream << colorize( tags, cols.color );
+            stream << pretty( tag );
+        }
+
         return stream.str();
     }
 
-    bool firstItem = true;
-
-    for ( const auto& tag : tags )
+    if ( tags.is_object() ) 
     {
-        // const auto& key = tag.first;
-        // const auto& value = tag.second;
+        for ( const auto& item : tags.items() ) 
+        {
+            if ( firstItem ) {
+                firstItem = false;
+            } else {
+                stream << skip( 1 );
+            }
 
-        // if ( firstItem ) {
-        //     firstItem = false;
-        // } else {
-        //     stream << skip( 1 );
-        // }
+            const auto& key = item.key();
+            const auto& value = item.value();
 
-        // const auto pair = theme_->get( key );
-        // const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
+            const auto pair = theme_->get( key );
+            const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
 
-        // stream << colorize( "#", theme_->secondary().variant );
-        // stream << colorize( key, cols.color );
+            stream << colorize( "#", theme_->secondary().variant );
+            stream << colorize( key, cols.color );
 
-        // if ( value.empty() ) {
-        //     continue;
-        // }
+            if ( value.empty() ) {
+                return stream.str();
+            }
 
-        // stream << colorize( ":", theme_->secondary().variant );
+            stream << colorize( ":", theme_->secondary().variant );
 
-        // if ( value.is_primitive() ) {
-        //     stream << colorize( value.dump(), cols.variant );
-        // } else {
-        //     stream << colorize( "…", cols.variant );
-        // }
+            if ( value.is_primitive() ) {
+                stream << colorize( value.dump(), cols.variant );
+            } else {
+                stream << colorize( "…", cols.variant );
+            }
+        }
+
+        return stream.str();
     }
-
-    return stream.str();
 }
 
 
