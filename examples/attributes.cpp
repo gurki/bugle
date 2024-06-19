@@ -1,6 +1,4 @@
-#include <bugle/core/postoffice.h>
-#include <bugle/sinks/consolelogger.h>
-
+#include <bugle/bugle.h>
 #include <future>
 
 
@@ -9,7 +7,19 @@ int main( int argc, char* argv[] )
 {
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
-    po.addObserver( cl );
+    auto filter = std::make_shared<bugle::TagFilter>( bugle::TagFilter( { "info" }, { "debug" } ) );
+
+    //  (:?^\s*(:?([\w\d:<>=!.,-_]*)\s*)*\n?$)*
+    //  (\S*)
+
+    // bugle::Route route = R"(
+    //     file:main.cpp
+    //     tags:info,debug,!lambda,!scope
+    //     attributes:envelope.duration>10 level>=1
+    //     attributes:envelope
+    //     timestamp>2024-04-25T00:00:00 timestamp<2024-04-25T23:59:59
+    // )";
+    po.addObserver( cl, filter );
 
     bugle::Envelope scope( po, "main" );
 
@@ -21,7 +31,7 @@ int main( int argc, char* argv[] )
     auto fn = [&]( int val ) {
         bugle::Envelope scope( po, "lambda" );
         std::this_thread::sleep_for( std::chrono::milliseconds( val ) );
-        po.post( "yo, lambda", {}, {{ "value", val }} );
+        po.post( "yo, lambda", { "info" }, {{ "value", val }} );
     };
 
     fn( 100 );

@@ -1,4 +1,4 @@
-// #pragma once
+#pragma once
 
 // //  register module; convenience for checking mc availability
 

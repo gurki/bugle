@@ -53,7 +53,7 @@ void Envelope::close()
 
     open = false;
     closedAt = Timestamp::now();
-    attributes[ "envelope.durationUs" ] = durationUs();
+    attributes[ "envelope.duration" ] = durationUs();
     attributes[ "envelope.open" ] = false;
     office.get().pop( thread );
     office.get().post( message, tags, attributes, location );

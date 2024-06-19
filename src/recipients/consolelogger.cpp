@@ -1,4 +1,4 @@
-#include "bugle/sinks/consolelogger.h"
+#include "bugle/recipient/consolelogger.h"
 #include "bugle/format/colortable.h"
 
 #include <print>

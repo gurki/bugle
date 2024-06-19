@@ -7,12 +7,6 @@
 namespace bugle {
 
 
-template<template <typename... Args> class Container, typename Type, typename... Types>
-inline bool contains( const Container<Type, Types...>& container, const Type& item ) {
-    return container.find( item ) != container.end();
-}
-
-
 inline std::string repeat( const std::string& word, size_t times )
 {
     std::string result;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bugle/utility/timestamp.h"
-#include "bugle/core/tags.h"
+#include "bugle/core/types.h"
 
 #include <string>
 #include <thread>

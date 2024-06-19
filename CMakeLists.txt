@@ -25,18 +25,16 @@ endif()
 
 
 add_library( ${PROJECT_NAME} STATIC
-    src/core/booleanfilter.cpp
-    src/core/filteritem.cpp
+    src/filter/address.cpp
+    src/filter/route.cpp
+    src/filter/tagline.cpp
+    src/core/envelope.cpp
     src/core/letter.cpp
     src/core/postoffice.cpp
-    src/core/envelope.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
     src/format/theme.cpp
-    src/sinks/consolelogger.cpp
-    # src/sinks/profiler.cpp
-    # src/sinks/htmllogger.cpp
-    # src/sinks/jsonlogger.cpp
+    src/recipients/consolelogger.cpp
     src/utility/timestamp.cpp
     src/utility/utility.cpp
 )
@@ -54,7 +52,6 @@ target_include_directories( ${PROJECT_NAME}
 target_link_libraries( ${PROJECT_NAME}
     PUBLIC
         nlohmann_json
-        vivid
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )

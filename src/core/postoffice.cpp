@@ -80,7 +80,7 @@ void PostOffice::post( Letter&& letter )
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::post(
-    const std::string& message,
+    const std::string& letter,
     const tags_t& tags,
     const attributes_t& attributes,
     const std::source_location& location )
@@ -94,7 +94,7 @@ void PostOffice::post(
     }
 
     const int level = this->level( std::this_thread::get_id() );
-    post( { message, tags, attributes, location, level } );
+    post( { letter, tags, attributes, location, level } );
 }
 
 
@@ -144,7 +144,7 @@ void PostOffice::pop( const std::thread::id& thread )
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::addObserver(
     const RecipientRef& observer,
-    const std::string& filter )
+    const FilterPtr& filter )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -154,11 +154,11 @@ void PostOffice::addObserver(
 
     observers_.insert( observer );
 
-    if ( filter_.find( observer ) == filter_.end() ) {
-        filter_[ observer ] = BooleanFilter( filter );
-    } else {
-        filter_[ observer ].unite( filter );
-    }
+    // if ( filter_.contains( observer ) ) {
+    //     filter_[ observer ].unite( filter );
+    // } else {
+        filter_[ observer ] = filter;
+    // }
 }
 
 
@@ -189,13 +189,13 @@ void PostOffice::processQueue()
             });
         }
 
-        Letter message {};
+        Letter letter {};
 
         while ( ! letters_.empty() )
         {
             {
                 std::unique_lock lock( queueMutex_ );
-                message = std::move( letters_.front() );
+                letter = std::move( letters_.front() );
                 letters_.pop_front();
             }
 
@@ -216,18 +216,16 @@ void PostOffice::processQueue()
                 it = observers_.erase( it );
             }
 
-            const auto& filters = filter_;
-
             for ( auto& observerRef : observers_ )
             {
-                const auto& filter = filters.at( observerRef );
+                const auto& filter = filter_.at( observerRef );
 
-                if ( ! filter.passes( message.tags ) ) {
+                if ( ! filter->matches( letter ) ) {
                     continue;
                 }
 
                 auto observer = observerRef.lock();
-                observer->receive( message );
+                observer->receive( letter );
             };
         }
     }

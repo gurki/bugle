@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bugle/core/booleanfilter.h"
+#include "bugle/core/filter.h"
 #include "bugle/core/letter.h"
 #include "bugle/core/envelope.h"
 #include "bugle/utility/utility.h"  //  WeakPtrHash, WeakPtrEqual
@@ -21,10 +21,6 @@
 
 namespace bugle {
 
-
-class BooleanFilter;
-
-// using ScopeWrp = std::reference_wrapper<Envelope>;
 using RecipientRef = std::weak_ptr<class Recipient>;
 using PostOfficePtr = std::shared_ptr<class PostOffice>;
 using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
@@ -47,7 +43,7 @@ class PostOffice
 
         void addObserver(
             const RecipientRef& observer,
-            const std::string& filter = {}
+            const FilterPtr& filter = {}
         );
 
         void removeObserver( const RecipientRef& observer );
@@ -76,7 +72,7 @@ class PostOffice
 
         std::unordered_map<
             RecipientRef,
-            BooleanFilter,
+            FilterPtr,
             WeakPtrHash<Recipient>,
             WeakPtrEqual<Recipient>
         > filter_;

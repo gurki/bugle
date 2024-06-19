@@ -8,14 +8,9 @@ FetchContent_Declare( json
     GIT_TAG v3.11.3
 )
 
-FetchContent_Declare( vivid
-    GIT_REPOSITORY https://github.com/gurki/vivid.git
-    GIT_TAG master
-)
-
 FetchContent_Declare( Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG v3.5.3
 )
 
-FetchContent_MakeAvailable( json vivid Catch2 )
+FetchContent_MakeAvailable( json Catch2 )
