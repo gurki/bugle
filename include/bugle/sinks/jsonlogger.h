@@ -17,7 +17,7 @@
 
 //     public slots:
 
-//         virtual void notify( const Message& message );
+//         virtual void notify( const Letter& message );
 
 //     private:
 

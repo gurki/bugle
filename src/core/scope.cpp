@@ -5,38 +5,62 @@ namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Scope::Scope( BUGLE_INFO_DECLARE ) :
-    Scope( {}, BUGLE_INFO_NAMES )
-{}
-
-
-////////////////////////////////////////////////////////////////////////////////
-#ifdef BUGLE_ENABLE
-Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE ) :
-    file_( file ),
-    func_( func ),
-    line_( line ),
-    tags_( bugle::filterTags( tags ) ),
-    timestamp_( DateTime::now() ),
-    threadId_( std::this_thread::get_id() )
+Scope::Scope(
+    const std::reference_wrapper<PostOffice>& _office,
+    const std::string& _title,
+    const std::source_location& _location ) :
+    Letter( _title, { "scope" }, {}, _location ),
+    office( _office )
 {
-    BUGLE_INSTANCE.pushScope( *this );
-}
-#else
-Scope::Scope( const nlohmann::json& tags, BUGLE_INFO_DECLARE )
-{}
+#ifdef BUGLE_ENABLE
+    level = office.get().level( this->thread );
+
+    tags.insert( "open" );
+    office.get().post( message, tags, attributes, location );
+    tags.erase( "open" );
+
+    office.get().pushScope( this->thread );
 #endif
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef BUGLE_ENABLE
 Scope::~Scope() {
-    BUGLE_INSTANCE.popScope( *this );
-}
-#else
-Scope::~Scope()
-{}
+#ifdef BUGLE_ENABLE
+    close();
 #endif
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+uint64_t Scope::durationUs() const
+{
+    if ( open_ ) {
+        return timestamp.elapsedUs();
+    }
+
+    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end_ - timestamp );
+    return duration.count();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void Scope::close()
+{
+#ifdef BUGLE_ENABLE
+    if ( ! open_ ) {
+        return;
+    }
+
+    open_ = false;
+    end_ = Timestamp::now();
+    office.get().popScope( this->thread );
+
+    tags.insert( "close" );
+    office.get().post( message, tags, attributes, location );
+    tags.erase( "close" );
+#endif
+}
 
 
 }   //  ::bugle

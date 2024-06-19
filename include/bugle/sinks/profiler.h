@@ -8,7 +8,7 @@ namespace bugle {
 
 struct Profiler : public Observer
 {
-    virtual void notify( const Message& message ) override;
+    virtual void notify( const Letter& message ) override;
 
     private:
 

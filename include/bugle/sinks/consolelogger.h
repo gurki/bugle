@@ -14,7 +14,7 @@ class ConsoleLogger : public Observer
         ConsoleLogger();
 
         void setFormatter( const FormatterPtr& formatter );
-        virtual void notify( const Message& messagePtr );
+        virtual void notify( const Letter& messagePtr );
 
     private:
 

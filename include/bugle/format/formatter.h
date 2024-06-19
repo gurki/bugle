@@ -1,6 +1,7 @@
 #pragma once
 
-#include "bugle/core/message.h"
+#include "bugle/core/letter.h"
+
 #include <string>
 #include <memory>
 
@@ -19,11 +20,11 @@ class Formatter
 
         Formatter(
             const std::string& space = " ",
-            const std::string& spacer = "·",
+            const std::string& spacer = "··",
             const std::string& newline = "\n"
         );
 
-        virtual std::string format( const Message& message ) const;
+        virtual std::string format( const Letter& message ) const;
         virtual std::string beginColor( const uint8_t index ) const { return {}; }
         virtual std::string endColor() const { return {}; }
 

@@ -27,7 +27,7 @@ endif()
 add_library( ${PROJECT_NAME} STATIC
     src/core/booleanfilter.cpp
     src/core/filteritem.cpp
-    src/core/message.cpp
+    src/core/letter.cpp
     src/core/postoffice.cpp
     src/core/scope.cpp
     src/core/tags.cpp
@@ -35,10 +35,10 @@ add_library( ${PROJECT_NAME} STATIC
     src/format/formatter.cpp
     src/format/theme.cpp
     src/sinks/consolelogger.cpp
-    src/sinks/profiler.cpp
+    # src/sinks/profiler.cpp
     # src/sinks/htmllogger.cpp
     # src/sinks/jsonlogger.cpp
-    src/utility/datetime.cpp
+    src/utility/timestamp.cpp
     src/utility/utility.cpp
 )
 

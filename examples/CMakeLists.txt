@@ -9,13 +9,13 @@ project(
 )
 
 add_executable( ${PROJECT_NAME}
-    profiling.cpp
+    attributes.cpp
 )
 
-target_include_directories( ${PROJECT_NAME} PUBLIC 
+target_include_directories( ${PROJECT_NAME} PUBLIC
     include
 )
 
-target_link_libraries( ${PROJECT_NAME} PUBLIC 
-    bugle 
+target_link_libraries( ${PROJECT_NAME} PUBLIC
+    bugle
 )

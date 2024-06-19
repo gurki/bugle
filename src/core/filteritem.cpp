@@ -34,20 +34,21 @@ bool FilterItem::compare( const nlohmann::json& value ) const {
 ////////////////////////////////////////////////////////////////////////////////
 bool FilterItem::passes( const tags_t& tags ) const
 {
-    if ( empty() ) {
-        return true;
-    }
+    return true;
+    // if ( empty() ) {
+    //     return true;
+    // }
 
-    if ( tags.find( key_ ) == tags.end() ) {
-        return negate_;
-    }
+    // if ( tags.find( key_ ) == tags.end() ) {
+    //     return negate_;
+    // }
 
-    if ( value_.empty() ) {
-        //  implies empty comparator
-        return true;
-    }
+    // if ( value_.empty() ) {
+    //     //  implies empty comparator
+    //     return true;
+    // }
 
-    return compare( tags.at( key_ ) );
+    // return compare( tags.at( key_ ) );
 }
 
 

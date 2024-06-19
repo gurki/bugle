@@ -1,5 +1,5 @@
 #include "bugle/core/postoffice.h"
-#include "bugle/core/message.h"
+#include "bugle/core/letter.h"
 #include "bugle/core/observer.h"
 
 namespace bugle {
@@ -59,26 +59,85 @@ void PostOffice::flush()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void PostOffice::pushScope( Scope& scope )
+void PostOffice::post( Letter&& letter )
 {
 #ifdef MC_DISABLE_POST
     return;
 #endif
 
-    auto& stack = scopes_[ scope.threadId() ];
-    scope.setLevel( int( stack.size() ));
-    scopes_[ scope.threadId() ].push( scope );
+    if ( ! enabled_ ) {
+        return;
+    }
+
+    {
+        std::scoped_lock lock( queueMutex_ );
+        letters_.emplace_back( letter );
+    }
+
+    queueReady_.notify_one();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void PostOffice::popScope( const Scope& scope )
+void PostOffice::post(
+    const std::string& message,
+    const tags_t& tags,
+    const attributes_t& attributes,
+    const std::source_location& location )
 {
 #ifdef MC_DISABLE_POST
     return;
 #endif
 
-    scopes_[ scope.threadId() ].pop();
+    if ( ! enabled_ ) {
+        return;
+    }
+
+    const int level = this->level( std::this_thread::get_id() );
+    post( { message, tags, attributes, location, level } );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+int PostOffice::level( const std::thread::id& thread )
+{
+    if ( ! levels_.contains( thread ) ) {
+        return 0;
+    }
+
+    return levels_.at( thread );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::pushScope( const std::thread::id& thread )
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
+    if ( ! levels_.contains( thread ) ) {
+        levels_[ thread ] = 1;
+        return;
+    }
+
+    levels_[ thread ]++;
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::popScope( const std::thread::id& thread )
+{
+#ifdef MC_DISABLE_POST
+    return;
+#endif
+
+    if ( ! levels_.contains( thread ) ) {
+        return;
+    }
+
+    levels_[ thread ]--;
 }
 
 
@@ -125,19 +184,19 @@ void PostOffice::processQueue()
         {
             std::unique_lock lock( queueMutex_ );
 
-            queueReady_.wait( lock, [=](){
-                return ! messages_.empty() || shouldExit_ ;
+            queueReady_.wait( lock, [ this ](){
+                return ! letters_.empty() || shouldExit_ ;
             });
         }
 
-        Message message {};
+        Letter message {};
 
-        while ( ! messages_.empty() )
+        while ( ! letters_.empty() )
         {
             {
                 std::unique_lock lock( queueMutex_ );
-                message = std::move( messages_.front() );
-                messages_.pop_front();
+                message = std::move( letters_.front() );
+                letters_.pop_front();
             }
 
             //  lock to avoid observer insertion from another thread during iteration.
@@ -163,7 +222,7 @@ void PostOffice::processQueue()
             {
                 const auto& filter = filters.at( observerRef );
 
-                if ( ! filter.passes( message.tags() ) ) {
+                if ( ! filter.passes( message.tags ) ) {
                     continue;
                 }
 

@@ -37,7 +37,7 @@
 
 
 // ////////////////////////////////////////////////////////////////////////////////
-// void JsonLogger::notify( const Message& message )
+// void JsonLogger::notify( const Letter& message )
 // {
 //     if ( ! file_.isOpen() ) {
 //         return;

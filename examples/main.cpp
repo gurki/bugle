@@ -211,13 +211,13 @@ void unitTests()
 
     //  datetime
 
-    auto dt = DateTime::now();
-    std::cout << dt.info( DateTime::Microseconds ) << std::endl;
+    auto dt = Timestamp::now();
+    std::cout << dt.info( Timestamp::Microseconds ) << std::endl;
 
     nlohmann::json jdt = dt;
-    DateTime dt2 = jdt;
+    Timestamp dt2 = jdt;
 
-    std::cout << dt2.info( DateTime::Microseconds ) << std::endl;
+    std::cout << dt2.info( Timestamp::Microseconds ) << std::endl;
     std::cout << std::endl;
 
 

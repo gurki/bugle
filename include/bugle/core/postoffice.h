@@ -1,8 +1,7 @@
 #pragma once
 
 #include "bugle/core/booleanfilter.h"
-#include "bugle/core/message.h"
-#include "bugle/core/defines.h"  //  MC_INFO, ...
+#include "bugle/core/letter.h"
 #include "bugle/core/scope.h"
 #include "bugle/utility/utility.h"  //  WeakPtrHash, WeakPtrEqual
 
@@ -25,7 +24,7 @@ namespace bugle {
 
 class BooleanFilter;
 
-using ScopeWrp = std::reference_wrapper<Scope>;
+// using ScopeWrp = std::reference_wrapper<Scope>;
 using ObserverRef = std::weak_ptr<class Observer>;
 using PostOfficePtr = std::shared_ptr<class PostOffice>;
 using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
@@ -42,8 +41,9 @@ class PostOffice
         void disable() { enabled_ = false; }
         void flush();
 
-        void pushScope( Scope& scope );
-        void popScope( const Scope& scope );
+        int level( const std::thread::id& );
+        void pushScope( const std::thread::id& );
+        void popScope( const std::thread::id& );
 
         void addObserver(
             const ObserverRef& observer,
@@ -52,25 +52,19 @@ class PostOffice
 
         void removeObserver( const ObserverRef& observer );
 
-        // void post(
-        //     const nlohmann::json& content,
-        //     BUGLE_INFO_DECLARE_DEFAULT,
-        //     const nlohmann::json& tags = {}
-        // );
-
-        template<typename... Args>
+        void post( Letter&& );
         void post(
-            BUGLE_INFO_DECLARE,
-            std::format_string<Args...> message,
+            const std::string& message = {},
             const tags_t& tags = {},
-            Args... args
+            const attributes_t& attributes = {},
+            const std::source_location& location = std::source_location::current()
         );
 
         static PostOffice& instance();
 
     private:
 
-        [[ noreturn ]] void processQueue();
+        void processQueue();
 
         std::atomic_bool enabled_ = true;
 
@@ -87,53 +81,17 @@ class PostOffice
             WeakPtrEqual<Observer>
         > filter_;
 
-        std::unordered_map<
-            std::thread::id,
-            std::stack<ScopeWrp>
-        > scopes_;
+        std::unordered_map<std::thread::id, int> levels_;
 
         std::thread workerThread_;
         std::shared_mutex observerMutex_;
         std::mutex queueMutex_;
-        std::deque<Message> messages_;
+        std::deque<Letter> letters_;
         std::condition_variable queueReady_;
         std::atomic_bool shouldExit_ = false;
 
         static PostOfficeUPtr instance_;
 };
-
-
-////////////////////////////////////////////////////////////////////////////////
-template<typename... Args>
-void PostOffice::post(
-    BUGLE_INFO_DECLARE,
-    std::format_string<Args...> message,
-    const tags_t& tags,
-    Args... args )
-{
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
-    if ( ! enabled_ ) {
-        return;
-    }
-
-    auto tid = std::this_thread::get_id();
-    auto level = -1;
-
-    if ( scopes_.find( tid ) != scopes_.end() ) {
-        level = int( scopes_[ tid ].size() );
-    }
-
-    {
-        const std::string content = std::format( message, std::forward<Args>(args)... );
-        std::unique_lock lock( queueMutex_ );
-        messages_.push_back( { file, func, line, level, tid, content, tags } );
-    }
-
-    queueReady_.notify_one();
-}
 
 
 }   //  ::bugle
