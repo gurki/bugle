@@ -182,7 +182,7 @@
 
 
 // ////////////////////////////////////////////////////////////////////////////////
-// void HtmlLogger::notify( const Letter& message )
+// void HtmlLogger::receive( const Letter& message )
 // {
 //     if ( ! fout_.isWritable() ) {
 //         return;

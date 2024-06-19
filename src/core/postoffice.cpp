@@ -1,6 +1,6 @@
 #include "bugle/core/postoffice.h"
 #include "bugle/core/letter.h"
-#include "bugle/core/observer.h"
+#include "bugle/core/recipient.h"
 
 namespace bugle {
 
@@ -143,7 +143,7 @@ void PostOffice::pop( const std::thread::id& thread )
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::addObserver(
-    const ObserverRef& observer,
+    const RecipientRef& observer,
     const std::string& filter )
 {
 #ifdef MC_DISABLE_POST
@@ -163,7 +163,7 @@ void PostOffice::addObserver(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void PostOffice::removeObserver( const ObserverRef& observer )
+void PostOffice::removeObserver( const RecipientRef& observer )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -227,7 +227,7 @@ void PostOffice::processQueue()
                 }
 
                 auto observer = observerRef.lock();
-                observer->notify( message );
+                observer->receive( message );
             };
         }
     }

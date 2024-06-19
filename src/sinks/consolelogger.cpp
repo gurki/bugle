@@ -22,7 +22,7 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::notify( const Letter& message )
+void ConsoleLogger::receive( const Letter& message )
 {
     std::unique_lock lock( mutex_ );
 

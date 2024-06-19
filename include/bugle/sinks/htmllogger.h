@@ -7,7 +7,7 @@
 // #include <QTextStream>
 
 
-// class HtmlLogger : public QObject, public Observer
+// class HtmlLogger : public QObject, public Recipient
 // {
 //     Q_OBJECT
 
@@ -23,7 +23,7 @@
 
 //     public slots:
 
-//         virtual void notify( const Letter& message );
+//         virtual void receive( const Letter& message );
 
 //     private:
 

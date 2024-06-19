@@ -1,7 +1,6 @@
 #include <bugle/core/postoffice.h>
 #include <bugle/sinks/consolelogger.h>
 
-#include <format>
 #include <future>
 
 

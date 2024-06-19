@@ -1,20 +1,20 @@
 #pragma once
 
-#include "bugle/core/observer.h"
+#include "bugle/core/recipient.h"
 #include "bugle/format/formatter.h"
 #include <mutex>
 
 namespace bugle {
 
 
-class ConsoleLogger : public Observer
+class ConsoleLogger : public Recipient
 {
     public:
 
         ConsoleLogger();
 
         void setFormatter( const FormatterPtr& formatter );
-        virtual void notify( const Letter& messagePtr );
+        virtual void receive( const Letter& messagePtr );
 
     private:
 

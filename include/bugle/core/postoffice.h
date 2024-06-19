@@ -25,7 +25,7 @@ namespace bugle {
 class BooleanFilter;
 
 // using ScopeWrp = std::reference_wrapper<Envelope>;
-using ObserverRef = std::weak_ptr<class Observer>;
+using RecipientRef = std::weak_ptr<class Recipient>;
 using PostOfficePtr = std::shared_ptr<class PostOffice>;
 using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
 
@@ -46,11 +46,11 @@ class PostOffice
         void pop( const std::thread::id& );
 
         void addObserver(
-            const ObserverRef& observer,
+            const RecipientRef& observer,
             const std::string& filter = {}
         );
 
-        void removeObserver( const ObserverRef& observer );
+        void removeObserver( const RecipientRef& observer );
 
         void post( Letter&& );
         void post(
@@ -69,16 +69,16 @@ class PostOffice
         std::atomic_bool enabled_ = true;
 
         std::unordered_set<
-            ObserverRef,
-            WeakPtrHash<Observer>,
-            WeakPtrEqual<Observer>
+            RecipientRef,
+            WeakPtrHash<Recipient>,
+            WeakPtrEqual<Recipient>
         > observers_;
 
         std::unordered_map<
-            ObserverRef,
+            RecipientRef,
             BooleanFilter,
-            WeakPtrHash<Observer>,
-            WeakPtrEqual<Observer>
+            WeakPtrHash<Recipient>,
+            WeakPtrEqual<Recipient>
         > filter_;
 
         std::unordered_map<std::thread::id, int> levels_;

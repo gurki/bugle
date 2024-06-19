@@ -5,7 +5,7 @@
 namespace bugle {
 
 
-void Profiler::notify( const Letter& message ) {
+void Profiler::receive( const Letter& message ) {
     std::scoped_lock lock( mutex_ );
     std::println( "{}", message.locationInfo() );
 }

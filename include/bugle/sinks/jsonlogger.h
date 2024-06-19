@@ -4,7 +4,7 @@
 // #include <QFile>
 
 
-// class JsonLogger : public QObject, public Observer
+// class JsonLogger : public QObject, public Recipient
 // {
 //     Q_OBJECT
 
@@ -17,7 +17,7 @@
 
 //     public slots:
 
-//         virtual void notify( const Letter& message );
+//         virtual void receive( const Letter& message );
 
 //     private:
 

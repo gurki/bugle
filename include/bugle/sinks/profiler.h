@@ -6,9 +6,9 @@
 namespace bugle {
 
 
-struct Profiler : public Observer
+struct Profiler : public Recipient
 {
-    virtual void notify( const Letter& message ) override;
+    virtual void receive( const Letter& message ) override;
 
     private:
 
