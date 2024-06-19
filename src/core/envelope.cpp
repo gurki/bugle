@@ -1,5 +1,6 @@
 #include "bugle/core/envelope.h"
 #include "bugle/core/postoffice.h"
+#include "bugle/format/duration.h"
 
 namespace bugle {
 
@@ -9,15 +10,20 @@ Envelope::Envelope(
     const std::reference_wrapper<PostOffice>& _office,
     const std::string& _title,
     const std::source_location& _location ) :
-    Letter( _title, { "envelope" }, {}, _location ),
     office( _office ),
-    open( true )
+    title( _title ),
+    location( _location ),
+    thread( std::this_thread::get_id() ),
+    open( true ),
+    openedAt( Timestamp::now() )
 {
 #ifdef BUGLE_ENABLE
-    level = office.get().level( thread );
-
-    attributes[ "envelope.open" ] = true;
-    office.get().post( message, tags, attributes, location );
+    office.get().post(
+        title,
+        { "envelope" },
+        { { "open", true } },
+        location
+    );
     office.get().push( thread );
 #endif
 }
@@ -35,10 +41,10 @@ Envelope::~Envelope() {
 uint64_t Envelope::durationUs() const
 {
     if ( open ) {
-        return timestamp.elapsedUs();
+        return openedAt.elapsedUs();
     }
 
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( closedAt - timestamp );
+    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( closedAt - openedAt );
     return duration.count();
 }
 
@@ -53,10 +59,22 @@ void Envelope::close()
 
     open = false;
     closedAt = Timestamp::now();
-    attributes[ "envelope.duration" ] = durationUs();
-    attributes[ "envelope.open" ] = false;
+
+    const auto duration = durationUs();
+    const std::string dur = durationInfo( duration );
+
+    attributes_t attributes = {
+        { "duration", duration },
+        { "open", false }
+    };
+
     office.get().pop( thread );
-    office.get().post( message, tags, attributes, location );
+    office.get().post(
+        title,
+        { "envelope" },
+        attributes,
+        location
+    );
 #endif
 }
 

@@ -3,3 +3,4 @@
 #include "format/colortable.h"
 #include "format/formatter.h"
 #include "format/theme.h"
+#include "format/duration.h"

@@ -1,16 +1,22 @@
 #pragma once
 
-#include "bugle/core/letter.h"
+#include "bugle/utility/timestamp.h"
+#include <source_location>
+#include <thread>
 
 namespace bugle {
 
 class PostOffice;
 
 
-struct Envelope : public Letter
+struct Envelope
 {
     const std::reference_wrapper<PostOffice> office;
+    std::string title;
+    std::source_location location;
+    std::thread::id thread;
     bool open;
+    Timestamp openedAt;
     Timestamp closedAt;
 
     Envelope(

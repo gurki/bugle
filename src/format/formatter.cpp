@@ -5,7 +5,8 @@
 
 #include <sstream>
 #include <format>
-
+#include <regex>
+#include <print>
 
 namespace bugle {
 
@@ -83,7 +84,23 @@ std::string Formatter::format( const Letter& message ) const
 
     //  meta
 
-    ss << colorize( message.locationInfo(), theme_->secondary().variant );
+    static const std::regex re( R"((.* )?(.*)(\(.*\))(::<lambda(.*)>)?)" );
+    const std::string fn = message.function();
+    std::smatch match;
+    std::regex_match( fn, match, re );
+
+    std::string name = match[ 2 ].str();
+
+    if ( match[ 4 ].matched ) {
+        name += "::lambda";
+    }
+
+    const auto text = std::format( "{}:{}", message.fileInfo(), message.line() );
+    // const auto link = std::format( "{}:{}", message.file(), message.line() );
+    // const auto hyperlink = std::format( "\e]8;;{}\e\\{}\e]8;;\e\\", link, text );
+    const auto location = std::format( "[{} {}]", name, text );
+
+    ss << colorize( location, theme_->secondary().variant );
     return ss.str();
 }
 

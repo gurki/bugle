@@ -1,5 +1,6 @@
 #include "bugle/recipient/consolelogger.h"
 #include "bugle/format/colortable.h"
+#include "bugle/format/duration.h"
 
 #include <print>
 #include <iostream>
@@ -22,7 +23,7 @@ void ConsoleLogger::setFormatter( const FormatterPtr& formatter ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::receive( const Letter& message )
+void ConsoleLogger::receive( const Letter& letter )
 {
     std::unique_lock lock( mutex_ );
 
@@ -30,7 +31,21 @@ void ConsoleLogger::receive( const Letter& message )
         return;
     }
 
-    std::println( "{}", formatter_->format( message ) );
+    if ( ! letter.tags.contains( "envelope" ) ) {
+        std::println( "{}", formatter_->format( letter ) );
+        return;
+    }
+
+    Letter envelope = letter;
+
+    if ( letter.attributes.at( "open" ) ) {
+        envelope.message = std::format( "{} opened ...", letter.message );
+    } else {
+        const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
+        envelope.message = std::format( "{} closed ({})", letter.message, duration );
+    }
+
+    std::println( "{}", formatter_->format( envelope ) );
 }
 
 

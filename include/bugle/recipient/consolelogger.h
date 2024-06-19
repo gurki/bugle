@@ -13,8 +13,8 @@ class ConsoleLogger : public Recipient
 
         ConsoleLogger();
 
-        void setFormatter( const FormatterPtr& formatter );
-        virtual void receive( const Letter& messagePtr );
+        void setFormatter( const FormatterPtr& );
+        virtual void receive( const Letter& );
 
     private:
 

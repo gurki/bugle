@@ -31,7 +31,7 @@ int main( int argc, char* argv[] )
     auto fn = [&]( int val, const std::string& name ) -> float {
         bugle::Envelope scope( po, name );
         std::this_thread::sleep_for( std::chrono::milliseconds( val ) );
-        po.post( "yo, we need to go deeper", { "info" }, {{ "value", val }} );
+        po.post( "go deeper", { "info" }, {{ "value", val }} );
         return -1.f;
     };
 
@@ -43,3 +43,20 @@ int main( int argc, char* argv[] )
     scope.close();
     std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
 }
+
+
+/*
+
+GCC
+
+21:56:54.250 [8ee1]  main opened ...  #envelope  [int main(int, char**)@attributes.cpp:24.39]
+21:56:54.250 [8ee1]  ··hallo  #debug #info  [int main(int, char**)@attributes.cpp:26.12]
+21:56:54.250 [8ee1]  ··sync opened ...  #envelope  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:32.41]
+21:56:54.355 [8ee1]  ····yo, we need to go deeper  #info  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:34.16]
+21:56:54.355 [8ee1]  ··sync closed (105 ms)  #envelope  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:32.41]
+21:56:54.355 [562c]  async opened ...  #envelope  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:32.41]
+21:56:54.560 [562c]  ··yo, we need to go deeper  #info  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:34.16]
+21:56:54.560 [562c]  async closed (205 ms)  #envelope  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:32.41]
+21:56:54.560 [8ee1]  main closed (310 ms)  #envelope  [int main(int, char**)@attributes.cpp:24.39]
+
+*/
