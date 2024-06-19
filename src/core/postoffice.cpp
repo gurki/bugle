@@ -154,6 +154,7 @@ void PostOffice::addObserver(
 
     observers_.insert( observer );
 
+    if ( ! filter ) return;
     // if ( filter_.contains( observer ) ) {
     //     filter_[ observer ].unite( filter );
     // } else {
@@ -218,10 +219,13 @@ void PostOffice::processQueue()
 
             for ( auto& observerRef : observers_ )
             {
-                const auto& filter = filter_.at( observerRef );
+                if ( filter_.contains( observerRef ) )
+                {
+                    const auto& filter = filter_.at( observerRef );
 
-                if ( ! filter->matches( letter ) ) {
-                    continue;
+                    if ( ! filter->matches( letter ) ) {
+                        continue;
+                    }
                 }
 
                 auto observer = observerRef.lock();

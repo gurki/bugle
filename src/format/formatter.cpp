@@ -73,6 +73,14 @@ std::string Formatter::format( const Letter& message ) const
         ss << tinfo << skip( 2 );
     }
 
+    // //  attributes
+
+    // const std::string ainfo = attributeInfo( message.attributes );
+
+    // if ( ! ainfo.empty() ) {
+    //     ss << ainfo << skip( 2 );
+    // }
+
     //  meta
 
     ss << colorize( message.locationInfo(), theme_->secondary().variant );
@@ -184,6 +192,49 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
         }
 
         stream << pretty( tag );
+    }
+
+    return stream.str();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::attributeInfo( const attributes_t& attributes ) const
+{
+    static const size_t maxSize = 24;
+
+    if ( attributes.empty() ) {
+        return {};
+    }
+
+    std::stringstream stream;
+    bool firstItem = true;
+
+    for ( const auto& [ key, value ] : attributes )
+    {
+        if ( firstItem ) {
+            firstItem = false;
+        } else {
+            stream << skip( 1 );
+        }
+
+        const auto pair = theme_->get( key );
+        const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
+
+        // stream << colorize( "#", theme_->secondary().variant );
+        stream << colorize( key, cols.color );
+
+        if ( value.empty() ) {
+            continue;
+        }
+
+        stream << colorize( ":", theme_->secondary().variant );
+
+        if ( value.is_primitive() ) {
+            stream << colorize( value.dump(), cols.variant );
+        } else {
+            stream << colorize( "…", cols.variant );
+        }
     }
 
     return stream.str();

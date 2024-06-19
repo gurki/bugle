@@ -25,12 +25,12 @@ endif()
 
 
 add_library( ${PROJECT_NAME} STATIC
-    src/filter/address.cpp
-    src/filter/route.cpp
-    src/filter/tagline.cpp
     src/core/envelope.cpp
     src/core/letter.cpp
     src/core/postoffice.cpp
+    src/filter/address.cpp
+    src/filter/route.cpp
+    src/filter/tagfilter.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
     src/format/theme.cpp

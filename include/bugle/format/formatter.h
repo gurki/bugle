@@ -51,6 +51,7 @@ class Formatter
     private:
 
         std::string tagInfo( const tags_t& tags ) const;
+        std::string attributeInfo( const attributes_t& attributes ) const;
         std::string pretty( const nlohmann::json& primitive ) const;
 
         uint8_t indent_ = 1;
