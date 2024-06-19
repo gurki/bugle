@@ -110,7 +110,7 @@ int PostOffice::level( const std::thread::id& thread )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void PostOffice::pushScope( const std::thread::id& thread )
+void PostOffice::push( const std::thread::id& thread )
 {
 #ifdef MC_DISABLE_POST
     return;
@@ -127,7 +127,7 @@ void PostOffice::pushScope( const std::thread::id& thread )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void PostOffice::popScope( const std::thread::id& thread )
+void PostOffice::pop( const std::thread::id& thread )
 {
 #ifdef MC_DISABLE_POST
     return;

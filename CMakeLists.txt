@@ -29,8 +29,7 @@ add_library( ${PROJECT_NAME} STATIC
     src/core/filteritem.cpp
     src/core/letter.cpp
     src/core/postoffice.cpp
-    src/core/scope.cpp
-    src/core/tags.cpp
+    src/core/envelope.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
     src/format/theme.cpp

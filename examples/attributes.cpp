@@ -12,7 +12,7 @@ int main( int argc, char* argv[] )
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     po.addObserver( cl );
 
-    bugle::Scope scope( po, "main" );
+    bugle::Envelope scope( po, "main" );
 
     po.post( "hallo", { "info", "debug" }, {
         { "value", 5 },
@@ -20,7 +20,7 @@ int main( int argc, char* argv[] )
     });
 
     auto fn = [&]( int val ) {
-        bugle::Scope scope( po, "lambda" );
+        bugle::Envelope scope( po, "lambda" );
         std::this_thread::sleep_for( std::chrono::milliseconds( val ) );
         po.post( "yo, lambda", {}, {{ "value", val }} );
     };

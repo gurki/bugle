@@ -1,31 +1,30 @@
-#include "bugle/core/scope.h"
+#include "bugle/core/envelope.h"
 #include "bugle/core/postoffice.h"
 
 namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Scope::Scope(
+Envelope::Envelope(
     const std::reference_wrapper<PostOffice>& _office,
     const std::string& _title,
     const std::source_location& _location ) :
-    Letter( _title, { "scope" }, {}, _location ),
-    office( _office )
+    Letter( _title, { "envelope" }, {}, _location ),
+    office( _office ),
+    open( true )
 {
 #ifdef BUGLE_ENABLE
-    level = office.get().level( this->thread );
+    level = office.get().level( thread );
 
-    tags.insert( "open" );
+    attributes[ "envelope.open" ] = true;
     office.get().post( message, tags, attributes, location );
-    tags.erase( "open" );
-
-    office.get().pushScope( this->thread );
+    office.get().push( thread );
 #endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-Scope::~Scope() {
+Envelope::~Envelope() {
 #ifdef BUGLE_ENABLE
     close();
 #endif
@@ -33,32 +32,31 @@ Scope::~Scope() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t Scope::durationUs() const
+uint64_t Envelope::durationUs() const
 {
-    if ( open_ ) {
+    if ( open ) {
         return timestamp.elapsedUs();
     }
 
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end_ - timestamp );
+    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( closedAt - timestamp );
     return duration.count();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void Scope::close()
+void Envelope::close()
 {
 #ifdef BUGLE_ENABLE
-    if ( ! open_ ) {
+    if ( ! open ) {
         return;
     }
 
-    open_ = false;
-    end_ = Timestamp::now();
-    office.get().popScope( this->thread );
-
-    tags.insert( "close" );
+    open = false;
+    closedAt = Timestamp::now();
+    attributes[ "envelope.durationUs" ] = durationUs();
+    attributes[ "envelope.open" ] = false;
+    office.get().pop( thread );
     office.get().post( message, tags, attributes, location );
-    tags.erase( "close" );
 #endif
 }
 

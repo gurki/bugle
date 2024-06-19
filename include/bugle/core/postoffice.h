@@ -2,7 +2,7 @@
 
 #include "bugle/core/booleanfilter.h"
 #include "bugle/core/letter.h"
-#include "bugle/core/scope.h"
+#include "bugle/core/envelope.h"
 #include "bugle/utility/utility.h"  //  WeakPtrHash, WeakPtrEqual
 
 #include <nlohmann/json.hpp>
@@ -24,7 +24,7 @@ namespace bugle {
 
 class BooleanFilter;
 
-// using ScopeWrp = std::reference_wrapper<Scope>;
+// using ScopeWrp = std::reference_wrapper<Envelope>;
 using ObserverRef = std::weak_ptr<class Observer>;
 using PostOfficePtr = std::shared_ptr<class PostOffice>;
 using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
@@ -42,8 +42,8 @@ class PostOffice
         void flush();
 
         int level( const std::thread::id& );
-        void pushScope( const std::thread::id& );
-        void popScope( const std::thread::id& );
+        void push( const std::thread::id& );
+        void pop( const std::thread::id& );
 
         void addObserver(
             const ObserverRef& observer,
