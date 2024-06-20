@@ -36,6 +36,7 @@ add_library( ${PROJECT_NAME} STATIC
     src/format/theme.cpp
     src/recipients/consolelogger.cpp
     src/recipients/jsonlogger.cpp
+    src/utility/systeminfo.cpp
     src/utility/timestamp.cpp
     src/utility/utility.cpp
 )
@@ -81,12 +82,6 @@ target_compile_definitions( ${PROJECT_NAME}
         BUGLE_VERSION=\"${PROJECT_VERSION}\"
         BUGLE_COMMIT=\"${BUGLE_COMMIT}\"
 )
-
-# Generate the header file
-file( WRITE "${CMAKE_BINARY_DIR}/version.h" "#pragma once\n\n")
-file( APPEND "${CMAKE_BINARY_DIR}/version.h" "#define BUGLE_VERSION \"${PROJECT_VERSION}\"\n")
-file( APPEND "${CMAKE_BINARY_DIR}/version.h" "#define BUGLE_COMMIT \"${BUGLE_COMMIT}\"\n")
-
 
 
 add_subdirectory( examples )
