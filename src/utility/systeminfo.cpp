@@ -1,13 +1,8 @@
 #include "bugle/utility/systeminfo.h"
 
-#include <chrono>
 #include <cstdio>
-#include <cstdlib>
+#include <chrono>
 #include <format>
-#include <iostream>
-#include <string>
-#include <thread>
-#include <vector>
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
@@ -30,7 +25,9 @@
 namespace bugle {
 
 
-uint64_t get_free_ram() {
+////////////////////////////////////////////////////////////////////////////////
+uint64_t get_free_ram()
+{
 #ifdef _WIN32
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
@@ -67,7 +64,10 @@ uint64_t get_free_ram() {
 #endif
 }
 
-uint64_t get_total_ram() {
+
+////////////////////////////////////////////////////////////////////////////////
+uint64_t get_total_ram()
+{
 #ifdef _WIN32
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
@@ -97,72 +97,9 @@ uint64_t get_total_ram() {
 }
 
 
-
-int get_logical_cores() {
-#ifdef _WIN32
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
-#elif defined(__linux__)
-    return sysconf(_SC_NPROCESSORS_ONLN);
-#elif defined(__APPLE__)
-    int nm[2];
-    size_t len = 4;
-    uint32_t count;
-
-    nm[0] = CTL_HW;
-    nm[1] = HW_AVAILCPU;
-    sysctl(nm, 2, &count, &len, NULL, 0);
-
-    if(count < 1) {
-        nm[1] = HW_NCPU;
-        sysctl(nm, 2, &count, &len, NULL, 0);
-        if(count < 1) { count = 1; }
-    }
-    return count;
-#else
-    return -1; // Unsupported platform
-#endif
-}
-
-int get_physical_cores() {
-#ifdef _WIN32
-    DWORD length = 0;
-    GetLogicalProcessorInformation(nullptr, &length);
-    std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer(length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
-    GetLogicalProcessorInformation(buffer.data(), &length);
-
-    int physical_cores = 0;
-    for (const auto& info : buffer) {
-        if (info.Relationship == RelationProcessorCore) {
-            physical_cores++;
-        }
-    }
-    return physical_cores;
-#elif defined(__linux__)
-    std::ifstream cpuinfo("/proc/cpuinfo");
-    std::string line;
-    int physical_cores = 0;
-    while (getline(cpuinfo, line)) {
-        if (line.find("cpu cores") != std::string::npos) {
-            physical_cores = std::stoi(line.substr(line.find(":") + 2));
-            break;
-        }
-    }
-    cpuinfo.close();
-    return physical_cores * (get_logical_cores() / std::thread::hardware_concurrency());
-#elif defined(__APPLE__)
-    int physical_cores;
-    size_t len = sizeof(physical_cores);
-    sysctlbyname("hw.physicalcpu", &physical_cores, &len, NULL, 0);
-    return physical_cores;
-#else
-    return -1; // Unsupported platform
-#endif
-}
-
-
-std::string get_os_version() {
+////////////////////////////////////////////////////////////////////////////////
+std::string get_os_version()
+{
     std::string os_version;
 
 #ifdef _WIN32
@@ -224,142 +161,10 @@ std::string get_os_version() {
     return os_version;
 }
 
-std::string get_kernel_version() {
-    std::string kernel_version;
 
-#ifdef _WIN32
-    OSVERSIONINFOEX os_info;
-    ZeroMemory(&os_info, sizeof(OSVERSIONINFOEX));
-    os_info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-    if (GetVersionEx((OSVERSIONINFO*)&os_info)) {
-        kernel_version = "Windows " + std::to_string(os_info.dwMajorVersion) + "." +
-                         std::to_string(os_info.dwMinorVersion) + " (Build " +
-                         std::to_string(os_info.dwBuildNumber) + ")";
-    } else {
-        kernel_version = "Failed to get Windows version";
-    }
-#elif defined(__linux__) || defined(__APPLE__)
-    struct utsname buffer;
-
-    if (uname(&buffer) == 0) {
-        kernel_version = buffer.sysname;
-        kernel_version += " ";
-        kernel_version += buffer.release;
-    } else {
-        kernel_version = "Failed to get Unix-like OS version";
-    }
-#else
-    kernel_version = "Unsupported platform";
-#endif
-
-    return kernel_version;
-}
-
-
-struct compiler_info {
-    std::string compiler_name;
-    std::string compiler_version;
-};
-
-
-compiler_info get_compiler_info() {
-    std::string compiler_name;
-    std::string compiler_version;
-#ifdef _MSC_VER
-    compiler_name = "Microsoft Visual Studio";
-    compiler_version = std::to_string(_MSC_VER);
-#elif defined(__clang__)
-    compiler_name = "Clang/LLVM";
-    compiler_version = std::to_string(__clang_major__) + "." +
-                       std::to_string(__clang_minor__) + "." +
-                       std::to_string(__clang_patchlevel__);
-#elif defined(__GNUC__) || defined(__GNUG__)
-    compiler_name = "GNU Compiler Collection (GCC)";
-    compiler_version = std::to_string(__GNUC__) + "." +
-                       std::to_string(__GNUC_MINOR__) + "." +
-                       std::to_string(__GNUC_PATCHLEVEL__);
-#else
-    compiler_name = "Unknown Compiler";
-    compiler_version = "Unknown Version";
-#endif
-
-    return { compiler_name, compiler_version };
-}
-
-
-std::string get_compiler_version() {
-#ifdef _MSC_VER
-    return std::to_string(_MSC_VER);
-#elif defined(__clang__)
-    return std::to_string(__clang_major__) + "." +
-        std::to_string(__clang_minor__) + "." +
-        std::to_string(__clang_patchlevel__);
-#elif defined(__GNUC__) || defined(__GNUG__)
-    return std::to_string(__GNUC__) + "." +
-        std::to_string(__GNUC_MINOR__) + "." +
-        std::to_string(__GNUC_PATCHLEVEL__);
-#else
-    return "Unknown";
-#endif
-}
-
-
-std::string get_compiler_name() {
-#ifdef _MSC_VER
-    return "Microsoft Visual Studio";
-#elif defined(__clang__)
-    return "Clang/LLVM";
-#elif defined(__GNUC__) || defined(__GNUG__)
-    return "GCC";
-#else
-    return "Unknown";
-#endif
-}
-
-
-// Function to get the operating system name
-std::string get_os_name() {
-    std::string os_name;
-#ifdef _WIN32
-    os_name = "Windows";
-#elif defined(__APPLE__) || defined(__MACH__)
-    os_name = "macOS";
-#elif defined(__linux__)
-    os_name = "Linux";
-#elif defined(__FreeBSD__)
-    os_name = "FreeBSD";
-#elif defined(__unix) || defined(__unix__)
-    os_name = "Unix";
-#else
-    os_name = "Unknown OS";
-#endif
-    return os_name;
-}
-
-// Function to get the architecture name
-std::string get_arch_name() {
-    std::string arch_name;
-#if defined(_M_X64) || defined(__x86_64__)
-    arch_name = "x64";
-#elif defined(_M_IX86) || defined(__i386__)
-    arch_name = "x86";
-#elif defined(_M_ARM64) || defined(__aarch64__)
-    arch_name = "ARM64";
-#elif defined(_M_ARM) || defined(__arm__)
-    arch_name = "ARM";
-#elif defined(__ppc64__) || defined(__powerpc64__)
-    arch_name = "PowerPC64";
-#elif defined(__ppc__) || defined(__powerpc__)
-    arch_name = "PowerPC";
-#else
-    arch_name = "Unknown Architecture";
-#endif
-    return arch_name;
-}
-
-
-std::string get_cpu_model() {
+////////////////////////////////////////////////////////////////////////////////
+std::string get_cpu_model()
+{
     std::string cpu_model;
 
 #ifdef _WIN32
@@ -409,20 +214,13 @@ std::string get_cpu_model() {
 }
 
 
-std::string get_local_time() {
+////////////////////////////////////////////////////////////////////////////////
+std::string get_local_time()
+{
     const auto now = std::chrono::system_clock::now();
     const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( now );
     const auto zt = std::chrono::zoned_time( std::chrono::current_zone(), tp );
     return std::format( "{:%F}T{:%T%z}", zt, zt );
-}
-
-
-std::string get_build_time() {
-    const auto combined = std::format( "{} {}", __DATE__, __TIME__ );
-    std::chrono::sys_time<std::chrono::seconds> tp;
-    std::istringstream stream( combined );
-    stream >> std::chrono::parse( "%b %d %Y %H:%M:%S", tp );
-    return std::format( "{:%F}T{:%T}", tp, tp );
 }
 
 
