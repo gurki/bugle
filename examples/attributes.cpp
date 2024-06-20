@@ -1,5 +1,7 @@
 #include <bugle/bugle.h>
 #include <future>
+#include <execution>
+#include <print>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -8,7 +10,9 @@ int main( int argc, char* argv[] )
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
-    jl->open();
+
+    const bool isOpen = jl->open();
+    std::println( "{}", isOpen );
 
     // bugle::Route route = R"(
     //     message:main
@@ -26,19 +30,38 @@ int main( int argc, char* argv[] )
     auto msgA = std::make_shared<bugle::MessageFilter>( "main" );
     addressB->lines = { { msgA } };
 
-    auto route = std::make_shared<bugle::Route>();
+    auto routeA = std::make_shared<bugle::Route>();
     auto attA = std::make_shared<bugle::AttributeFilter>( "position" );
-    route->addresses = { addressA, addressB, attA };
+    routeA->addresses = { addressA, addressB, attA };
 
     // bugle::Route route = R"(
-    //     file:main.cpp
-    //     tags:info,debug,!lambda,!scope
-    //     attributes:envelope.duration>10 level>=1
-    //     attributes:envelope
-    //     timestamp>2024-04-25T00:00:00 timestamp<2024-04-25T23:59:59
+    //     !tag:benchmark
+    //     attribute:value%1000=0
     // )";
-    po.addObserver( cl, route );
-    po.addObserver( jl );
+
+    auto routeB = std::make_shared<bugle::Route>();
+    auto addressC = std::make_shared<bugle::Address>();
+    auto tagC = std::make_shared<bugle::TagFilter>( "benchmark" );
+    auto valB = std::make_shared<bugle::ValueFilter>( "value", 1000,
+        []( const nlohmann::json& valA, const nlohmann::json& valB ) -> bool {
+            return ( valA.get<int>() % valB.get<int>() ) == 0;
+        }
+    );
+    addressC->lines = { { tagC, true } };
+    routeB->addresses = { addressC, valB };
+
+    po.addObserver( cl, routeA );
+    po.addObserver( jl, routeB );
+
+    // random example with inline conjunctions
+    //
+    // bugle::Route route = R"(
+    //     file:main.cpp
+    //     tag:info,debug,!lambda,!scope
+    //     attribute:duration>10,level>=1
+    //     attribute:duration
+    //     timestamp:>2024-04-25T00:00:00,<2024-04-25T23:59:59
+    // )";
 
     bugle::Envelope scope( po, "main" );
 
@@ -63,8 +86,14 @@ int main( int argc, char* argv[] )
     const auto future = std::async( fn, 200, "async" );
     future.wait();
 
+    std::vector<int> vals( 1<<18 );
+    std::iota( vals.begin(), vals.end(), 0 );
+    std::for_each( std::execution::par_unseq, vals.begin(), vals.end(), [ &po ]( const int val ) {
+        po.post( "", { "benchmark" }, { { "value", val } } );
+    });
+
     scope.close();
-    std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
+    po.flush();
 }
 
 

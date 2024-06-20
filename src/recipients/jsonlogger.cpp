@@ -29,8 +29,13 @@ bool JsonLogger::open( const std::string& filename )
 
     const auto directory = std::filesystem::relative( filepath ).parent_path();
 
-    if ( ! std::filesystem::create_directories( directory ) ) {
-        return false;
+    if ( ! std::filesystem::exists( directory ) )
+    {
+        const bool succ = std::filesystem::create_directories( directory );
+
+        if ( ! succ ) {
+            return false;
+        }
     }
 
     fout_.open( filepath );

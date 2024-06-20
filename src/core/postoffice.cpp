@@ -47,7 +47,10 @@ PostOffice::~PostOffice()
 void PostOffice::flush()
 {
 #ifdef BUGLE_ENABLE
-    queueReady_.notify_one();
+    //  FIXME: probably need to guard empty check against threading
+    while ( ! letters_.empty() ) {
+        queueReady_.notify_one();
+    }
 #endif
 }
 
@@ -175,7 +178,7 @@ void PostOffice::processQueue()
         while ( ! letters_.empty() )
         {
             {
-                std::unique_lock lock( queueMutex_ );
+                std::scoped_lock lock( queueMutex_ );
                 letter = std::move( letters_.front() );
                 letters_.pop_front();
             }
