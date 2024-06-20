@@ -4,6 +4,7 @@
 
 #include <format>
 #include <filesystem>
+#include <print>
 
 namespace bugle {
 
@@ -16,25 +17,35 @@ JsonLogger::~JsonLogger() {
 ////////////////////////////////////////////////////////////////////////////////
 bool JsonLogger::open( const std::string& filename )
 {
+#ifdef BUGLE_ENABLE
     fout_.close();
 
-    if ( filename.empty() )
-    {
-        std::filesystem::create_directory( "logs/" );
+    std::string filepath = filename;
+
+    if ( filename.empty() ) {
         const auto dt = Timestamp::now();
-        const std::string name = std::format( "logs/{}.jsonl", dt.fileInfo() );
-        fout_.open( name );
-    }
-    else {
-        fout_.open( filename );
+        filepath = std::format( "logs/{}.jsonl", dt.fileInfo() );
     }
 
+    const auto directory = std::filesystem::relative( filepath ).parent_path();
+
+    if ( ! std::filesystem::create_directories( directory ) ) {
+        return false;
+    }
+
+    fout_.open( filepath );
+#endif
     return fout_.is_open();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void JsonLogger::receive( const Letter& letter ) {
+void JsonLogger::receive( const Letter& letter )
+{
+    if ( ! fout_.is_open() ) {
+        return;
+    }
+
     const nlohmann::json data = letter;
     fout_ << data.dump() << "\n";
 }

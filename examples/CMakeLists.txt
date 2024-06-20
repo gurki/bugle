@@ -1,5 +1,9 @@
 cmake_minimum_required( VERSION 3.28 )
 
+
+set( BUGLE_ENABLE ON CACHE BOOL "Enable bugle 📯" FORCE )
+
+
 project(
     bugle-examples
     VERSION 0.0.0

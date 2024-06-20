@@ -1,5 +1,9 @@
 cmake_minimum_required( VERSION 3.28 )
 
+
+option( BUGLE_ENABLE OFF "Enable bugle 📯" )
+
+
 project(
     bugle
     VERSION 0.0.0
@@ -11,17 +15,6 @@ project(
 add_subdirectory( dependencies )
 add_compile_definitions( BUGLE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/" )
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/" )
-
-option( BUGLE_ENABLE "" ON )
-option( BUGLE_LOWERCASE_DEFINES "" ON )
-
-if ( BUGLE_ENABLE )
-    add_compile_definitions( BUGLE_ENABLE )
-endif()
-
-if ( BUGLE_LOWERCASE_DEFINES )
-    add_compile_definitions( BUGLE_LOWERCASE_DEFINES )
-endif()
 
 
 add_library( ${PROJECT_NAME} STATIC
@@ -66,7 +59,7 @@ install(
 )
 
 install(
-    TARGETS bugle
+    TARGETS ${PROJECT_NAME}
     DESTINATION ${EXECUTABLE_OUTPUT_PATH}
 )
 
@@ -85,3 +78,8 @@ target_compile_definitions( ${PROJECT_NAME}
 
 
 add_subdirectory( examples )
+
+
+if ( BUGLE_ENABLE )
+    add_compile_definitions( BUGLE_ENABLE )
+endif()

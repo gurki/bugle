@@ -22,21 +22,16 @@ PostOffice& PostOffice::instance()
 ////////////////////////////////////////////////////////////////////////////////
 PostOffice::PostOffice()
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     workerThread_ = std::thread( &PostOffice::processQueue, this );
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 PostOffice::~PostOffice()
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     if ( ! workerThread_.joinable() ) {
         return;
     }
@@ -44,27 +39,23 @@ PostOffice::~PostOffice()
     shouldExit_ = true;
     queueReady_.notify_one();
     workerThread_.join();
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::flush()
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     queueReady_.notify_one();
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::post( Letter&& letter )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     if ( ! enabled_ ) {
         return;
     }
@@ -75,6 +66,7 @@ void PostOffice::post( Letter&& letter )
     }
 
     queueReady_.notify_one();
+#endif
 }
 
 
@@ -85,16 +77,14 @@ void PostOffice::post(
     const attributes_t& attributes,
     const std::source_location& location )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     if ( ! enabled_ ) {
         return;
     }
 
     const int level = this->level( std::this_thread::get_id() );
     post( { letter, tags, attributes, location, level } );
+#endif
 }
 
 
@@ -112,32 +102,27 @@ int PostOffice::level( const std::thread::id& thread )
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::push( const std::thread::id& thread )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     if ( ! levels_.contains( thread ) ) {
         levels_[ thread ] = 1;
         return;
     }
 
     levels_[ thread ]++;
-
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::pop( const std::thread::id& thread )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
+#ifdef BUGLE_ENABLE
     if ( ! levels_.contains( thread ) ) {
         return;
     }
 
     levels_[ thread ]--;
+#endif
 }
 
 
@@ -146,34 +131,29 @@ void PostOffice::addObserver(
     const RecipientRef& observer,
     const FilterPtr& filter )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
-    std::unique_lock lock( observerMutex_ );
+#ifdef BUGLE_ENABLE
+    std::scoped_lock lock( observerMutex_ );
 
     observers_.insert( observer );
 
-    if ( ! filter ) return;
-    // if ( filter_.contains( observer ) ) {
-    //     filter_[ observer ].unite( filter );
-    // } else {
-        filter_[ observer ] = filter;
-    // }
+    if ( ! filter ) {
+        return;
+    }
+
+    filter_[ observer ] = filter;
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::removeObserver( const RecipientRef& observer )
 {
-#ifdef MC_DISABLE_POST
-    return;
-#endif
-
-    std::unique_lock lock( observerMutex_ );
+#ifdef BUGLE_ENABLE
+    std::scoped_lock lock( observerMutex_ );
 
     observers_.erase( observer );
     filter_.erase( observer );
+#endif
 }
 
 
