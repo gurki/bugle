@@ -6,10 +6,14 @@
 namespace bugle {
 
 
-class Letter;
+struct AddressLine {
+    FilterPtr variable = nullptr;
+    bool negate = false;
+};
+
 
 struct Address : public Filter {
-    std::vector<FilterPtr> lines;
+    std::vector<AddressLine> lines;
     virtual bool matches( const Letter& ) const override;
 };
 
