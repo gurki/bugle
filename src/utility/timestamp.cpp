@@ -97,7 +97,8 @@ std::string Timestamp::isoInfo() const {
 //////////////////////////////////////////////////////////////////////////////////
 std::string Timestamp::fileInfo() const {
     const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( *this );
-    return std::format( "{:%F}_{:%H%M%S}", tp, tp );
+    const auto zt = std::chrono::zoned_time( std::chrono::current_zone(), tp );
+    return std::format( "{:%F}_{:%H%M%S}", zt, zt );
 }
 
 
