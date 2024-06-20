@@ -82,5 +82,11 @@ target_compile_definitions( ${PROJECT_NAME}
         BUGLE_COMMIT=\"${BUGLE_COMMIT}\"
 )
 
+# Generate the header file
+file( WRITE "${CMAKE_BINARY_DIR}/version.h" "#pragma once\n\n")
+file( APPEND "${CMAKE_BINARY_DIR}/version.h" "#define BUGLE_VERSION \"${PROJECT_VERSION}\"\n")
+file( APPEND "${CMAKE_BINARY_DIR}/version.h" "#define BUGLE_COMMIT \"${BUGLE_COMMIT}\"\n")
+
+
 
 add_subdirectory( examples )
