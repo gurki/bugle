@@ -1,25 +1,24 @@
-// #pragma once
+#pragma once
 
-// #include "observer.h"
-// #include <QFile>
+#include "bugle/core/recipient.h"
+#include <fstream>
+
+namespace bugle {
+
+class Letter;
 
 
-// class JsonLogger : public QObject, public Recipient
-// {
-//     Q_OBJECT
+struct JsonLogger : public Recipient
+{
+    ~JsonLogger();
+    bool open( const std::string& filename = {} );
 
-//     public:
+    virtual void receive( const Letter& ) override;
 
-//         explicit JsonLogger( QObject* parent = nullptr );
+    private:
 
-//         bool open( const QString& filename );
-//         void createDefaultFile();
+        std::ofstream fout_;
+};
 
-//     public slots:
 
-//         virtual void receive( const Letter& message );
-
-//     private:
-
-//         QFile file_;
-// };
+}   //  ::bugle

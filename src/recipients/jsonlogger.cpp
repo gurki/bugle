@@ -1,73 +1,43 @@
-// #include "bugle/jsonlogger.h"
+#include "bugle/recipient/jsonlogger.h"
+#include "bugle/utility/timestamp.h"
+#include "bugle/core/letter.h"
 
-// #include <json.hpp>
+#include <format>
+#include <filesystem>
 
-// #include <QDir>
-// #include <QDateTime>
-// #include <QTextStream>
-// #include <QMapIterator>
+namespace bugle {
 
-// using namespace nlohmann;
-
-
-// ////////////////////////////////////////////////////////////////////////////////
-// JsonLogger::JsonLogger( QObject* parent ) :
-//     QObject( parent )
-// {}
+////////////////////////////////////////////////////////////////////////////////
+JsonLogger::~JsonLogger() {
+    fout_.close();
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// bool JsonLogger::open( const QString& filename ) {
-//     file_.setFileName( filename );
-//     return file_.open( QFile::WriteOnly );
-// }
+////////////////////////////////////////////////////////////////////////////////
+bool JsonLogger::open( const std::string& filename )
+{
+    fout_.close();
+
+    if ( filename.empty() )
+    {
+        std::filesystem::create_directory( "logs/" );
+        const auto dt = Timestamp::now();
+        const std::string name = std::format( "logs/{}.jsonl", dt.fileInfo() );
+        fout_.open( name );
+    }
+    else {
+        fout_.open( filename );
+    }
+
+    return fout_.is_open();
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// void JsonLogger::createDefaultFile()
-// {
-//     const QString dt = QDateTime::currentDateTime().toString( "yyyy-MM-dd_HHmmss" );
-//     const QString name = "logs/" + dt + "_cc.json";
-
-//     QDir dir( "logs/" );
-//     dir.mkdir( "." );
-
-//     open( name );
-// }
+////////////////////////////////////////////////////////////////////////////////
+void JsonLogger::receive( const Letter& letter ) {
+    const nlohmann::json data = letter;
+    fout_ << data.dump() << "\n";
+}
 
 
-// ////////////////////////////////////////////////////////////////////////////////
-// void JsonLogger::receive( const Letter& message )
-// {
-//     if ( ! file_.isOpen() ) {
-//         return;
-//     }
-
-//     json jobj;
-
-//     if ( ! message.text().isEmpty() ) {
-//         jobj[ "text" ] = message.text().toStdString();
-//     }
-
-//     QMapIterator<QString, QVariant> iter( message.tags() );
-
-//     while( iter.hasNext() )
-//     {
-//         iter.next();
-
-//         const QString& key = iter.key();
-//         const bool systemKey = key.startsWith( "__" );
-//         json& node = systemKey ? jobj[ "system" ] : jobj;
-
-//         if ( iter.value().isValid() ) {
-//             node[ "rich" ][ key.toStdString() ] = iter.value().toString().toStdString();
-//         }
-//         else {
-//             node[ "tags" ].push_back( key.toStdString() );
-//         }
-//     }
-
-//     QTextStream str( &file_ );
-//     str << jobj.dump( 4 ).c_str();
-//     str << ",\n";
-// }
+}   //  ::bugle

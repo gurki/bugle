@@ -7,6 +7,9 @@ int main( int argc, char* argv[] )
 {
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
+    auto jl = std::make_shared<bugle::JsonLogger>();
+    jl->open();
+
     auto filter = std::make_shared<bugle::TagFilter>( bugle::TagFilter( { "info" }, { "debug" } ) );
 
     //  (:?^\s*(:?([\w\d:<>=!.,-_]*)\s*)*\n?$)*
@@ -20,6 +23,7 @@ int main( int argc, char* argv[] )
     //     timestamp>2024-04-25T00:00:00 timestamp<2024-04-25T23:59:59
     // )";
     po.addObserver( cl );
+    po.addObserver( jl );
 
     bugle::Envelope scope( po, "main" );
 

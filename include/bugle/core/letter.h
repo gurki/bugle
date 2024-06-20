@@ -49,8 +49,8 @@ struct Letter
 };
 
 
-void to_json( nlohmann::json& json, const Letter& message );
-void from_json( const nlohmann::json& json, Letter& message );
+void to_json( nlohmann::json&, const Letter& );
+void from_json( const nlohmann::json&, Letter& );
 
 
 

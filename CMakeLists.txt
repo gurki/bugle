@@ -35,6 +35,7 @@ add_library( ${PROJECT_NAME} STATIC
     src/format/formatter.cpp
     src/format/theme.cpp
     src/recipients/consolelogger.cpp
+    src/recipients/jsonlogger.cpp
     src/utility/timestamp.cpp
     src/utility/utility.cpp
 )
@@ -66,6 +67,19 @@ install(
 install(
     TARGETS bugle
     DESTINATION ${EXECUTABLE_OUTPUT_PATH}
+)
+
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE BUGLE_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+target_compile_definitions( ${PROJECT_NAME}
+    PUBLIC
+        BUGLE_VERSION=\"${PROJECT_VERSION}\"
+        BUGLE_COMMIT=\"${BUGLE_COMMIT}\"
 )
 
 

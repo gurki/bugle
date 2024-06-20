@@ -89,6 +89,19 @@ Timestamp Timestamp::parse( const std::string& str )
 
 
 //////////////////////////////////////////////////////////////////////////////////
+std::string Timestamp::isoInfo() const {
+    return info<std::chrono::seconds>();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+std::string Timestamp::fileInfo() const {
+    const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( *this );
+    return std::format( "{:%F}_{:%H%M%S}", tp, tp );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
 void to_json( nlohmann::json& json, const Timestamp& datetime ) {
     json = datetime.info<std::chrono::microseconds>();
 }

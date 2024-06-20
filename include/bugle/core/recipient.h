@@ -12,7 +12,7 @@ using RecipientPtr = std::shared_ptr<class Recipient>;
 
 struct Recipient {
     virtual ~Recipient() {}
-    virtual void receive( const Letter& message ) = 0;
+    virtual void receive( const Letter& ) = 0;
 };
 
 

@@ -9,7 +9,7 @@ project(
 )
 
 add_executable( ${PROJECT_NAME}
-    attributes.cpp
+    systeminfo.cpp
 )
 
 target_include_directories( ${PROJECT_NAME} PUBLIC
