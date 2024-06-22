@@ -175,7 +175,7 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
         const auto cols = theme_->get( value );
 
         return std::format( "{}{}",
-            colorize( "#", theme_->primary().variant ),
+            colorize( "#", theme_->secondary().color ),
             colorize( value.get<std::string>(), cols.color )
         );
     }
@@ -185,7 +185,7 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
     }
 
     if ( value.size() > 1 ) {
-        return colorize( "#…", theme_->primary().variant );
+        return colorize( "#…", theme_->secondary().color );
     }
 
     if ( value.is_object() )
@@ -199,7 +199,7 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
         const auto pair = theme_->get( key );
         const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
 
-        stream << colorize( "#", theme_->primary().variant );
+        stream << colorize( "#", theme_->secondary().color );
         stream << colorize( key, cols.color );
 
         if ( value.empty() ) {

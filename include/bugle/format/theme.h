@@ -68,8 +68,8 @@ class DefaultTheme : public Theme
                 { "error", { 196, 203 } }
             };
 
-            primary_ = { 254, 246 };
-            secondary_ = { 242, 238 };
+            primary_ = { 254, 242 };
+            secondary_ = { 248, 236 };
         }
 };
 
