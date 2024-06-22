@@ -24,6 +24,15 @@ Enjoy and let me know what you think!
 \- Gurki
 
 
+Add:
+- unnecessarily complex standards out there
+- logfmt: great and simple, but tags are afterthought (tags:"info,action,notify")
+- key:values are useful, but what if you need to log structured data? separate file, different format, and difrag your logs?
+- tracing, profiling and even metrics as simple side effects of good logging, but few libs do that
+- few libs with indentation
+- few libs with color
+
+
 ## Design Goals
 
 - **Easy integration.** The MC is designed to be usable out of the box with no hassle for set-up and usage in production.

@@ -51,7 +51,7 @@ int main( int argc, char* argv[] )
     routeB->addresses = { addressC, valB };
 
     po.addObserver( cl );
-    po.addObserver( jl, routeB );
+    po.addObserver( jl );
 
     // random example with inline conjunctions
     //
@@ -62,6 +62,12 @@ int main( int argc, char* argv[] )
     //     attribute:duration
     //     timestamp:>2024-04-25T00:00:00,<2024-04-25T23:59:59
     // )";
+
+    const nlohmann::json buildInfo = bugle::BuildInfo::current();
+    const nlohmann::json sessionInfo = bugle::SessionInfo::current();
+
+    po.post( {}, { "build", "hwinfo" }, buildInfo );
+    po.post( {}, { "session", "hwinfo" }, sessionInfo );
 
     bugle::Envelope scope( po, "main" );
 
@@ -93,7 +99,7 @@ int main( int argc, char* argv[] )
     // });
 
     scope.close();
-    po.flush();
+    // po.flush();
 }
 
 

@@ -94,20 +94,20 @@ std::string Formatter::format( const Letter& letter ) const
 
     // ss << "\033[120G";
 
-    static const std::regex re( R"((.* )?(.*)(\(.*\))(::<lambda(.*)>)?)" );
-    const std::string fn = letter.function();
-    std::smatch match;
-    std::regex_match( fn, match, re );
+    // static const std::regex re( R"((.* )?(.*)(\(.*\))(::<lambda(.*)>)?)" );
+    // const std::string fn = letter.function();
+    // std::smatch match;
+    // std::regex_match( fn, match, re );
 
-    std::string name;
-    if ( ! match.empty() ) 
-    {
-        name = match[ 2 ].str();
+    // std::string name;
+    // if ( ! match.empty() ) 
+    // {
+    //     name = match[ 2 ].str();
 
-        if ( match[ 4 ].matched ) {
-            name += "::lambda";
-        }
-    }
+    //     if ( match[ 4 ].matched ) {
+    //         name += "::lambda";
+    //     }
+    // }
 
     const auto text = std::format( "{}:{}", letter.fileInfo(), letter.line() );
     // const auto link = std::format( "{}:{}", letter.file(), letter.line() );
