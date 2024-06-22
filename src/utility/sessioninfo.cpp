@@ -1,8 +1,9 @@
-#include "bugle/utility/systeminfo.h"
+#include "bugle/utility/sessioninfo.h"
 
 #include <cstdio>
 #include <chrono>
 #include <format>
+#include <thread>
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
@@ -25,8 +26,32 @@
 namespace bugle {
 
 
+std::string localTime();
+std::string systemName();
+std::string systemVersion();
+std::string systemArchitecture();
+std::string cpuModel();
+uint64_t ramTotal();
+uint64_t ramAvailable();
+
+
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t get_free_ram()
+SessionInfo SessionInfo::current() {
+    SessionInfo info {};
+    info.localTime = bugle::localTime();
+    info.systemName = bugle::systemName();
+    info.systemVersion = bugle::systemVersion();
+    info.systemArchitecture = bugle::systemArchitecture();
+    info.cpuModel = bugle::cpuModel();
+    info.cpuCores = std::thread::hardware_concurrency();
+    info.ramTotal = bugle::ramTotal();
+    info.ramAvailable = bugle::ramAvailable();
+    return info;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+uint64_t ramAvailable()
 {
 #ifdef _WIN32
     MEMORYSTATUSEX status;
@@ -66,7 +91,7 @@ uint64_t get_free_ram()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t get_total_ram()
+uint64_t ramTotal()
 {
 #ifdef _WIN32
     MEMORYSTATUSEX status;
@@ -98,7 +123,7 @@ uint64_t get_total_ram()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string get_os_version()
+std::string systemVersion()
 {
     std::string os_version;
 
@@ -163,7 +188,7 @@ std::string get_os_version()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string get_cpu_model()
+std::string cpuModel()
 {
     std::string cpu_model;
 
@@ -215,12 +240,56 @@ std::string get_cpu_model()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string get_local_time()
+std::string localTime()
 {
     const auto now = std::chrono::system_clock::now();
     const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( now );
     const auto zt = std::chrono::zoned_time( std::chrono::current_zone(), tp );
     return std::format( "{:%F}T{:%T%z}", zt, zt );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string systemName()
+{
+    std::string os_name;
+#ifdef _WIN32
+    os_name = "Windows";
+#elif defined(__APPLE__) || defined(__MACH__)
+    os_name = "macOS";
+#elif defined(__linux__)
+    os_name = "Linux";
+#elif defined(__FreeBSD__)
+    os_name = "FreeBSD";
+#elif defined(__unix) || defined(__unix__)
+    os_name = "Unix";
+#else
+    os_name = "Unknown OS";
+#endif
+    return os_name;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string systemArchitecture()
+{
+    std::string arch_name;
+#if defined(_M_X64) || defined(__x86_64__)
+    arch_name = "AMD64";
+#elif defined(_M_IX86) || defined(__i386__)
+    arch_name = "x86";
+#elif defined(_M_ARM64) || defined(__aarch64__)
+    arch_name = "ARM64";
+#elif defined(_M_ARM) || defined(__arm__)
+    arch_name = "ARM";
+#elif defined(__ppc64__) || defined(__powerpc64__)
+    arch_name = "PowerPC64";
+#elif defined(__ppc__) || defined(__powerpc__)
+    arch_name = "PowerPC";
+#else
+    arch_name = "Unknown Architecture";
+#endif
+    return arch_name;
 }
 
 

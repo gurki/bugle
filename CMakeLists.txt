@@ -23,15 +23,16 @@ add_library( ${PROJECT_NAME} STATIC
     src/core/postoffice.cpp
     src/filter/address.cpp
     src/filter/route.cpp
-    src/filter/tagfilter.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
     src/format/theme.cpp
     src/recipients/consolelogger.cpp
     src/recipients/jsonlogger.cpp
-    src/utility/systeminfo.cpp
     src/utility/timestamp.cpp
     src/utility/utility.cpp
+    src/utility/gpuinfo.cpp
+    src/utility/buildinfo.cpp
+    src/utility/sessioninfo.cpp
 )
 
 add_library( ${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
@@ -70,10 +71,47 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+string( TIMESTAMP BUGLE_BUILD_TIME "%Y-%m-%dT%H:%M:%S" )
+
+cmake_host_system_information( RESULT BUGLE_BUILD_HOST QUERY HOSTNAME )
+cmake_host_system_information( RESULT BUGLE_BUILD_CPU_CORES_LOGICAL QUERY NUMBER_OF_LOGICAL_CORES )
+cmake_host_system_information( RESULT BUGLE_BUILD_CPU_CORES_PHYSICAL QUERY NUMBER_OF_PHYSICAL_CORES )
+cmake_host_system_information( RESULT BUGLE_BUILD_CPU_NAME QUERY PROCESSOR_DESCRIPTION )
+cmake_host_system_information( RESULT BUGLE_BUILD_VRAM_TOTAL QUERY TOTAL_VIRTUAL_MEMORY )
+cmake_host_system_information( RESULT BUGLE_BUILD_VRAM_AVAILABLE QUERY AVAILABLE_VIRTUAL_MEMORY )
+cmake_host_system_information( RESULT BUGLE_BUILD_RAM_TOTAL QUERY TOTAL_PHYSICAL_MEMORY )
+cmake_host_system_information( RESULT BUGLE_BUILD_RAM_AVAILABLE QUERY AVAILABLE_PHYSICAL_MEMORY )
+
 target_compile_definitions( ${PROJECT_NAME}
     PUBLIC
         BUGLE_VERSION=\"${PROJECT_VERSION}\"
         BUGLE_COMMIT=\"${BUGLE_COMMIT}\"
+
+        BUGLE_BUILD_TIME=\"${BUGLE_BUILD_TIME}\"
+        BUGLE_BUILD_HOST=\"${BUGLE_BUILD_HOST}\"
+        BUGLE_BUILD_DIRECTORY=\"${CMAKE_SOURCE_DIR}\"
+
+        BUGLE_BUILD_CMAKE_VERSION=\"${CMAKE_VERSION}\"
+        BUGLE_BUILD_CMAKE_GENERATOR=\"${CMAKE_GENERATOR}\"
+        BUGLE_BUILD_COMPILER_NAME=\"${CMAKE_CXX_COMPILER_ID}\"
+        BUGLE_BUILD_COMPILER_VERSION=\"${CMAKE_CXX_COMPILER_VERSION}\"
+        
+        BUGLE_BUILD_SYSTEM_NAME=\"${CMAKE_SYSTEM_NAME}\"
+        BUGLE_BUILD_SYSTEM_VERSION=\"${CMAKE_SYSTEM_VERSION}\"
+        BUGLE_BUILD_SYSTEM_ARCHITECTURE=\"${CMAKE_SYSTEM_PROCESSOR}\"
+            
+        BUGLE_BUILD_CPU_CORES_LOGICAL=\"${BUGLE_BUILD_CPU_CORES_LOGICAL}\"
+        BUGLE_BUILD_CPU_CORES_PHYSICAL=\"${BUGLE_BUILD_CPU_CORES_PHYSICAL}\"
+        BUGLE_BUILD_RAM_TOTAL=\"${BUGLE_BUILD_RAM_TOTAL}\"
+        BUGLE_BUILD_RAM_AVAILABLE=\"${BUGLE_BUILD_RAM_AVAILABLE}\"
+        BUGLE_BUILD_VRAM_TOTAL=\"${BUGLE_BUILD_VRAM_TOTAL}\"
+        BUGLE_BUILD_VRAM_AVAILABLE=\"${BUGLE_BUILD_VRAM_AVAILABLE}\"
+
+        $<$<CONFIG:Debug>:BUGLE_BUILD_TYPE="Debug">
+        $<$<CONFIG:Release>:BUGLE_BUILD_TYPE="Relase">
+        $<$<CONFIG:Profile>:BUGLE_BUILD_TYPE="Profile">
+        $<$<CONFIG:MinSizeRel>:BUGLE_BUILD_TYPE="MinSizeRel">
+        $<$<CONFIG:RelWithDebInfo>:BUGLE_BUILD_TYPE="RelWithDebInfo">
 )
 
 

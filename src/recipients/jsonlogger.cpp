@@ -27,7 +27,7 @@ bool JsonLogger::open( const std::string& filename )
         filepath = std::format( "logs/{}.jsonl", dt.fileInfo() );
     }
 
-    const auto directory = std::filesystem::relative( filepath ).parent_path();
+    const auto directory = std::filesystem::path( filepath ).parent_path();
 
     if ( ! std::filesystem::exists( directory ) )
     {

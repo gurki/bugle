@@ -1,5 +1,4 @@
 #include "bugle/filter/route.h"
-#include "bugle/core/letter.h"
 
 namespace bugle {
 

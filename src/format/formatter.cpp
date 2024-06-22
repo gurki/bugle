@@ -89,16 +89,20 @@ std::string Formatter::format( const Letter& message ) const
     std::smatch match;
     std::regex_match( fn, match, re );
 
-    std::string name = match[ 2 ].str();
+    std::string name;
+    if ( ! match.empty() ) 
+    {
+        name = match[ 2 ].str();
 
-    if ( match[ 4 ].matched ) {
-        name += "::lambda";
+        if ( match[ 4 ].matched ) {
+            name += "::lambda";
+        }
     }
 
     const auto text = std::format( "{}:{}", message.fileInfo(), message.line() );
     // const auto link = std::format( "{}:{}", message.file(), message.line() );
     // const auto hyperlink = std::format( "\e]8;;{}\e\\{}\e]8;;\e\\", link, text );
-    const auto location = std::format( "[{} {}]", name, text );
+    const auto location = std::format( "[{} {}]", message.functionInfo(), text );
 
     ss << colorize( location, theme_->secondary().variant );
     return ss.str();

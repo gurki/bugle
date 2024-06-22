@@ -65,7 +65,7 @@ std::string Letter::functionInfo() const {
 ////////////////////////////////////////////////////////////////////////////////
 std::string Letter::fileInfo() const {
     std::filesystem::path path( file() );
-    return path.filename();
+    return path.filename().string();
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bugle/core/filter.h"
+#include "bugle/core/letter.h"
 #include <vector>
 
 namespace bugle {

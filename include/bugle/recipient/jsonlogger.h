@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bugle/core/recipient.h"
+#include "bugle/core/letter.h"
 #include <fstream>
 
 namespace bugle {

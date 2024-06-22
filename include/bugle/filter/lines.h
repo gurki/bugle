@@ -24,7 +24,7 @@ struct MessageFilter : public Filter
         compare( _compare )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override {
+    virtual bool matches( const Letter& letter ) const override {
         return compare( letter.message, message );
     }
 };
@@ -38,7 +38,7 @@ struct TagFilter : public Filter
         tag( _tag )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override {
+    virtual bool matches( const Letter& letter ) const override {
         return letter.tags.contains( tag );
     }
 };
@@ -52,7 +52,7 @@ struct FileFilter : public Filter
         filename( _filename )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override {
+    virtual bool matches( const Letter& letter ) const override {
         return letter.fileInfo() == filename;
     }
 };
@@ -66,7 +66,7 @@ struct FunctionFilter : public Filter
         function( _function )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override {
+    virtual bool matches( const Letter& letter ) const override {
         return letter.functionInfo() == function;
     }
 };
@@ -80,7 +80,7 @@ struct AttributeFilter : public Filter
         key( _key )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override {
+    virtual bool matches( const Letter& letter ) const override {
         return letter.attributes.contains( key );
     }
 };
@@ -102,7 +102,7 @@ struct ValueFilter : public Filter
         compare( _compare )
     {};
 
-    constexpr virtual bool matches( const Letter& letter ) const override
+    virtual bool matches( const Letter& letter ) const override
     {
         if ( ! letter.attributes.contains( key ) ) {
             return false;

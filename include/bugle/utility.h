@@ -1,5 +1,7 @@
 #pragma once
 
-#include "utility/systeminfo.h"
 #include "utility/timestamp.h"
 #include "utility/utility.h"
+#include "utility/buildinfo.h"
+#include "utility/sessioninfo.h"
+#include "utility/gpuinfo.h"
