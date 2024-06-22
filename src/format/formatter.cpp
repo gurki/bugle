@@ -37,14 +37,21 @@ void Formatter::setTheme( const ThemePtr& theme ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::format( const Letter& message ) const
+std::string elide( const std::string& msg, const int max ) {
+    if ( msg.size() > max ) return std::format( "{}…", msg.substr( 0, max ) );
+    return std::format( "{}", msg );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::format( const Letter& letter ) const
 {
     std::stringstream ss;
 
     //  time
 
     ss << colorize(
-        message.timestamp.timeInfo<std::chrono::milliseconds>(),
+        letter.timestamp.timeInfo<std::chrono::milliseconds>(),
         theme_->primary().variant
     );
 
@@ -52,23 +59,24 @@ std::string Formatter::format( const Letter& message ) const
 
     ss << skip( 1 );
     ss << colorize(
-        std::format( "[{}]", message.threadInfo() ),
-        theme_->primary().variant
+        std::format( "[{}]", letter.threadInfo() ),
+        theme_->secondary().variant
     );
 
-    //  message without quotes
+    //  letter without quotes
 
-    if ( ! message.message.empty() ) {
+    if ( ! letter.message.empty() ) {
         ss << skip( 2 );
-        ss << indent( message.level );
-        ss << colorize( message.message, theme_->primary().color );
+        ss << indent( letter );
+        ss << colorize( elide( letter.message, 40 ), theme_->primary().color );
     }
 
+    // ss << "\033[80G";
     ss << skip( 2 );
 
     //  tags
 
-    const std::string tinfo = tagInfo( message.tags );
+    const std::string tinfo = tagInfo( letter.tags );
 
     if ( ! tinfo.empty() ) {
         ss << tinfo << skip( 2 );
@@ -76,7 +84,7 @@ std::string Formatter::format( const Letter& message ) const
 
     // //  attributes
 
-    // const std::string ainfo = attributeInfo( message.attributes );
+    // const std::string ainfo = attributeInfo( letter.attributes );
 
     // if ( ! ainfo.empty() ) {
     //     ss << ainfo << skip( 2 );
@@ -84,8 +92,10 @@ std::string Formatter::format( const Letter& message ) const
 
     //  meta
 
+    // ss << "\033[120G";
+
     static const std::regex re( R"((.* )?(.*)(\(.*\))(::<lambda(.*)>)?)" );
-    const std::string fn = message.function();
+    const std::string fn = letter.function();
     std::smatch match;
     std::regex_match( fn, match, re );
 
@@ -99,10 +109,10 @@ std::string Formatter::format( const Letter& message ) const
         }
     }
 
-    const auto text = std::format( "{}:{}", message.fileInfo(), message.line() );
-    // const auto link = std::format( "{}:{}", message.file(), message.line() );
+    const auto text = std::format( "{}:{}", letter.fileInfo(), letter.line() );
+    // const auto link = std::format( "{}:{}", letter.file(), letter.line() );
     // const auto hyperlink = std::format( "\e]8;;{}\e\\{}\e]8;;\e\\", link, text );
-    const auto location = std::format( "[{} {}]", message.functionInfo(), text );
+    const auto location = std::format( "[{} {}]", elide( letter.function(), 40 ), text );
 
     ss << colorize( location, theme_->secondary().variant );
     return ss.str();
@@ -125,14 +135,33 @@ std::string Formatter::skip( const uint8_t count ) const  {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Formatter::indent( const int level ) const
+std::string Formatter::indent( const Letter& letter ) const
 {
-    if ( level <= 0 || indent_ == 0 ) {
+    const int level = letter.level;
+
+    if ( level < 0 || indent_ == 0 ) {
         return {};
     }
 
+    const bool isEnv = letter.tags.contains( "envelope" );
+    const bool isOpen = (
+        letter.attributes.contains( "open" ) ?
+        letter.attributes.at( "open" ).get<bool>() :
+        false
+    );
+
+    std::string sym = "├";
+    
+    if ( isEnv ) {
+        sym = isOpen ? "┌" : "└";
+    } else if ( lastThread != letter.thread ) {
+        sym = "┬";
+    }
+    
+    lastThread = letter.thread;
+
     return colorize(
-        bugle::repeat( spacer(), indent_ * level ),
+        bugle::repeat( spacer(), indent_ * std::max( level, 0 ) ) + sym + " ",
         theme_->secondary().variant
     );
 }
@@ -146,7 +175,7 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
         const auto cols = theme_->get( value );
 
         return std::format( "{}{}",
-            colorize( "#", theme_->secondary().variant ),
+            colorize( "#", theme_->primary().variant ),
             colorize( value.get<std::string>(), cols.color )
         );
     }
@@ -156,7 +185,7 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
     }
 
     if ( value.size() > 1 ) {
-        return colorize( "#…", theme_->secondary().variant );
+        return colorize( "#…", theme_->primary().variant );
     }
 
     if ( value.is_object() )
@@ -170,14 +199,14 @@ std::string Formatter::pretty( const nlohmann::json& value ) const
         const auto pair = theme_->get( key );
         const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
 
-        stream << colorize( "#", theme_->secondary().variant );
+        stream << colorize( "#", theme_->primary().variant );
         stream << colorize( key, cols.color );
 
         if ( value.empty() ) {
             return stream.str();
         }
 
-        stream << colorize( ":", theme_->secondary().variant );
+        stream << colorize( ":", theme_->primary().variant );
 
         if ( value.is_primitive() ) {
             stream << colorize( value.dump(), cols.variant );

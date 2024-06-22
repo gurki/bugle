@@ -13,7 +13,7 @@ project(
 )
 
 add_executable( ${PROJECT_NAME}
-    systeminfo.cpp
+    main.cpp
 )
 
 target_include_directories( ${PROJECT_NAME} PUBLIC

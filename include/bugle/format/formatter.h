@@ -20,7 +20,7 @@ class Formatter
 
         Formatter(
             const std::string& space = " ",
-            const std::string& spacer = "··",
+            const std::string& spacer = "│ ",
             const std::string& newline = "\n"
         );
 
@@ -32,7 +32,7 @@ class Formatter
         const std::string& spacer() const { return spacer_; }
         const std::string& newline() const { return newline_; }
         std::string skip( const uint8_t count ) const;
-        std::string indent( const int level ) const;
+        std::string indent( const Letter& letter ) const;
 
         std::string colorize(
             const std::string& text,
@@ -54,6 +54,7 @@ class Formatter
         std::string attributeInfo( const attributes_t& attributes ) const;
         std::string pretty( const nlohmann::json& primitive ) const;
 
+        mutable std::thread::id lastThread;
         uint8_t indent_ = 1;
         ThemePtr theme_ = nullptr;
 };
