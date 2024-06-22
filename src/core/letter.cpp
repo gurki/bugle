@@ -70,20 +70,20 @@ std::string Letter::fileInfo() const {
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void to_json( nlohmann::json& json, const Letter& message )
+void to_json( nlohmann::json& json, const Letter& letter )
 {
-    json[ "timestamp" ] = message.timestamp;
-    json[ "thread" ] = message.threadInfo();
-    json[ "level" ] = message.level;
+    json[ "timestamp" ] = letter.timestamp;
+    json[ "thread" ] = letter.threadInfo();
+    json[ "level" ] = letter.level;
 
-    json[ "file" ] = message.file();
-    json[ "function" ] = message.function();
-    json[ "line" ] = message.line();
-    json[ "column" ] = message.column();
+    json[ "file" ] = letter.file();
+    json[ "function" ] = letter.function();
+    json[ "line" ] = letter.line();
+    json[ "column" ] = letter.column();
 
-    json[ "message" ] = message.message;
-    json[ "tags" ] = message.tags;
-    json[ "attributes" ] = message.attributes;
+    json[ "message" ] = letter.message;
+    json[ "tags" ] = letter.tags;
+    json[ "attributes" ] = letter.attributes;
 }
 
 
