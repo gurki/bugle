@@ -49,6 +49,7 @@ void PostOffice::flush()
 #ifdef BUGLE_ENABLE
     //  FIXME: probably need to guard empty check against threading
     while ( ! letters_.empty() ) {
+        std::scoped_lock lock( queueMutex_ );
         queueReady_.notify_one();
     }
 #endif
@@ -94,11 +95,17 @@ void PostOffice::post(
 ////////////////////////////////////////////////////////////////////////////////
 int PostOffice::level( const std::thread::id& thread )
 {
+#ifdef BUGLE_ENABLE
+    std::scoped_lock lock( queueMutex_ );
+
     if ( ! levels_.contains( thread ) ) {
         return 0;
     }
 
     return levels_.at( thread );
+#else
+    return 0;
+#endif
 }
 
 
@@ -106,6 +113,8 @@ int PostOffice::level( const std::thread::id& thread )
 void PostOffice::push( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
+    std::scoped_lock lock( queueMutex_ );
+
     if ( ! levels_.contains( thread ) ) {
         levels_[ thread ] = 1;
         return;
@@ -120,6 +129,8 @@ void PostOffice::push( const std::thread::id& thread )
 void PostOffice::pop( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
+    std::scoped_lock lock( queueMutex_ );
+
     if ( ! levels_.contains( thread ) ) {
         return;
     }
@@ -177,6 +188,10 @@ void PostOffice::processQueue()
 
         while ( ! letters_.empty() )
         {
+            if ( shouldExit_ ) {
+                return;
+            }
+
             {
                 std::scoped_lock lock( queueMutex_ );
                 letter = std::move( letters_.front() );
@@ -202,6 +217,10 @@ void PostOffice::processQueue()
 
             for ( auto& observerRef : observers_ )
             {
+                if ( shouldExit_ ) {
+                    return;
+                }
+
                 if ( filter_.contains( observerRef ) )
                 {
                     const auto& filter = filter_.at( observerRef );
@@ -209,6 +228,10 @@ void PostOffice::processQueue()
                     if ( ! filter->matches( letter ) ) {
                         continue;
                     }
+                }
+
+                if ( observerRef.expired() ) {
+                    continue;
                 }
 
                 auto observer = observerRef.lock();

@@ -99,7 +99,7 @@ int main( int argc, char* argv[] )
     // });
 
     scope.close();
-    // po.flush();
+    po.flush();
 }
 
 
@@ -117,16 +117,16 @@ GCC
 21:56:54.560 [562c]  async closed (205 ms)  #envelope  [main(int, char**)::<lambda(int, const std::string&)>@attributes.cpp:32.41]
 21:56:54.560 [8ee1]  main closed (310 ms)  #envelope  [int main(int, char**)@attributes.cpp:24.39]
 
-MSVC 
+MSVC
 
 21:19:24.207 [de22]  main opened ...  #envelope  [int __cdecl main(int,char *[]) attributes.cpp:65]
 21:19:24.207 [de22]  ··hallo  #info #debug  [int __cdecl main(int,char *[]) attributes.cpp:67]
 21:19:24.207 [de22]  ··sync opened ...  #envelope  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const attributes.cpp:77]
 21:19:24.315 [de22]  ····we need to go deeper  #info  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const attributes.cpp:79]
 21:19:24.315 [de22]  ··sync closed (108 ms)  #envelope  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const attributes.cpp:77]
-21:19:24.316 [2c21]  async opened ...  #envelope  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > 
+21:19:24.316 [2c21]  async opened ...  #envelope  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >
 &) const attributes.cpp:77]
-21:19:24.518 [2c21]  ··we need to go deeper  #info  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const 
+21:19:24.518 [2c21]  ··we need to go deeper  #info  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const
 attributes.cpp:79]
 21:19:24.518 [2c21]  async closed (202 ms)  #envelope  [float __cdecl main::<lambda_2>::operator ()(int,const class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &) const attributes.cpp:77]
 21:19:24.518 [de22]  main closed (311 ms)  #envelope  [int __cdecl main(int,char *[]) attributes.cpp:65]
