@@ -5,10 +5,10 @@
 namespace bugle {
 
 
-struct BuildInfo 
+struct BuildInfo
 {
     //  environment
-    std::string time;
+    std::string timestamp;
     std::string host;
     std::string directory;
 
@@ -18,26 +18,26 @@ struct BuildInfo
     std::string cmakeGenerator;
     std::string compilerName;
     std::string compilerVersion;
-    
+
     //  system
     std::string systemName;
     std::string systemVersion;
     std::string systemArchitecture;
 
     //  hardware
-    std::string cpuCoresLogical;
-    std::string cpuCoresPhysical;
-    std::string ramTotal;
-    std::string ramAvailable;
-    std::string vramTotal;
-    std::string vramAvailable;
+    int cpuCoresLogical;
+    int cpuCoresPhysical;
+    int ramTotalMb;
+    int ramAvailableMb;
+    int vramTotalMb;
+    int vramAvailableMb;
 
     static BuildInfo current();
 };
 
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
-    time,
+    timestamp,
     host,
     type,
     directory,
@@ -46,17 +46,17 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
     cmakeGenerator,
     compilerName,
     compilerVersion,
-    
+
     systemName,
     systemVersion,
     systemArchitecture,
 
     cpuCoresLogical,
     cpuCoresPhysical,
-    ramTotal,
-    ramAvailable,
-    vramTotal,
-    vramAvailable
+    ramTotalMb,
+    ramAvailableMb,
+    vramTotalMb,
+    vramAvailableMb
 );
 
 

@@ -8,6 +8,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
+    const nlohmann::json buildInfo = bugle::BuildInfo::current();
+    const nlohmann::json sessionInfo = bugle::SessionInfo::current();
+
+    std::println( "{}", buildInfo.dump( 2 ) );
+    std::println( "{}", sessionInfo.dump( 2 ) );
+
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
@@ -62,9 +68,6 @@ int main( int argc, char* argv[] )
     //     attribute:duration
     //     timestamp:>2024-04-25T00:00:00,<2024-04-25T23:59:59
     // )";
-
-    const nlohmann::json buildInfo = bugle::BuildInfo::current();
-    const nlohmann::json sessionInfo = bugle::SessionInfo::current();
 
     po.post( {}, { "build", "hwinfo" }, buildInfo );
     po.post( {}, { "session", "hwinfo" }, sessionInfo );

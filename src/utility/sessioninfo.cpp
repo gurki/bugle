@@ -31,40 +31,40 @@ std::string systemName();
 std::string systemVersion();
 std::string systemArchitecture();
 std::string cpuModel();
-uint64_t ramTotal();
-uint64_t ramAvailable();
+int ramTotalMb();
+int ramAvailableMb();
 
 
 ////////////////////////////////////////////////////////////////////////////////
 SessionInfo SessionInfo::current() {
     SessionInfo info {};
-    info.localTime = bugle::localTime();
+    info.timestamp = bugle::localTime();
     info.systemName = bugle::systemName();
     info.systemVersion = bugle::systemVersion();
     info.systemArchitecture = bugle::systemArchitecture();
     info.cpuModel = bugle::cpuModel();
     info.cpuCores = std::thread::hardware_concurrency();
-    info.ramTotal = bugle::ramTotal();
-    info.ramAvailable = bugle::ramAvailable();
+    info.ramTotalMb = bugle::ramTotalMb();
+    info.ramAvailableMb = bugle::ramAvailableMb();
     return info;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t ramAvailable()
+int ramAvailableMb()
 {
 #ifdef _WIN32
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     if (GlobalMemoryStatusEx(&status)) {
-        return status.ullAvailPhys;
+        return status.ullAvailPhys / 1000000;
     } else {
         return 0; // Failure
     }
 #elif defined(__linux__)
     struct sysinfo info;
     if (sysinfo(&info) == 0) {
-        return info.freeram * info.mem_unit;
+        return info.freeram * info.mem_unit / 1000000;
     } else {
         return 0; // Failure
     }
@@ -83,7 +83,7 @@ uint64_t ramAvailable()
     }
 
     uint64_t free_memory = (vm_stats.free_count + vm_stats.inactive_count) * page_size;
-    return free_memory;
+    return free_memory / 1000000;
 #else
     return 0; // Unsupported platform
 #endif
@@ -91,20 +91,20 @@ uint64_t ramAvailable()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t ramTotal()
+int ramTotalMb()
 {
 #ifdef _WIN32
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     if (GlobalMemoryStatusEx(&status)) {
-        return status.ullTotalPhys;
+        return status.ullTotalPhys / 1000000;
     } else {
         return 0; // Failure
     }
 #elif defined(__linux__)
     struct sysinfo info;
     if (sysinfo(&info) == 0) {
-        return info.totalram * info.mem_unit;
+        return info.totalram * info.mem_unit / 1000000;
     } else {
         return 0; // Failure
     }
@@ -112,7 +112,7 @@ uint64_t ramTotal()
     int64_t memsize;
     size_t len = sizeof(memsize);
     if (sysctlbyname("hw.memsize", &memsize, &len, NULL, 0) == 0) {
-        return memsize;
+        return memsize / 1000000;
     } else {
         return 0; // Failure
     }

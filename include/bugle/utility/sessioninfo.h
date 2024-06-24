@@ -5,29 +5,30 @@
 namespace bugle {
 
 
-struct SessionInfo 
+struct SessionInfo
 {
-    std::string localTime;
+    std::string timestamp;
     std::string systemName;
     std::string systemVersion;
     std::string systemArchitecture;
     std::string cpuModel;
     int cpuCores;
-    uint64_t ramTotal;
-    uint64_t ramAvailable;
+    int ramTotalMb;
+    int ramAvailableMb;
 
     static SessionInfo current();
 };
 
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo,
-    localTime,
+    timestamp,
     systemName,
     systemVersion,
     systemArchitecture,
     cpuModel,
-    ramTotal,
-    ramAvailable
+    cpuCores,
+    ramTotalMb,
+    ramAvailableMb
 );
 
 
