@@ -69,14 +69,14 @@ int ramAvailableMb()
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     if (GlobalMemoryStatusEx(&status)) {
-        return status.ullAvailPhys / 1000000;
+        return status.ullAvailPhys / 1024 / 1024;
     } else {
         return 0; // Failure
     }
 #elif defined(__linux__)
     struct sysinfo info;
     if (sysinfo(&info) == 0) {
-        return info.freeram * info.mem_unit / 1000000;
+        return info.freeram * info.mem_unit / 1024 / 1024;
     } else {
         return 0; // Failure
     }
@@ -95,7 +95,7 @@ int ramAvailableMb()
     }
 
     uint64_t free_memory = (vm_stats.free_count + vm_stats.inactive_count) * page_size;
-    return free_memory / 1000000;
+    return free_memory / 1024 / 1024;
 #else
     return 0; // Unsupported platform
 #endif
@@ -109,14 +109,14 @@ int ramTotalMb()
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
     if (GlobalMemoryStatusEx(&status)) {
-        return status.ullTotalPhys / 1000000;
+        return status.ullTotalPhys / 1024 / 1024;
     } else {
         return 0; // Failure
     }
 #elif defined(__linux__)
     struct sysinfo info;
     if (sysinfo(&info) == 0) {
-        return info.totalram * info.mem_unit / 1000000;
+        return info.totalram * info.mem_unit / 1024 / 1024;
     } else {
         return 0; // Failure
     }
@@ -124,7 +124,7 @@ int ramTotalMb()
     int64_t memsize;
     size_t len = sizeof(memsize);
     if (sysctlbyname("hw.memsize", &memsize, &len, NULL, 0) == 0) {
-        return memsize / 1000000;
+        return memsize / 1024 / 1024;
     } else {
         return 0; // Failure
     }

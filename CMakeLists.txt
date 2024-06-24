@@ -19,9 +19,11 @@ set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/" )
 
 add_library( ${PROJECT_NAME} STATIC
     src/core/envelope.cpp
+    src/core/filter.cpp
     src/core/letter.cpp
     src/core/postoffice.cpp
     src/filter/address.cpp
+    src/filter/lines.cpp
     src/filter/route.cpp
     src/format/colortable.cpp
     src/format/formatter.cpp
@@ -117,7 +119,7 @@ target_compile_definitions( ${PROJECT_NAME}
 
 
 add_subdirectory( examples )
-
+add_subdirectory( tests )
 
 if ( BUGLE_ENABLE )
     add_compile_definitions( BUGLE_ENABLE )

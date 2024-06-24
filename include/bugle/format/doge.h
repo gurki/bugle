@@ -2,11 +2,12 @@
 
 #include <vector>
 #include <string>
+#include <random>
 
 namespace bugle {
 
 
-const std::vector<std::string> firstWords = {
+static const std::vector<std::string> kDogePrefix = {
     "WOW",
     "SUCH",
     "MANY",
@@ -29,7 +30,7 @@ const std::vector<std::string> firstWords = {
     "STUNNING"
 };
 
-const std::vector<std::string> secondWords = {
+static const std::vector<std::string> kDogeSuffix = {
     "SUCCESS",
     "EFFORT",
     "GAIN",
@@ -81,8 +82,29 @@ const std::vector<std::string> secondWords = {
     "SMOOTHNESS",
     "DEPENDABILITY",
     "SOLUTIONS",
-    "PERFORMANCE"
+    "PERFORMANCE",
 };
+
+
+static std::string randomDoge() 
+{
+    static auto gen = std::mt19937{ std::random_device{}() };
+    static auto rnd = std::uniform_real_distribution();  
+
+    std::vector<std::string> confs( 2 );
+    std::ranges::sample( kDogeSuffix, confs.begin() + 1, 1, gen );
+    std::ranges::sample( kDogePrefix, confs.begin(), 1, gen );
+
+    if ( rnd( gen ) < 0.1f ) {
+        return confs[ 0 ];        
+    }
+
+    if ( rnd( gen ) < 0.1f ) {
+        return confs[ 1 ];
+    }
+
+    return std::format( "{} {}", confs[ 0 ], confs[ 1 ] );
+}
 
 
 }   //  ::bugle

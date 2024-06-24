@@ -16,6 +16,7 @@ struct AddressLine {
 struct Address : public Filter {
     std::vector<AddressLine> lines;
     virtual bool matches( const Letter& ) const override;
+    static FilterPtr fromString( const std::string& );
 };
 
 

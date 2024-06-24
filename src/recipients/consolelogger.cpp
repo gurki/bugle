@@ -58,19 +58,13 @@ void ConsoleLogger::receive( const Letter& letter )
 //////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::logEnvelope( const Letter& letter ) 
 {    
-    static auto gen = std::mt19937{ std::random_device{}() };
     Letter envelope = letter;
 
     if ( letter.attributes.at( "open" ) ) {
         envelope.message = std::format( "{} opened ...", letter.message );
-    } 
-    else 
-    {
+    } else {
         const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
-        std::vector<std::string> confs( 2 );
-        std::ranges::sample( firstWords, confs.begin(), 1, gen );
-        std::ranges::sample( secondWords, confs.begin() + 1, 1, gen );
-        envelope.message = std::format( "\033[3m{} {} ({})\033[0m", confs[0], confs[1], duration );
+        envelope.message = std::format( "\033[3m{} ({})\033[0m", randomDoge(), duration );
     }
 
     std::println( "{}", formatter_->format( envelope ) );

@@ -110,6 +110,8 @@ struct ValueFilter : public Filter
 
         return compare( letter.attributes.at( key ), value );
     }
+
+    static FilterPtr fromString( const std::string& );
 };
 
 
