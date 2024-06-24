@@ -2,11 +2,14 @@
 #include "bugle/format/colortable.h"
 #include "bugle/format/duration.h"
 #include "bugle/format/doge.h"
+#include "bugle/utility/buildinfo.h"
+#include "bugle/utility/sessioninfo.h"
 
 #include <print>
 #include <iostream>
 #include <thread>
 #include <random>
+#include <cctype>
 
 namespace bugle {
 
@@ -30,18 +33,40 @@ void ConsoleLogger::receive( const Letter& letter )
         return;
     }
 
-    if ( ! letter.tags.contains( "envelope" ) ) {
-        std::println( "{}", formatter_->format( letter ) );
+    if ( letter.tags.contains( "system" ) ) 
+    {
+        if ( letter.tags.contains( "build" ) ) {
+            logBuild( letter );
+            return;
+        } 
+        
+        if ( letter.tags.contains( "session" ) ) {
+            logSession( letter );
+            return;
+        }
+    }
+
+    if ( letter.tags.contains( "envelope" ) ) {
+        logEnvelope( letter );
         return;
     }
 
+    std::println( "{}", formatter_->format( letter ) );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logEnvelope( const Letter& letter ) 
+{    
+    static auto gen = std::mt19937{ std::random_device{}() };
     Letter envelope = letter;
 
     if ( letter.attributes.at( "open" ) ) {
         envelope.message = std::format( "{} opened ...", letter.message );
-    } else {
+    } 
+    else 
+    {
         const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
-        auto gen = std::mt19937{std::random_device{}()};
         std::vector<std::string> confs( 2 );
         std::ranges::sample( firstWords, confs.begin(), 1, gen );
         std::ranges::sample( secondWords, confs.begin() + 1, 1, gen );
@@ -49,6 +74,121 @@ void ConsoleLogger::receive( const Letter& letter )
     }
 
     std::println( "{}", formatter_->format( envelope ) );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logBuild( const Letter& letter ) 
+{
+    BuildInfo info = nlohmann::json( letter.attributes );
+
+    const auto tx = 254;
+    const auto tx2 = 250;
+    const auto tx3 = 246;
+
+    const auto h1 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto h2 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto kv = [ this ]( const std::string& key, const auto& val ) {
+        std::println( "{:<12} {}", 
+            formatter_->colorize( key, tx3 ),
+            formatter_->colorize( std::format( "{}", val ), tx2 ) 
+        );
+    };
+
+    h1( "🚧 BUILD" );
+
+    //  environment
+    h2( "🌳 Environment" );
+    kv( "timestamp:", info.timestamp );
+    kv( "bugle:", info.bugle );
+    kv( "host:", info.host );
+    // kv( "directory:", info.directory );
+
+    //  compilation
+    h2( "🏭 Compilation" );
+    kv( "type:", info.type );
+    kv( "cmake:", info.cmakeVersion );
+    kv( "generator:", info.cmakeGenerator );
+    kv( "compiler:", info.compilerName );
+    kv( "version:", info.compilerVersion );
+
+    // //  system
+    // h2( "💻 System" );
+    // kv( "name:", info.systemName );
+    // kv( "version:", info.systemVersion );
+    // kv( "architecture:", info.systemArchitecture );
+
+    // //  hardware
+    // h2( "💾 Hardware" );
+    // kv( "cpu:", info.cpuName );
+    // kv( "cores:", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
+    // kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+    // kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f )  );
+
+    std::println( "" );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logSession( const Letter& letter ) 
+{
+    SessionInfo info = nlohmann::json( letter.attributes );
+
+    const auto tx = 254;
+    const auto tx2 = 250;
+    const auto tx3 = 246;
+
+    const auto h1 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto h2 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto kv = [ this ]( const std::string& key, const auto& val ) {
+        std::println( "{:<12} {}", 
+            formatter_->colorize( key, tx3 ),
+            formatter_->colorize( std::format( "{}", val ), tx2 ) 
+        );
+    };
+
+    h1( "💡 SESSION" );
+
+    //  
+    h2( "🍎 Application" );
+    kv( "timestamp:", info.timestamp );
+    kv( "app:", info.appName );
+    kv( "version:", info.appVersion );
+    kv( "commit:", info.appCommit );
+
+    //  system
+    h2( "💻 System" );
+    kv( "name:", info.systemName );
+    kv( "version:", info.systemVersion );
+    kv( "architecture:", info.systemArchitecture );
+
+    //  hardware
+    h2( "💾 Hardware" );
+    kv( "cpu:", std::format( "{}", info.cpuModel ) );
+    kv( "cores:", std::format( "{}", info.cpuCores ) );
+    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+
+    std::println( "" );
 }
 
 

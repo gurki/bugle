@@ -36,9 +36,21 @@ int ramAvailableMb();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-SessionInfo SessionInfo::current() {
+SessionInfo SessionInfo::current() 
+{
     SessionInfo info {};
     info.timestamp = bugle::localTime();
+
+#ifdef APP_NAME
+    info.appName = APP_NAME;
+    info.appVersion = APP_VERSION;
+    info.appCommit = APP_COMMIT;
+#else
+    info.appName = "n/a";
+    info.appVersion = "n/a";
+    info.appCommit = "n/a";
+#endif 
+
     info.systemName = bugle::systemName();
     info.systemVersion = bugle::systemVersion();
     info.systemArchitecture = bugle::systemArchitecture();

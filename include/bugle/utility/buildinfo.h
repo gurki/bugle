@@ -9,6 +9,7 @@ struct BuildInfo
 {
     //  environment
     std::string timestamp;
+    std::string bugle;
     std::string host;
     std::string directory;
 
@@ -25,6 +26,7 @@ struct BuildInfo
     std::string systemArchitecture;
 
     //  hardware
+    std::string cpuName;
     int cpuCoresLogical;
     int cpuCoresPhysical;
     int ramTotalMb;
@@ -38,10 +40,11 @@ struct BuildInfo
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
     timestamp,
+    bugle,
     host,
-    type,
     directory,
 
+    type,
     cmakeVersion,
     cmakeGenerator,
     compilerName,
@@ -51,6 +54,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
     systemVersion,
     systemArchitecture,
 
+    cpuName,
     cpuCoresLogical,
     cpuCoresPhysical,
     ramTotalMb,

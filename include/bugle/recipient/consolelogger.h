@@ -18,6 +18,9 @@ class ConsoleLogger : public Recipient
 
     private:
 
+        void logBuild( const Letter& );    
+        void logSession( const Letter& );    
+        void logEnvelope( const Letter& );
         FormatterPtr formatter_ = nullptr;
 };
 

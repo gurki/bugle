@@ -6,7 +6,7 @@ set( BUGLE_ENABLE ON CACHE BOOL "Enable bugle 📯" FORCE )
 
 project(
     bugle-examples
-    VERSION 0.0.0
+    VERSION 1.0.0
     DESCRIPTION "A tag-based, filterable, colorful and thread-safe cpp logging library"
     HOMEPAGE_URL "https://github.com/gurki/bugle"
     LANGUAGES CXX
@@ -26,16 +26,13 @@ target_link_libraries( ${PROJECT_NAME} PUBLIC
 
 target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_23 )
 
-target_compile_definitions( ${PROJECT_NAME}
-    PUBLIC
-        APP_NAME=\"${PROJECT_NAME}\"
-        APP_VERSION=\"${PROJECT_VERSION}\"
-        APP_COMMIT=\"${PROJECT_COMMIT}\"
-)
-
 execute_process(
     COMMAND git rev-parse --short HEAD
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE PROJECT_COMMIT
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+set( APP_NAME \"${PROJECT_NAME}\" PARENT_SCOPE )
+set( APP_VERSION \"${PROJECT_VERSION}\" PARENT_SCOPE )
+set( APP_COMMIT \"${PROJECT_COMMIT}\" PARENT_SCOPE )

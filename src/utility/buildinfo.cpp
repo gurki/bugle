@@ -8,6 +8,7 @@ BuildInfo BuildInfo::current()
     static const BuildInfo info
     {
         .timestamp = BUGLE_BUILD_TIME,
+        .bugle = BUGLE_VERSION,
         .host = BUGLE_BUILD_HOST,
         .directory = BUGLE_BUILD_DIRECTORY,
 
@@ -21,6 +22,7 @@ BuildInfo BuildInfo::current()
         .systemVersion = BUGLE_BUILD_SYSTEM_VERSION,
         .systemArchitecture = BUGLE_BUILD_SYSTEM_ARCHITECTURE,
 
+        .cpuName = BUGLE_BUILD_CPU_NAME,
         .cpuCoresLogical = BUGLE_BUILD_CPU_CORES_LOGICAL,
         .cpuCoresPhysical = BUGLE_BUILD_CPU_CORES_PHYSICAL,
         .ramTotalMb = BUGLE_BUILD_RAM_TOTAL,

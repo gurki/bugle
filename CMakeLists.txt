@@ -6,7 +6,7 @@ option( BUGLE_ENABLE OFF "Enable bugle 📯" )
 
 project(
     bugle
-    VERSION 0.0.0
+    VERSION 1.0.0
     DESCRIPTION "A tag-based, filterable, colorful and thread-safe cpp logging library"
     HOMEPAGE_URL "https://github.com/gurki/bugle"
     LANGUAGES CXX
@@ -100,6 +100,7 @@ target_compile_definitions( ${PROJECT_NAME}
         BUGLE_BUILD_SYSTEM_VERSION=\"${CMAKE_SYSTEM_VERSION}\"
         BUGLE_BUILD_SYSTEM_ARCHITECTURE=\"${CMAKE_SYSTEM_PROCESSOR}\"
 
+        BUGLE_BUILD_CPU_NAME=\"${BUGLE_BUILD_CPU_NAME}\"
         BUGLE_BUILD_CPU_CORES_LOGICAL=${BUGLE_BUILD_CPU_CORES_LOGICAL}
         BUGLE_BUILD_CPU_CORES_PHYSICAL=${BUGLE_BUILD_CPU_CORES_PHYSICAL}
         BUGLE_BUILD_RAM_TOTAL=${BUGLE_BUILD_RAM_TOTAL}
@@ -120,4 +121,13 @@ add_subdirectory( examples )
 
 if ( BUGLE_ENABLE )
     add_compile_definitions( BUGLE_ENABLE )
+endif()
+
+if ( APP_NAME )
+    target_compile_definitions( ${PROJECT_NAME} 
+        PUBLIC
+            APP_NAME=${APP_NAME}
+            APP_VERSION=${APP_VERSION}
+            APP_COMMIT=${APP_COMMIT}
+    )
 endif()
