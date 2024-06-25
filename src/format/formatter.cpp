@@ -65,14 +65,15 @@ std::string Formatter::format( const Letter& letter ) const
 
     //  letter without quotes
 
+    ss << skip( 2 );
+    ss << indent( letter );
+
     if ( ! letter.message.empty() ) {
-        ss << skip( 2 );
-        ss << indent( letter );
         ss << colorize( elide( letter.message, 40 ), theme_->primary().color );
+        ss << skip( 2 );
     }
 
     // ss << "\033[80G";
-    ss << skip( 2 );
 
     //  tags
 
