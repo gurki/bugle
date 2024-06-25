@@ -127,7 +127,10 @@ if ( BUGLE_BUILD_TESTS )
 endif()
 
 if ( BUGLE_ENABLE )
-    add_compile_definitions( BUGLE_ENABLE )
+    target_compile_definitions( ${PROJECT_NAME}
+        PUBLIC
+            BUGLE_ENABLE
+    )
 endif()
 
 if ( APP_NAME )
