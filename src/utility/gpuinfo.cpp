@@ -1,5 +1,10 @@
 #include "bugle/utility/gpuinfo.h"
 
+#ifdef GLEW_STATIC
+#include <gl/glew.h>
+#include <glfw/glfw3.h>
+#endif 
+
 namespace bugle {
 
 

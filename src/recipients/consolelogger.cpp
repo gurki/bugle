@@ -4,6 +4,7 @@
 #include "bugle/format/doge.h"
 #include "bugle/utility/buildinfo.h"
 #include "bugle/utility/sessioninfo.h"
+#include "bugle/utility/gpuinfo.h"
 
 #include <print>
 
@@ -38,6 +39,11 @@ void ConsoleLogger::receive( const Letter& letter )
         
         if ( letter.tags.contains( "session" ) ) {
             logSession( letter );
+            return;
+        }
+        
+        if ( letter.tags.contains( "gpu" ) ) {
+            logGpu( letter );
             return;
         }
     }
@@ -180,6 +186,54 @@ void ConsoleLogger::logSession( const Letter& letter )
     kv( "cpu:", std::format( "{}", info.cpuModel ) );
     kv( "cores:", std::format( "{}", info.cpuCores ) );
     kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+
+    std::println( "" );
+    std::fflush( nullptr );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logGpu( const Letter& letter ) 
+{
+    bugle::GpuInfo info = nlohmann::json( letter.attributes );
+
+    const auto tx = 254;
+    const auto tx2 = 250;
+    const auto tx3 = 246;
+
+    const auto h1 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto h2 = [ this ]( const std::string& title ) {
+        std::println( "\n{}", 
+            formatter_->colorize( title, tx )
+        );
+    };
+
+    const auto kv = [ this ]( const std::string& key, const auto& val ) {
+        std::println( "{:<12} {}", 
+            formatter_->colorize( key, tx3 ),
+            formatter_->colorize( std::format( "{}", val ), tx2 ) 
+        );
+    };
+
+    h1( "🎨 GPU" );
+
+    //  renderer
+    h2( "👩‍🎨 Renderer" );
+    kv( "renderer", info.renderer );
+    kv( "version", info.version );
+
+    //  capabilities
+    h2( "🦾 Capabilities" );
+    kv( "maxPatchVertices", info.maxPatchVertices );
+    kv( "maxTextureImageUnits", info.maxTextureImageUnits );
+    kv( "maxTextureSize", info.maxTextureSize );
+    kv( "maxArrayTextureLayers", info.maxArrayTextureLayers );
+    kv( "max3dTextureSize", info.max3dTextureSize );
 
     std::println( "" );
     std::fflush( nullptr );

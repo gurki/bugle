@@ -19,6 +19,7 @@ class ConsoleLogger : public Recipient
 
         void logBuild( const Letter& );    
         void logSession( const Letter& );    
+        void logGpu( const Letter& );    
         void logEnvelope( const Letter& );
         FormatterPtr formatter_ = nullptr;
 };
