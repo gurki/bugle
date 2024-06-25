@@ -2,7 +2,6 @@
 
 #include "bugle/core/recipient.h"
 #include "bugle/format/formatter.h"
-#include <mutex>
 
 namespace bugle {
 
