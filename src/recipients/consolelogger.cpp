@@ -6,10 +6,6 @@
 #include "bugle/utility/sessioninfo.h"
 
 #include <print>
-#include <iostream>
-#include <thread>
-#include <random>
-#include <cctype>
 
 namespace bugle {
 
@@ -52,6 +48,7 @@ void ConsoleLogger::receive( const Letter& letter )
     }
 
     std::println( "{}", formatter_->format( letter ) );
+    std::fflush( nullptr );
 }
 
 
@@ -68,6 +65,7 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
     }
 
     std::println( "{}", formatter_->format( envelope ) );
+    std::fflush( nullptr );
 }
 
 
@@ -130,6 +128,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
     // kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f )  );
 
     std::println( "" );
+    std::fflush( nullptr );
 }
 
 
@@ -183,6 +182,7 @@ void ConsoleLogger::logSession( const Letter& letter )
     kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
 
     std::println( "" );
+    std::fflush( nullptr );
 }
 
 
