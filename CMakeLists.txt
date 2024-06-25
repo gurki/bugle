@@ -1,8 +1,8 @@
 cmake_minimum_required( VERSION 3.28 )
 
-
 option( BUGLE_ENABLE OFF "Enable bugle 📯" )
-
+option( BUGLE_BUILD_EXAMPLES OFF "Build examples" )
+option( BUGLE_BUILD_TESTS OFF "Build tests" )
 
 project(
     bugle
@@ -118,15 +118,20 @@ target_compile_definitions( ${PROJECT_NAME}
 )
 
 
-add_subdirectory( examples )
-add_subdirectory( tests )
+if ( BUGLE_BUILD_EXAMPLES )
+    add_subdirectory( examples )
+endif()
+
+if ( BUGLE_BUILD_TESTS )
+    add_subdirectory( tests )
+endif()
 
 if ( BUGLE_ENABLE )
     add_compile_definitions( BUGLE_ENABLE )
 endif()
 
 if ( APP_NAME )
-    target_compile_definitions( ${PROJECT_NAME} 
+    target_compile_definitions( ${PROJECT_NAME}
         PUBLIC
             APP_NAME=${APP_NAME}
             APP_VERSION=${APP_VERSION}
