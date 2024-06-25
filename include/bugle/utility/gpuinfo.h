@@ -14,6 +14,8 @@ struct GpuInfo
     int maxTextureSize;
     int maxArrayTextureLayers;
     int max3dTextureSize;
+    int ramTotalMb;
+    int ramAvailableMb;
 
     static GpuInfo current();
 };
@@ -26,7 +28,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( GpuInfo,
     maxTextureImageUnits, 
     maxTextureSize, 
     maxArrayTextureLayers,
-    max3dTextureSize 
+    max3dTextureSize,
+    ramTotalMb,
+    ramAvailableMb
 );
 
 

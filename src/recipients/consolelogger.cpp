@@ -226,6 +226,7 @@ void ConsoleLogger::logGpu( const Letter& letter )
     h2( "👩‍🎨 Renderer" );
     kv( "renderer", info.renderer );
     kv( "version", info.version );
+    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
 
     //  capabilities
     h2( "🦾 Capabilities" );
