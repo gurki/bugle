@@ -97,7 +97,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
     };
 
     const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<12} {}",
+        std::println( "{} {} {:<20} {}",
             closeOuter ? "└" : "│",
             closeInner ? "└" : "├",
             formatter_->colorize( key, tx3 ),
@@ -122,18 +122,18 @@ void ConsoleLogger::logBuild( const Letter& letter )
     kv( "compiler:", info.compilerName );
     kv( "version:", info.compilerVersion, true );
 
-    //  system
-    h2( "💻 System" );
-    kv( "name:", info.systemName );
-    kv( "version:", info.systemVersion );
-    kv( "architecture:", info.systemArchitecture, true );
+    // //  system
+    // h2( "💻 System" );
+    // kv( "name:", info.systemName );
+    // kv( "version:", info.systemVersion );
+    // kv( "architecture:", info.systemArchitecture, true );
 
-    //  hardware
-    h2( "💾 Hardware" );
-    kv( "cpu:", info.cpuName );
-    kv( "cores:", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
-    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
-    kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
+    // //  hardware
+    // h2( "💾 Hardware" );
+    // kv( "cpu:", info.cpuName );
+    // kv( "cores:", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
+    // kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+    // kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
 
     std::println( "" );
     std::fflush( nullptr );
@@ -162,7 +162,7 @@ void ConsoleLogger::logSession( const Letter& letter )
     };
 
     const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<12} {}",
+        std::println( "{} {} {:<20} {}",
             closeOuter ? "└" : "│",
             closeInner ? "└" : "├",
             formatter_->colorize( key, tx3 ),
@@ -218,7 +218,7 @@ void ConsoleLogger::logGpu( const Letter& letter )
     };
 
     const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<12} {}",
+        std::println( "{} {} {:<20} {}",
               closeOuter ? "└" : "│",
               closeInner ? "└" : "├",
               formatter_->colorize( key, tx3 ),
