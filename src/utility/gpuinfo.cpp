@@ -11,6 +11,13 @@ GpuInfo GpuInfo::current()
 {
     GpuInfo info {};
 #ifdef GL_VERSION
+    const GLubyte* vendor = glGetString( GL_VENDOR );
+
+    if ( vendor == nullptr ) {
+        //  opengl context not initialized yet
+        return info;
+    }
+
     const GLubyte* renderer = glGetString( GL_RENDERER );
     const GLubyte* version = glGetString( GL_VERSION );
     info.renderer = reinterpret_cast<const char*>( renderer );
