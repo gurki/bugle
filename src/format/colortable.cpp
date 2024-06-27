@@ -4,9 +4,8 @@
 #include <fstream>
 #include <sstream>
 #include <ios>  //  std::hex
-#include <string_view>
 #include <regex>
-
+#include <print>
 
 namespace bugle {
 
@@ -20,14 +19,20 @@ ColorTable ColorTable::instance_ = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 ColorTable::ColorTable() {
-    load( BUGLE_ROOT + "res/colors.json"s );
+    load( "res/colors.json" );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ColorTable::load( const std::string& path ) {
+void ColorTable::load( const std::string& path )
+{
     std::ifstream fin( path );
-    assert( fin.is_open() );
+
+    if ( ! fin.is_open() ) {
+        std::println( "couldn't load {}", path );
+        return;
+    }
+
     table_ = nlohmann::json::parse( fin );
 }
 

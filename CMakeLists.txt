@@ -13,8 +13,6 @@ project(
 )
 
 add_subdirectory( dependencies )
-add_compile_definitions( BUGLE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/" )
-set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/install/" )
 
 
 add_library( ${PROJECT_NAME} STATIC
@@ -37,33 +35,33 @@ add_library( ${PROJECT_NAME} STATIC
     src/utility/sessioninfo.cpp
 )
 
-add_library( ${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME} )
-
-target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_23 )
-
-target_include_directories( ${PROJECT_NAME}
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+target_compile_features( ${PROJECT_NAME} PUBLIC
+    cxx_std_23
 )
 
-target_link_libraries( ${PROJECT_NAME}
-    PUBLIC
-        nlohmann_json
+target_include_directories( ${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
-set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
-set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
+target_link_libraries( ${PROJECT_NAME} PUBLIC
+    nlohmann_json
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/colors.json
+    ${CMAKE_BINARY_DIR}/res/colors.json
+    COPYONLY
+)
 
 install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res
-    DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    DESTINATION ${CMAKE_BINARY_DIR}
 )
 
 install(
     TARGETS ${PROJECT_NAME}
-    DESTINATION ${EXECUTABLE_OUTPUT_PATH}
+    DESTINATION ${CMAKE_BINARY_DIR}
 )
 
 execute_process(
