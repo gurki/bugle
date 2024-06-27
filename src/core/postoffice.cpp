@@ -76,7 +76,7 @@ void PostOffice::post( Letter&& letter )
 
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::post(
-    const std::string& letter,
+    const std::string& message,
     const tags_t& tags,
     const attributes_t& attributes,
     const std::source_location& location )
@@ -87,7 +87,7 @@ void PostOffice::post(
     }
 
     const int level = this->level( std::this_thread::get_id() );
-    post( { letter, tags, attributes, location, level } );
+    post( { message, tags, attributes, location, level } );
 #endif
 }
 
