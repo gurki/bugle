@@ -1,4 +1,5 @@
 #include "bugle/format/colortable.h"
+#include "bugle/format/colors.h"
 
 #include <iostream>
 #include <fstream>
@@ -19,7 +20,7 @@ ColorTable ColorTable::instance_ = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 ColorTable::ColorTable() {
-    load( "res/colors.json" );
+    table_ = kColorNames;
 }
 
 
@@ -33,7 +34,11 @@ void ColorTable::load( const std::string& path )
         return;
     }
 
-    table_ = nlohmann::json::parse( fin );
+    try {
+        table_ = nlohmann::json::parse( fin );
+    } catch ( const std::exception& err ) {
+        std::println( "coudln't parse {}", path );
+    }
 }
 
 
