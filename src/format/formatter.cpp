@@ -69,7 +69,7 @@ std::string Formatter::format( const Letter& letter ) const
     ss << indent( letter );
 
     if ( ! letter.message.empty() ) {
-        ss << colorize( elide( letter.message, 40 ), theme_->primary().color );
+        ss << colorize( letter.message, theme_->primary().color );
         ss << skip( 2 );
     }
 
