@@ -56,6 +56,15 @@ class PostOffice
             const std::source_location& location = std::source_location::current()
         );
 
+        template <typename... Args>
+        void memo( std::format_string<Args...> fmt, Args&&... args );
+
+        template <typename... Args>
+        void card( 
+            const tags_t& tags, 
+            std::format_string<Args...> fmt, Args&&... args 
+        );
+
         static PostOffice& instance();
 
     private:
@@ -88,6 +97,23 @@ class PostOffice
 
         static PostOfficeUPtr instance_;
 };
+
+
+template <typename... Args>
+void PostOffice::memo( std::format_string<Args...> fmt, Args&&... args ) {
+    post( std::format( fmt, std::forward<Args>( args )... ) );
+}
+
+template <typename... Args>
+void PostOffice::card( 
+    const tags_t& tags, 
+    std::format_string<Args...> fmt, Args&&... args ) 
+{
+    post( 
+        std::format( fmt, std::forward<Args>( args )... ), 
+        tags 
+    );
+}
 
 
 }   //  ::bugle
