@@ -1,8 +1,9 @@
-cmake_minimum_required( VERSION 3.28 )
+cmake_minimum_required( VERSION 3.28 FATAL_ERROR )
 
-option( BUGLE_ENABLE OFF "Enable bugle 📯" )
-option( BUGLE_BUILD_EXAMPLES OFF "Build examples" )
-option( BUGLE_BUILD_TESTS OFF "Build tests" )
+option( BUGLE_ENABLE "Enable bugle 📯" OFF )
+option( BUGLE_BUILD_EXAMPLES "Build examples" OFF )
+option( BUGLE_BUILD_TESTS "Build tests" OFF )
+
 
 project(
     bugle
@@ -115,10 +116,9 @@ target_compile_definitions( ${PROJECT_NAME}
         $<$<CONFIG:RelWithDebInfo>:BUGLE_BUILD_TYPE="RelWithDebInfo">
 )
 
-
-if ( BUGLE_BUILD_EXAMPLES )
+# if ( BUGLE_BUILD_EXAMPLES )
     add_subdirectory( examples )
-endif()
+# endif()
 
 if ( BUGLE_BUILD_TESTS )
     add_subdirectory( tests )

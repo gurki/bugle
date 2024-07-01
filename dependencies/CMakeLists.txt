@@ -1,16 +1,11 @@
-cmake_minimum_required( VERSION 3.14 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.28 FATAL_ERROR )
 
 include( FetchContent )
-set( FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 
 FetchContent_Declare( json
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.11.3
+    EXCLUDE_FROM_ALL
 )
 
-FetchContent_Declare( Catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.5.3
-)
-
-FetchContent_MakeAvailable( json Catch2 )
+FetchContent_MakeAvailable( json )

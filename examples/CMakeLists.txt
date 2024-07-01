@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.28 )
+cmake_minimum_required( VERSION 3.28 FATAL_ERROR )
 
 
 set( BUGLE_ENABLE ON CACHE BOOL "Enable bugle 📯" FORCE )

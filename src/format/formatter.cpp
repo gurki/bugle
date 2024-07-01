@@ -101,7 +101,7 @@ std::string Formatter::format( const Letter& letter ) const
     // std::regex_match( fn, match, re );
 
     // std::string name;
-    // if ( ! match.empty() ) 
+    // if ( ! match.empty() )
     // {
     //     name = match[ 2 ].str();
 
@@ -113,7 +113,7 @@ std::string Formatter::format( const Letter& letter ) const
     const auto text = std::format( "{}:{}", letter.fileInfo(), letter.line() );
     // const auto link = std::format( "{}:{}", letter.file(), letter.line() );
     // const auto hyperlink = std::format( "\e]8;;{}\e\\{}\e]8;;\e\\", link, text );
-    const auto location = std::format( "[{} {}]", elide( letter.function(), 40 ), text );
+    const auto location = std::format( "[{} {}]", letter.functionInfo(), text );
 
     ss << colorize( location, theme_->secondary().variant );
     return ss.str();
@@ -152,13 +152,13 @@ std::string Formatter::indent( const Letter& letter ) const
     );
 
     std::string sym = "├";
-    
+
     if ( isEnv ) {
         sym = isOpen ? "┌" : "└";
     } else if ( lastThread != letter.thread ) {
         sym = "┬";
     }
-    
+
     lastThread = letter.thread;
 
     return colorize(

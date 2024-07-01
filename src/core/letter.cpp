@@ -37,7 +37,7 @@ std::string Letter::locationInfo() const
 
     return std::format( "{}{}@{}:{}.{}{}",
         locOpen,
-        function(),
+        functionInfo(),
         fileInfo(),
         line(),
         column(),
@@ -54,7 +54,7 @@ std::string Letter::threadInfo() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string Letter::functionInfo() const {
-    static const std::regex re( R"((.*)? (?:__cdecl )?([\w\d_<>:~]*)(?:::operator \(\))?(\(.*\))( .*)?)" );
+    const std::regex re( R"((.+ )?(?:__cdecl )?([\w\d_<>:~]+)(?:::operator \(\))?(\(.*\))(?: const)?)" );
     std::smatch match;
     const std::string& fn = function();
     std::regex_match( fn, match, re );
