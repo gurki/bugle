@@ -66,9 +66,16 @@ void Profiler::receive( const Letter& letter )
 ////////////////////////////////////////////////////////////////////////////////
 bool Profiler::open()
 {
+    constexpr std::string_view folder = "profiles";
+
+    if ( ! std::filesystem::exists( folder ) ) {
+        std::filesystem::create_directory( folder );
+    }
+
     const auto time = std::chrono::system_clock::now();
     const auto outname = std::format(
-        "{:%Y-%m-%d_%H%M%S_collapsed.txt}",
+        "{}/{:%Y-%m-%d_%H%M%S_collapsed.txt}",
+        folder,
         std::chrono::time_point_cast<std::chrono::seconds>( time )
     );
 

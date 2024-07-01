@@ -98,8 +98,6 @@ int main( int argc, char* argv[] )
         { "position", { 0.5f, 0.2f, 0.1f } }
     });
 
-    child();
-
     // po.post( "incoming", { "measurement" }, {
     //     { "temperature", 10 }
     // });
@@ -121,6 +119,8 @@ int main( int argc, char* argv[] )
     // std::for_each( std::execution::par_unseq, vals.begin(), vals.end(), [ &po ]( const int val ) {
     //     po.post( "", { "benchmark" }, { { "value", val } } );
     // });
+
+    child();
 
     scope.close();
     po.flush();
