@@ -22,10 +22,10 @@ struct MessageFilter : public Filter
         const comp_t& _compare = std::equal_to<>{} ) :
         message( _message ),
         compare( _compare )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override {
-        return compare( letter.message, message );
+    {
+        matches = [ this ]( const Letter& letter ) {
+            return compare( letter.message, message );
+        };
     }
 };
 
@@ -36,10 +36,10 @@ struct TagFilter : public Filter
 
     TagFilter( const std::string& _tag ) :
         tag( _tag )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override {
-        return letter.tags.contains( tag );
+    {
+        matches = [ this ]( const Letter& letter ) {
+            return letter.tags.contains( tag );
+        };
     }
 };
 
@@ -50,10 +50,10 @@ struct FileFilter : public Filter
 
     FileFilter( const std::string& _filename ) :
         filename( _filename )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override {
-        return letter.fileInfo() == filename;
+    {
+        matches = [ this ]( const Letter& letter ) {
+            return letter.fileInfo() == filename;
+        };
     }
 };
 
@@ -64,10 +64,10 @@ struct FunctionFilter : public Filter
 
     FunctionFilter( const std::string& _function ) :
         function( _function )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override {
-        return letter.functionInfo() == function;
+    {
+        matches = [ this ]( const Letter& letter ) {
+            return letter.functionInfo() == function;
+        };
     }
 };
 
@@ -78,10 +78,10 @@ struct AttributeFilter : public Filter
 
     AttributeFilter( const std::string& _key ) :
         key( _key )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override {
-        return letter.attributes.contains( key );
+    {
+        matches = [ this ]( const Letter& letter ) {
+            return letter.attributes.contains( key );
+        };
     }
 };
 
@@ -100,15 +100,14 @@ struct ValueFilter : public Filter
         key( _key ),
         value( _value ),
         compare( _compare )
-    {};
-
-    virtual bool matches( const Letter& letter ) const override
     {
-        if ( ! letter.attributes.contains( key ) ) {
-            return false;
-        }
+        matches = [ this ]( const Letter& letter ) {
+            if ( ! letter.attributes.contains( key ) ) {
+                return false;
+            }
 
-        return compare( letter.attributes.at( key ), value );
+            return compare( letter.attributes.at( key ), value );
+        };
     }
 
     static FilterPtr fromString( const std::string& );

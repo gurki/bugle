@@ -8,7 +8,7 @@ namespace bugle {
 
 
 struct AddressLine {
-    FilterPtr variable = nullptr;
+    Filter variable;
     bool negate = false;
 };
 
@@ -23,7 +23,20 @@ struct LineInfo {
 struct Address : public Filter
 {
     std::vector<AddressLine> lines;
-    virtual bool matches( const Letter& ) const override;
+
+    Address()
+    {
+        matches = [ this ]( const Letter& letter )
+        {
+            for ( const auto& line : lines ) {
+                if ( line.variable.matches( letter ) == line.negate ) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
 
     static constexpr auto splitConjuncts( std::string_view expression )
     {

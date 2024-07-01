@@ -37,39 +37,41 @@ int main( int argc, char* argv[] )
         std::println( "{} {} {}", con.negate, con.type, con.variable );
     });
 
-    auto addressA = std::make_shared<bugle::Address>();
-    auto tagA = std::make_shared<bugle::TagFilter>( "info" );
-    auto tagB = std::make_shared<bugle::TagFilter>( "debug" );
-    auto valA = std::make_shared<bugle::ValueFilter>( "value", 100, std::greater<>{} );
-    addressA->lines = { { tagA }, { tagB, true }, { valA, true } };
+    bugle::TagFilter tagA( "info" );
+    bugle::TagFilter tagB( "debug" );
+    bugle::ValueFilter valA( "value", 100, std::greater<>{} );
+    bugle::Address addressA;
+    addressA.lines = { { tagA }, { tagB, true }, { valA, true } };
 
-    auto addressB = std::make_shared<bugle::Address>();
-    auto msgA = std::make_shared<bugle::MessageFilter>( "main" );
-    addressB->lines = { { msgA } };
+    bugle::MessageFilter msgA( "main" );
+    bugle::Address addressB;
+    addressB.lines = { { msgA } };
 
-    auto routeA = std::make_shared<bugle::Route>();
-    auto attA = std::make_shared<bugle::AttributeFilter>( "position" );
-    routeA->addresses = { addressA, addressB, attA };
+    bugle::AttributeFilter attA( "position" );
+    bugle::Route routeA;
+    routeA.addresses = { addressA, addressB, attA };
 
     // bugle::Route route = R"(
     //     !tag:benchmark
     //     attribute:value%1000=0
     // )";
 
-    auto routeB = std::make_shared<bugle::Route>();
-    auto addressC = std::make_shared<bugle::Address>();
-    auto tagC = std::make_shared<bugle::TagFilter>( "benchmark" );
-    auto valB = std::make_shared<bugle::ValueFilter>( "value", 1000,
+    bugle::TagFilter tagC( "benchmark" );
+    bugle::ValueFilter valB( "value", 1000,
         []( const nlohmann::json& valA, const nlohmann::json& valB ) -> bool {
             return ( valA.get<int>() % valB.get<int>() ) == 0;
         }
     );
-    addressC->lines = { { tagC, true } };
-    routeB->addresses = { addressC, valB };
 
-    auto envFilter = std::make_shared<bugle::TagFilter>( "envelope" );
-    auto nenvFilter = std::make_shared<bugle::Address>();
-    nenvFilter->lines = { { envFilter, true } };
+    bugle::Address addressC;
+    addressC.lines = { { tagC, true } };
+
+    bugle::Route routeB;
+    routeB.addresses = { addressC, valB };
+
+    bugle::TagFilter envFilter( "envelope" );
+    bugle::Address nenvFilter;
+    nenvFilter.lines = { { envFilter, true } };
 
     po.addObserver( cl );
     po.addObserver( jl );

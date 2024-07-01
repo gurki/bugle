@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 
 namespace bugle {
 
@@ -14,10 +15,8 @@ class Letter;
 
 struct Filter
 {
-    virtual ~Filter() {};
+    std::function<bool(const Letter&)> matches {};
 
-    //  empty default (matches any letter)
-    virtual bool matches( const Letter& ) const = 0;
     static FilterPtr fromString( const std::string& expression );
 };
 

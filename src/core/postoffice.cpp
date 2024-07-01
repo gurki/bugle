@@ -143,14 +143,14 @@ void PostOffice::pop( const std::thread::id& thread )
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::addObserver(
     const RecipientRef& observer,
-    const FilterPtr& filter )
+    const Filter& filter )
 {
 #ifdef BUGLE_ENABLE
     std::scoped_lock lock( observerMutex_ );
 
     observers_.insert( observer );
 
-    if ( ! filter ) {
+    if ( ! filter.matches ) {
         return;
     }
 
@@ -227,7 +227,7 @@ void PostOffice::processQueue()
                 {
                     const auto& filter = filter_.at( observerRef );
 
-                    if ( ! filter->matches( letter ) ) {
+                    if ( ! filter.matches( letter ) ) {
                         continue;
                     }
                 }

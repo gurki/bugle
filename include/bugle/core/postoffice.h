@@ -43,7 +43,7 @@ class PostOffice
 
         void addObserver(
             const RecipientRef& observer,
-            const FilterPtr& filter = {}
+            const Filter& filter = {}
         );
 
         void removeObserver( const RecipientRef& observer );
@@ -81,7 +81,7 @@ class PostOffice
 
         std::unordered_map<
             RecipientRef,
-            FilterPtr,
+            Filter,
             WeakPtrHash<Recipient>,
             WeakPtrEqual<Recipient>
         > filter_;
