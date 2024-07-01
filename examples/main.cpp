@@ -3,6 +3,7 @@
 #include <future>
 #include <execution>
 #include <print>
+#include <ranges>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,12 @@ int main( int argc, char* argv[] )
     //     tag:info !tag:debug !attribute:value>100
     //     attribute:position
     // )";
+
+    auto cons = bugle::Address::splitConjuncts( "tag:info !tag:debug !attribute:value>100" );
+
+    std::ranges::for_each( cons, []( const auto& con ) {
+        std::println( "{} {} {}", con.negate, con.type, con.variable );
+    });
 
     auto addressA = std::make_shared<bugle::Address>();
     auto tagA = std::make_shared<bugle::TagFilter>( "info" );

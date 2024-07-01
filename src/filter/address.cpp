@@ -20,18 +20,4 @@ bool Address::matches( const Letter& letter ) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-FilterPtr Address::fromString( const std::string& expression )
-{
-    const auto lines = expression | std::views::split( ' ' );
-
-    // std::ranges::for_each( lines, []( auto&& line ) {
-    //     std::string str_line( line.begin(), line.end() );
-    //     std::println( "{}", str_line );
-    // });
-
-    return nullptr;
-}
-
-
 }   //  ::bugle
