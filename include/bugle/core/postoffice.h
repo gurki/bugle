@@ -60,9 +60,9 @@ class PostOffice
         void memo( std::format_string<Args...> fmt, Args&&... args );
 
         template <typename... Args>
-        void card( 
-            const tags_t& tags, 
-            std::format_string<Args...> fmt, Args&&... args 
+        void card(
+            const tags_t& tags,
+            std::format_string<Args...> fmt, Args&&... args
         );
 
         static PostOffice& instance();
@@ -94,6 +94,7 @@ class PostOffice
         std::deque<Letter> letters_;
         std::condition_variable queueReady_;
         std::atomic_bool shouldExit_ = false;
+        std::atomic_bool onRoute_ = false;
 
         static PostOfficeUPtr instance_;
 };
@@ -105,13 +106,13 @@ void PostOffice::memo( std::format_string<Args...> fmt, Args&&... args ) {
 }
 
 template <typename... Args>
-void PostOffice::card( 
-    const tags_t& tags, 
-    std::format_string<Args...> fmt, Args&&... args ) 
+void PostOffice::card(
+    const tags_t& tags,
+    std::format_string<Args...> fmt, Args&&... args )
 {
-    post( 
-        std::format( fmt, std::forward<Args>( args )... ), 
-        tags 
+    post(
+        std::format( fmt, std::forward<Args>( args )... ),
+        tags
     );
 }
 

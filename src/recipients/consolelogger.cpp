@@ -1,4 +1,4 @@
-#include "bugle/recipient/consolelogger.h"
+#include "bugle/recipients/consolelogger.h"
 #include "bugle/format/colortable.h"
 #include "bugle/format/duration.h"
 #include "bugle/format/doge.h"
@@ -30,18 +30,18 @@ void ConsoleLogger::receive( const Letter& letter )
         return;
     }
 
-    if ( letter.tags.contains( "system" ) ) 
+    if ( letter.tags.contains( "system" ) )
     {
         if ( letter.tags.contains( "build" ) ) {
             logBuild( letter );
             return;
-        } 
-        
+        }
+
         if ( letter.tags.contains( "session" ) ) {
             logSession( letter );
             return;
         }
-        
+
         if ( letter.tags.contains( "gpu" ) ) {
             logGpu( letter );
             return;
@@ -59,15 +59,23 @@ void ConsoleLogger::receive( const Letter& letter )
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logEnvelope( const Letter& letter ) 
-{    
+void ConsoleLogger::logEnvelope( const Letter& letter )
+{
     Letter envelope = letter;
 
-    if ( letter.attributes.at( "open" ) ) {
-        envelope.message = std::format( "{} opened ...", letter.message );
-    } else {
+    if ( letter.attributes.at( "open" ) )
+    {
+        const std::string name = (
+            letter.message.empty() ?
+            letter.functionInfo() :
+            std::format( "{}::{}", letter.functionInfo(), letter.message )
+        );
+
+        envelope.message = std::format( "{} opened …", name );
+    }
+    else {
         const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
-        envelope.message = std::format( "\033[3m{} ({})\033[0m", randomDoge(), duration );
+        envelope.message = std::format( "\033[3m({}) {}\033[0m", duration, randomDoge() );
     }
 
     std::println( "{}", formatter_->format( envelope ) );
@@ -76,7 +84,7 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logBuild( const Letter& letter ) 
+void ConsoleLogger::logBuild( const Letter& letter )
 {
     BuildInfo info = nlohmann::json( letter.attributes );
 
@@ -101,7 +109,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
             closeOuter ? "└" : "│",
             closeInner ? "└" : "├",
             formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 ) 
+            formatter_->colorize( std::format( "{}", val ), tx2 )
         );
     };
 
@@ -141,7 +149,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logSession( const Letter& letter ) 
+void ConsoleLogger::logSession( const Letter& letter )
 {
     SessionInfo info = nlohmann::json( letter.attributes );
 
@@ -172,7 +180,7 @@ void ConsoleLogger::logSession( const Letter& letter )
 
     h1( "💡 SESSION" );
 
-    //  
+    //
     h2( "🍎 Application" );
     kv( "timestamp:", info.timestamp );
     kv( "app:", info.appName );
@@ -197,7 +205,7 @@ void ConsoleLogger::logSession( const Letter& letter )
 
 
 //////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logGpu( const Letter& letter ) 
+void ConsoleLogger::logGpu( const Letter& letter )
 {
     bugle::GpuInfo info = nlohmann::json( letter.attributes );
 

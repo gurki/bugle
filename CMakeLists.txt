@@ -29,6 +29,7 @@ add_library( ${PROJECT_NAME} STATIC
     src/format/theme.cpp
     src/recipients/consolelogger.cpp
     src/recipients/jsonlogger.cpp
+    src/recipients/profiler.cpp
     src/utility/timestamp.cpp
     src/utility/utility.cpp
     src/utility/gpuinfo.cpp

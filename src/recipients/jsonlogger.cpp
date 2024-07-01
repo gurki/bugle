@@ -1,4 +1,4 @@
-#include "bugle/recipient/jsonlogger.h"
+#include "bugle/recipients/jsonlogger.h"
 #include "bugle/utility/timestamp.h"
 #include "bugle/core/letter.h"
 

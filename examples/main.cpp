@@ -6,11 +6,21 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
+std::vector<float> child( const int val = 5 ) {
+    bugle::Envelope scope( PO );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+    return {};
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
+    auto pr = std::make_shared<bugle::Profiler>();
+    pr->open();
 
     const bool isOpen = jl->open();
 
@@ -50,8 +60,13 @@ int main( int argc, char* argv[] )
     addressC->lines = { { tagC, true } };
     routeB->addresses = { addressC, valB };
 
+    auto envFilter = std::make_shared<bugle::TagFilter>( "envelope" );
+    auto nenvFilter = std::make_shared<bugle::Address>();
+    nenvFilter->lines = { { envFilter, true } };
+
     po.addObserver( cl );
     po.addObserver( jl );
+    po.addObserver( pr, envFilter );
 
     // random example with inline conjunctions
     //
@@ -68,12 +83,22 @@ int main( int argc, char* argv[] )
     po.post( {}, { "session", "system" }, sessionInfo );
     po.post( {}, { "build", "system" }, buildInfo );
 
-    bugle::Envelope scope( po, "main" );
+    bugle::Envelope scope( po );
+
+    bugle::Envelope outer( po, "outer" );
+    {
+        std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+        bugle::Envelope inner( po, "inner" );
+        std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+    }
+    outer.close();
 
     po.post( "hallo", { "info", "debug" }, {
         { "value", 5 },
         { "position", { 0.5f, 0.2f, 0.1f } }
     });
+
+    child();
 
     // po.post( "incoming", { "measurement" }, {
     //     { "temperature", 10 }

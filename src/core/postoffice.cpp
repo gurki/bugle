@@ -48,7 +48,7 @@ void PostOffice::flush()
 {
 #ifdef BUGLE_ENABLE
     //  FIXME: probably need to guard empty check against threading
-    while ( ! letters_.empty() ) {
+    while ( ! letters_.empty() || onRoute_ ) {
         std::scoped_lock lock( queueMutex_ );
         queueReady_.notify_one();
     }
@@ -192,6 +192,8 @@ void PostOffice::processQueue()
                 return;
             }
 
+            onRoute_ = true;
+
             {
                 std::scoped_lock lock( queueMutex_ );
                 letter = std::move( letters_.front() );
@@ -237,6 +239,8 @@ void PostOffice::processQueue()
                 auto observer = observerRef.lock();
                 observer->receive( letter );
             };
+
+            onRoute_ = false;
         }
     }
 }
