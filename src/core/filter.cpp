@@ -18,16 +18,4 @@ namespace bugle {
 // )";
 
 
-////////////////////////////////////////////////////////////////////////////////
-FilterPtr Filter::fromString( const std::string& expression )
-{
-    constexpr auto splitAddresses = std::views::split( '\n' );
-    constexpr auto splitLines = std::views::split( ' ' );
-
-    const auto addresses = expression | splitAddresses;
-    // const auto some = addresses | std::views::transform( splitLines );
-    return nullptr;
-}
-
-
 }   //  ::bugle

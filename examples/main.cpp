@@ -17,6 +17,23 @@ std::vector<float> child( const int val = 5 ) {
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
+    auto dis = bugle::parseDisjunction( R"(
+        tag:info !tag:debug !attribute:value>100
+        !file:main.cpp
+        line:31
+
+    )");
+
+    std::ranges::for_each( dis, []( auto cons ) {
+        std::ranges::for_each( cons, []( const auto& con ) {
+            std::println( "{} {} {}", con.negate, con.type, con.variable );
+        });
+        std::println( "//" );
+    });
+
+    return EXIT_SUCCESS;
+
+
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
@@ -30,12 +47,6 @@ int main( int argc, char* argv[] )
     //     tag:info !tag:debug !attribute:value>100
     //     attribute:position
     // )";
-
-    auto cons = bugle::Address::splitConjuncts( "tag:info !tag:debug !attribute:value>100" );
-
-    std::ranges::for_each( cons, []( const auto& con ) {
-        std::println( "{} {} {}", con.negate, con.type, con.variable );
-    });
 
     bugle::TagFilter tagA( "info" );
     bugle::TagFilter tagB( "debug" );

@@ -110,9 +110,9 @@ target_compile_definitions( ${PROJECT_NAME}
     add_subdirectory( examples )
 # endif()
 
-if ( BUGLE_BUILD_TESTS )
+# if ( BUGLE_BUILD_TESTS )
     add_subdirectory( tests )
-endif()
+# endif()
 
 if ( BUGLE_ENABLE )
     target_compile_definitions( ${PROJECT_NAME}

@@ -16,6 +16,8 @@ project( bugle-tests
 
 add_executable( ${PROJECT_NAME}
     filter.cpp
+    main.cpp
+    parse.cpp
 )
 
 target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_23 )
