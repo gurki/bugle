@@ -7,12 +7,17 @@
 
 namespace bugle {
 
-
 struct Literal {
     std::string_view type;
     std::string_view variable;
     bool negate;
 };
+
+using Conjunction = std::vector<Literal>;
+using Disjunction = std::vector<Conjunction>;
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////////////

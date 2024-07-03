@@ -5,9 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 TEST_CASE( "parse filter", "[filter]" )
 {
-    using conjunction_t = std::vector<bugle::Literal>;
-    using disjunction_t = std::vector<conjunction_t>;
-
     SECTION( "trim" ) {
         std::string_view res = bugle::trim( "  wh a t? " );
         REQUIRE( std::string( res ) == "wh a t?" );
@@ -21,7 +18,7 @@ TEST_CASE( "parse filter", "[filter]" )
     SECTION( "conjunction" )
     {
         auto con = bugle::parseConjunction( "tag:info !tag:debug !attribute:value>100" );
-        const auto literals = std::ranges::to<conjunction_t>( con );
+        const auto literals = std::ranges::to<bugle::Conjunction>( con );
 
         REQUIRE( literals.size() == 3 );
 
@@ -46,7 +43,7 @@ TEST_CASE( "parse filter", "[filter]" )
 
         )");
 
-        const auto cons = std::ranges::to<disjunction_t>( dis );
+        const auto cons = std::ranges::to<bugle::Disjunction>( dis );
 
         REQUIRE( cons.size() == 2 );
         REQUIRE( cons[ 0 ].size() == 2 );

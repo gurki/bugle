@@ -17,7 +17,8 @@ struct Address : public Filter
 {
     std::vector<AddressLine> lines;
 
-    Address()
+    Address( const std::vector<AddressLine>& _lines ) :
+        lines( _lines )
     {
         matches = [ this ]( const Letter& letter )
         {

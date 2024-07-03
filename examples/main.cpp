@@ -17,23 +17,6 @@ std::vector<float> child( const int val = 5 ) {
 ////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char* argv[] )
 {
-    auto dis = bugle::parseDisjunction( R"(
-        tag:info !tag:debug !attribute:value>100
-        !file:main.cpp
-        line:31
-
-    )");
-
-    std::ranges::for_each( dis, []( auto cons ) {
-        std::ranges::for_each( cons, []( const auto& con ) {
-            std::println( "{} {} {}", con.negate, con.type, con.variable );
-        });
-        std::println( "//" );
-    });
-
-    return EXIT_SUCCESS;
-
-
     auto& po = bugle::PostOffice::instance();
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
@@ -51,21 +34,25 @@ int main( int argc, char* argv[] )
     bugle::TagFilter tagA( "info" );
     bugle::TagFilter tagB( "debug" );
     bugle::ValueFilter valA( "value", 100, std::greater<>{} );
-    bugle::Address addressA;
-    addressA.lines = { { tagA }, { tagB, true }, { valA, true } };
+    bugle::Address addressA({
+        { tagA, false }, { tagB, true }, { valA, true }
+    });
 
     bugle::MessageFilter msgA( "main" );
-    bugle::Address addressB;
-    addressB.lines = { { msgA } };
+    bugle::Address addressB({ { msgA, false } });
 
     bugle::AttributeFilter attA( "position" );
-    bugle::Route routeA;
-    routeA.addresses = { addressA, addressB, attA };
+    bugle::Route routeA({ addressA, addressB, attA });
 
     // bugle::Route route = R"(
     //     !tag:benchmark
     //     attribute:value%1000=0
     // )";
+
+    std::vector<bugle::Filter> filter = {
+        bugle::TagFilter( "info" ),
+        bugle::MessageFilter( "hallo" )
+    };
 
     bugle::TagFilter tagC( "benchmark" );
     bugle::ValueFilter valB( "value", 1000,
@@ -74,15 +61,12 @@ int main( int argc, char* argv[] )
         }
     );
 
-    bugle::Address addressC;
-    addressC.lines = { { tagC, true } };
+    bugle::Address addressC({ { tagC, true } });
 
-    bugle::Route routeB;
-    routeB.addresses = { addressC, valB };
+    bugle::Route routeB({ addressC, valB });
 
     bugle::TagFilter envFilter( "envelope" );
-    bugle::Address nenvFilter;
-    nenvFilter.lines = { { envFilter, true } };
+    bugle::Address nenvFilter({ { envFilter, true } });
 
     po.addObserver( cl );
     po.addObserver( jl );
