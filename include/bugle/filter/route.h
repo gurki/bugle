@@ -9,19 +9,16 @@
 namespace bugle {
 
 
-class Letter;
-
 struct Route : public Filter
 {
-    std::vector<Filter> addresses;
-
-    Route( const std::vector<Filter>& _addresses ) :
-        addresses( _addresses )
+    Route( const std::vector<Filter>& _addresses )
     {
-        matches = [ this ]( const Letter& letter ) {
-            return std::ranges::any_of( addresses, [ &letter ]( const auto& address ) {
-                return address.matches( letter );
-            });
+        matches = [ _addresses ]( const Letter& letter ) {
+            return std::ranges::any_of( _addresses,
+                [ &letter ]( const auto& address ) {
+                    return address.matches( letter );
+                }
+            );
         };
     }
 };

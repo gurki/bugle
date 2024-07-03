@@ -14,16 +14,11 @@ struct MessageFilter : public Filter
 {
     using comp_t = std::function< bool( const std::string&, const std::string& ) >;
 
-    std::string message;
-    comp_t compare = std::equal_to<>{};
-
     MessageFilter(
-        const std::string& _message,
-        const comp_t& _compare = std::equal_to<>{} ) :
-        message( _message ),
-        compare( _compare )
+        const std::string& message,
+        const comp_t& compare = std::equal_to<>{} )
     {
-        matches = [ this ]( const Letter& letter ) {
+        matches = [ message, compare ]( const Letter& letter ) {
             return compare( letter.message, message );
         };
     }
@@ -32,12 +27,8 @@ struct MessageFilter : public Filter
 
 struct TagFilter : public Filter
 {
-    std::string tag;
-
-    TagFilter( const std::string& _tag ) :
-        tag( _tag )
-    {
-        matches = [ this ]( const Letter& letter ) {
+    TagFilter( const std::string& tag ) {
+        matches = [ tag ]( const Letter& letter ) {
             return letter.tags.contains( tag );
         };
     }
@@ -46,12 +37,8 @@ struct TagFilter : public Filter
 
 struct FileFilter : public Filter
 {
-    std::string filename;
-
-    FileFilter( const std::string& _filename ) :
-        filename( _filename )
-    {
-        matches = [ this ]( const Letter& letter ) {
+    FileFilter( const std::string& filename ) {
+        matches = [ filename ]( const Letter& letter ) {
             return letter.fileInfo() == filename;
         };
     }
@@ -60,12 +47,8 @@ struct FileFilter : public Filter
 
 struct FunctionFilter : public Filter
 {
-    std::string function;
-
-    FunctionFilter( const std::string& _function ) :
-        function( _function )
-    {
-        matches = [ this ]( const Letter& letter ) {
+    FunctionFilter( const std::string& function ) {
+        matches = [ function ]( const Letter& letter ) {
             return letter.functionInfo() == function;
         };
     }
@@ -74,12 +57,8 @@ struct FunctionFilter : public Filter
 
 struct AttributeFilter : public Filter
 {
-    std::string key;
-
-    AttributeFilter( const std::string& _key ) :
-        key( _key )
-    {
-        matches = [ this ]( const Letter& letter ) {
+    AttributeFilter( const std::string& key ) {
+        matches = [ key ]( const Letter& letter ) {
             return letter.attributes.contains( key );
         };
     }
@@ -89,19 +68,14 @@ struct AttributeFilter : public Filter
 struct ValueFilter : public Filter
 {
     using comp_t = std::function< bool( const nlohmann::json&, const nlohmann::json& ) >;
-    std::string key;
-    nlohmann::json value;
-    comp_t compare = std::equal_to<>{};
 
     ValueFilter(
-        const std::string& _key,
-        const nlohmann::json& _value,
-        const comp_t& _compare = std::equal_to<>{} ) :
-        key( _key ),
-        value( _value ),
-        compare( _compare )
+        const std::string& key,
+        const nlohmann::json& value,
+        const comp_t& compare = std::equal_to<>{} )
     {
-        matches = [ this ]( const Letter& letter ) {
+        matches = [ key, value, compare ]( const Letter& letter )
+        {
             if ( ! letter.attributes.contains( key ) ) {
                 return false;
             }

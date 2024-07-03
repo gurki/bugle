@@ -7,7 +7,7 @@
 namespace bugle {
 
 
-struct AddressLine {
+struct Line {
     Filter variable;
     bool negate = false;
 };
@@ -15,14 +15,11 @@ struct AddressLine {
 
 struct Address : public Filter
 {
-    std::vector<AddressLine> lines;
-
-    Address( const std::vector<AddressLine>& _lines ) :
-        lines( _lines )
+    Address( const std::vector<Line>& _lines )
     {
-        matches = [ this ]( const Letter& letter )
+        matches = [ _lines ]( const Letter& letter )
         {
-            for ( const auto& line : lines ) {
+            for ( const auto& line : _lines ) {
                 if ( line.variable.matches( letter ) == line.negate ) {
                     return false;
                 }

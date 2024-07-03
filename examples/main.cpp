@@ -62,7 +62,6 @@ int main( int argc, char* argv[] )
     );
 
     bugle::Address addressC({ { tagC, true } });
-
     bugle::Route routeB({ addressC, valB });
 
     bugle::TagFilter envFilter( "envelope" );

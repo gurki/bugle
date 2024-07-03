@@ -10,7 +10,7 @@ class Letter;
 
 
 struct Filter {
-    std::function<bool(const Letter&)> matches {};
+    std::function<bool(const Letter&)> matches = {};
 };
 
 
