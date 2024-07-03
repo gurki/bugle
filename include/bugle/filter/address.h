@@ -15,11 +15,11 @@ struct Line {
 
 struct Address : public Filter
 {
-    Address( const std::vector<Line>& _lines )
+    Address( const std::vector<Line>& lines )
     {
-        matches = [ _lines ]( const Letter& letter )
+        matches = [ lines ]( const Letter& letter )
         {
-            for ( const auto& line : _lines ) {
+            for ( const auto& line : lines ) {
                 if ( line.variable.matches( letter ) == line.negate ) {
                     return false;
                 }

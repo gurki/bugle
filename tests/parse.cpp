@@ -61,4 +61,57 @@ TEST_CASE( "parse filter", "[filter]" )
         REQUIRE( std::string( cons[ 1 ][ 0 ].type ) == "line" );
         REQUIRE( std::string( cons[ 1 ][ 0 ].variable ) == "31" );
     }
+
+    SECTION( "disjunction from tag" )
+    {
+        auto dis = bugle::parseDisjunction( "tag:debug" );
+
+        const auto cons = std::ranges::to<bugle::Disjunction>( dis );
+
+        REQUIRE( cons.size() == 1 );
+        REQUIRE( cons[ 0 ].size() == 1 );
+
+        REQUIRE( cons[ 0 ][ 0 ].negate == false );
+        REQUIRE( std::string( cons[ 0 ][ 0 ].type ) == "tag" );
+        REQUIRE( std::string( cons[ 0 ][ 0 ].variable ) == "debug" );
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+TEST_CASE( "build filter", "[filter]" )
+{
+    SECTION( "conjunction" )
+    {
+        const bugle::Filter filter = bugle::Filter::fromString( R"(
+            tag:info !tag:debug !attribute:value>100
+        )" );
+
+        bugle::Letter letter;
+
+        letter.tags = { "info", "warning" };
+        REQUIRE( filter.matches( letter ) );
+
+        letter.tags = { "debug" };
+        REQUIRE_FALSE( filter.matches( letter ) );
+    }
+
+    SECTION( "disjunction" )
+    {
+        const bugle::Filter filter = bugle::Filter::fromString( R"(
+            tag:info !tag:debug !attribute:value>100
+            message:hi
+        )" );
+
+        bugle::Letter letter;
+
+        letter.tags = { "info", "warning" };
+        REQUIRE( filter.matches( letter ) );
+
+        letter.tags = { "debug" };
+        REQUIRE_FALSE( filter.matches( letter ) );
+
+        letter.message = "hi";
+        REQUIRE( filter.matches( letter ) );
+    }
 }
