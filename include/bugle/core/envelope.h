@@ -1,6 +1,8 @@
 #pragma once
 
 #include "bugle/utility/timestamp.h"
+#include "bugle/core/types.h"
+
 #include <source_location>
 #include <thread>
 
