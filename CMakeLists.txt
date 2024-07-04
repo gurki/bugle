@@ -7,7 +7,7 @@ option( BUGLE_BUILD_TESTS "Build tests" OFF )
 
 project(
     bugle
-    VERSION 1.0.0
+    VERSION 1.1.0
     DESCRIPTION "A tag-based, filterable, colorful and thread-safe cpp logging library"
     HOMEPAGE_URL "https://github.com/gurki/bugle"
     LANGUAGES CXX

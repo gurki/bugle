@@ -120,7 +120,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
     kv( "timestamp:", info.timestamp );
     kv( "bugle:", info.bugle );
     kv( "host:", info.host, true );
-    // kv( "directory:", info.directory );
+    kv( "directory:", info.directory );
 
     //  compilation
     h2( "🏭 Compilation" );
@@ -128,7 +128,7 @@ void ConsoleLogger::logBuild( const Letter& letter )
     kv( "cmake:", info.cmakeVersion );
     kv( "generator:", info.cmakeGenerator );
     kv( "compiler:", info.compilerName );
-    kv( "version:", info.compilerVersion, true );
+    kv( "version:", info.compilerVersion, true, true );
 
     // //  system
     // h2( "💻 System" );

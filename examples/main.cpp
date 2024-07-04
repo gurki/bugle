@@ -18,68 +18,35 @@ std::vector<float> child( const int val = 5 ) {
 int main( int argc, char* argv[] )
 {
     auto& po = bugle::PostOffice::instance();
+
     auto cl = std::make_shared<bugle::ConsoleLogger>();
     auto jl = std::make_shared<bugle::JsonLogger>();
     auto pr = std::make_shared<bugle::Profiler>();
+
+    jl->open();
     pr->open();
 
-    const bool isOpen = jl->open();
+    bugle::Filter routeA = bugle::Filter::fromString( R"(
+        message:main
+        tag:info !tag:debug !attribute:value>100
+        attribute:position
+    )" );
 
-    // bugle::Route route = R"(
-    //     message:main
-    //     tag:info !tag:debug !attribute:value>100
-    //     attribute:position
-    // )";
-
-    bugle::TagFilter tagA( "info" );
-    bugle::TagFilter tagB( "debug" );
-    bugle::ValueFilter valA( "value", 100, std::greater<>{} );
-    bugle::Address addressA({
-        { tagA, false }, { tagB, true }, { valA, true }
-    });
-
-    bugle::MessageFilter msgA( "main" );
-    bugle::Address addressB({ { msgA, false } });
-
-    bugle::AttributeFilter attA( "position" );
-    bugle::Route routeA({ addressA, addressB, attA });
-
-    // bugle::Route route = R"(
-    //     !tag:benchmark
-    //     attribute:value%1000=0
-    // )";
-
-    std::vector<bugle::Filter> filter = {
-        bugle::TagFilter( "info" ),
-        bugle::MessageFilter( "hallo" )
-    };
-
-    bugle::TagFilter tagC( "benchmark" );
-    bugle::ValueFilter valB( "value", 1000,
+    bugle::ValueFilter valA( "value", 1000,
         []( const nlohmann::json& valA, const nlohmann::json& valB ) -> bool {
             return ( valA.get<int>() % valB.get<int>() ) == 0;
         }
     );
 
-    bugle::Address addressC({ { tagC, true } });
-    bugle::Route routeB({ addressC, valB });
+    bugle::Filter tagA = bugle::Filter::fromString( "tag:benchmark" );
+    bugle::Route routeB({ tagA, valA });
 
-    bugle::TagFilter envFilter( "envelope" );
-    bugle::Address nenvFilter({ { envFilter, true } });
+    bugle::Filter tagB = bugle::Filter::fromString( "tag:envelope" );
+    bugle::Address addressA({ { tagB, true } });
 
     po.addObserver( cl );
     po.addObserver( jl );
-    po.addObserver( pr, envFilter );
-
-    // random example with inline conjunctions
-    //
-    // bugle::Route route = R"(
-    //     file:main.cpp
-    //     tag:info,debug,!lambda,!scope
-    //     attribute:duration>10,level>=1
-    //     attribute:duration
-    //     timestamp:>2024-04-25T00:00:00,<2024-04-25T23:59:59
-    // )";
+    po.addObserver( pr, tagB );
 
     const nlohmann::json buildInfo = bugle::BuildInfo::current();
     const nlohmann::json sessionInfo = bugle::SessionInfo::current();
@@ -101,9 +68,9 @@ int main( int argc, char* argv[] )
         { "position", { 0.5f, 0.2f, 0.1f } }
     });
 
-    // po.post( "incoming", { "measurement" }, {
-    //     { "temperature", 10 }
-    // });
+    po.post( "incoming", { "measurement" }, {
+        { "temperature", 10 }
+    });
 
     auto fn = [&]( int val, const std::string& name ) -> float {
         bugle::Envelope scope( po, name );

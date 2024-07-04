@@ -10,6 +10,7 @@ namespace bugle {
 
 enum class VariableType {
     Invalid,
+    Timestamp,
     Message,
     Tag,
     File,
@@ -67,6 +68,7 @@ constexpr std::string_view trim( std::string_view expression )
 ////////////////////////////////////////////////////////////////////////////////
 constexpr VariableType typeFromString( std::string_view type )
 {
+    if ( type == "timestamp" ) return VariableType::Timestamp;
     if ( type == "message" ) return VariableType::Message;
     if ( type == "tag" ) return VariableType::Tag;
     if ( type == "file" ) return VariableType::File;
