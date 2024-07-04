@@ -9,18 +9,22 @@ namespace bugle {
 Envelope::Envelope(
     const std::reference_wrapper<PostOffice>& _office,
     const std::string& _title,
+    const tags_t& _tags,
     const std::source_location& _location ) :
     office( _office ),
     title( _title ),
     location( _location ),
     thread( std::this_thread::get_id() ),
+    tags( _tags ),
     open( true ),
     openedAt( Timestamp::now() )
 {
+    tags.insert( "envelope" );
+
 #ifdef BUGLE_ENABLE
     office.get().post(
         title,
-        { "envelope" },
+        tags,
         { { "open", true } },
         location
     );
@@ -71,7 +75,7 @@ void Envelope::close()
     office.get().pop( thread );
     office.get().post(
         title,
-        { "envelope" },
+        tags,
         attributes,
         location
     );
