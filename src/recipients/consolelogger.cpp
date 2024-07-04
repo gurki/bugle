@@ -71,7 +71,7 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
             std::format( "{}::{}", letter.functionInfo(), letter.message )
         );
 
-        envelope.message = std::format( "{} opened …", name );
+        envelope.message = std::format( "{} …", name );
     }
     else {
         const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
