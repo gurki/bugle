@@ -17,6 +17,9 @@ Profiler::~Profiler() {
 ////////////////////////////////////////////////////////////////////////////////
 void Profiler::receive( const Letter& letter )
 {
+    assert( letter.tags.contains( "envelope" ) );
+    assert( letter.attributes.contains( "open" ) );
+
     const std::thread::id tid = letter.thread;
 
     if ( ! stacks_.contains( tid ) ) {
