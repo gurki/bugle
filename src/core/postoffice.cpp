@@ -102,7 +102,7 @@ void PostOffice::memo( const std::string& message, const std::source_location& l
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::card( const tags_t& tags, const std::source_location& location )
 {
-    post( "", tags, {}, location );
+    post( {}, tags, {}, location );
 }
 
 
