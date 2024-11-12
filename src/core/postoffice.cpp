@@ -93,6 +93,20 @@ void PostOffice::post(
 
 
 ////////////////////////////////////////////////////////////////////////////////
+void PostOffice::memo( const std::string& message, const std::source_location& location )
+{
+    post( message, {}, {}, location );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::card( const tags_t& tags, const std::source_location& location )
+{
+    post( {}, tags, {}, location );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 int PostOffice::level( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
