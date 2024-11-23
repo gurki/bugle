@@ -14,8 +14,8 @@
 namespace bugle {
 
 
-using LetterUPtr = std::unique_ptr<class Letter>;
-using LetterPtr = std::shared_ptr<class Letter>;
+using LetterUPtr = std::unique_ptr<struct Letter>;
+using LetterPtr = std::shared_ptr<struct Letter>;
 
 
 struct Letter

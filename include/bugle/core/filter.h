@@ -5,7 +5,7 @@
 
 namespace bugle {
 
-class Letter;
+struct Letter;
 
 
 struct Filter {

@@ -25,7 +25,7 @@ class Formatter
         );
 
         virtual std::string format( const Letter& message ) const;
-        virtual std::string beginColor( const uint8_t index ) const { return {}; }
+        virtual std::string beginColor( const uint8_t ) const { return {}; }
         virtual std::string endColor() const { return {}; }
 
         const std::string& space() const { return space_; }

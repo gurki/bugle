@@ -6,7 +6,7 @@
 
 namespace bugle {
 
-class Letter;
+struct Letter;
 
 
 struct JsonLogger : public Recipient

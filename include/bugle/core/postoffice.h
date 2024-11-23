@@ -21,7 +21,7 @@
 
 namespace bugle {
 
-using RecipientRef = std::weak_ptr<class Recipient>;
+using RecipientRef = std::weak_ptr<struct Recipient>;
 using PostOfficePtr = std::shared_ptr<class PostOffice>;
 using PostOfficeUPtr = std::unique_ptr<class PostOffice>;
 
