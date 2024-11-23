@@ -88,31 +88,6 @@ void ConsoleLogger::logBuild( const Letter& letter )
 {
     BuildInfo info = nlohmann::json( letter.attributes );
 
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
     h1( "🚧 BUILD" );
 
     //  environment
@@ -153,31 +128,6 @@ void ConsoleLogger::logSession( const Letter& letter )
 {
     SessionInfo info = nlohmann::json( letter.attributes );
 
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
     h1( "💡 SESSION" );
 
     //
@@ -209,31 +159,6 @@ void ConsoleLogger::logGpu( const Letter& letter )
 {
     bugle::GpuInfo info = nlohmann::json( letter.attributes );
 
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-              closeOuter ? "└" : "│",
-              closeInner ? "└" : "├",
-              formatter_->colorize( key, tx3 ),
-              formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
     h1( "🎨 GPU" );
 
     //  renderer
@@ -252,6 +177,34 @@ void ConsoleLogger::logGpu( const Letter& letter )
 
     std::println( "" );
     std::fflush( nullptr );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::h1( const std::string& title ) {
+    std::println( "┌ {}",
+        formatter_->colorize( title, tx )
+    );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::h2( const std::string& title ) {
+    std::println( "│ ┌ {}",
+        formatter_->colorize( title, tx )
+    );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::kv( const std::string& key, const auto& val, const bool closeInner, const bool closeOuter ) 
+{
+    std::println( "{} {} {:<20} {}",
+        closeOuter ? "└" : "│",
+        closeInner ? "└" : "├",
+        formatter_->colorize( key, tx3 ),
+        formatter_->colorize( std::format( "{}", val ), tx2 )
+    );
 }
 
 
