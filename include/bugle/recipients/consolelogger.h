@@ -2,6 +2,7 @@
 
 #include "bugle/core/recipient.h"
 #include "bugle/format/formatter.h"
+#include <print>
 
 namespace bugle {
 
@@ -17,7 +18,12 @@ class ConsoleLogger : public Recipient
 
         void h1( const std::string& title );
         void h2( const std::string& title );
-        void kv( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false );
+        void kv( 
+            const std::string& key, 
+            const auto& val, 
+            const bool closeInner = false, 
+            const bool closeOuter = false 
+        );
 
     private:
 
@@ -31,6 +37,22 @@ class ConsoleLogger : public Recipient
         static const auto tx2 = 250;
         static const auto tx3 = 246;
 };
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::kv( 
+    const std::string& key, 
+    const auto& val, 
+    const bool closeInner, 
+    const bool closeOuter ) 
+{
+    std::println( "{} {} {:<20} {}",
+        closeOuter ? "└" : "│",
+        closeInner ? "└" : "├",
+        formatter_->colorize( key, tx3 ),
+        formatter_->colorize( std::format( "{}", val ), tx2 )
+    );
+}
 
 
 }   //  ::bugle

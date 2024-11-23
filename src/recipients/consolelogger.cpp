@@ -196,16 +196,4 @@ void ConsoleLogger::h2( const std::string& title ) {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::kv( const std::string& key, const auto& val, const bool closeInner, const bool closeOuter ) 
-{
-    std::println( "{} {} {:<20} {}",
-        closeOuter ? "└" : "│",
-        closeInner ? "└" : "├",
-        formatter_->colorize( key, tx3 ),
-        formatter_->colorize( std::format( "{}", val ), tx2 )
-    );
-}
-
-
 }   //  ::bugle
