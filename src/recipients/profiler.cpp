@@ -2,6 +2,8 @@
 #include "bugle/core/letter.h"
 
 #include <print>
+#include <filesystem>
+#include <ranges>
 
 using namespace std::string_view_literals;
 
