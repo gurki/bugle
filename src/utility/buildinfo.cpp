@@ -29,10 +29,10 @@ BuildInfo BuildInfo::current()
             .cpuName = BUGLE_BUILD_CPU_NAME,
             .cpuCoresLogical = BUGLE_BUILD_CPU_CORES_LOGICAL,
             .cpuCoresPhysical = BUGLE_BUILD_CPU_CORES_PHYSICAL,
-            .ramTotalGiB = std::round( 100.f * BUGLE_BUILD_RAM_TOTAL / 1024.f ) / 100.f,
-            .ramAvailableGiB = std::round( 100.f * BUGLE_BUILD_RAM_AVAILABLE / 1024.f ) / 100.f,
-            .vramTotalGiB = std::round( 100.f * BUGLE_BUILD_VRAM_TOTAL / 1024.f ) / 100.f,
-            .vramAvailableGiB = std::round( 100.f * BUGLE_BUILD_VRAM_AVAILABLE / 1024.f ) / 100.f,
+            .ramTotalGiB = BUGLE_BUILD_RAM_TOTAL / 1024.f,
+            .ramAvailableGiB = BUGLE_BUILD_RAM_AVAILABLE / 1024.f,
+            .vramTotalGiB = BUGLE_BUILD_VRAM_TOTAL / 1024.f,
+            .vramAvailableGiB = BUGLE_BUILD_VRAM_AVAILABLE / 1024.f,
         }
     };
 

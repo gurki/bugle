@@ -57,8 +57,8 @@ SessionInfo SessionInfo::current()
     
     info.hardware.cpuModel = bugle::cpuModel();
     info.hardware.cpuCores = std::thread::hardware_concurrency();
-    info.hardware.ramTotalGiB = std::round( 100.f * bugle::ramTotalMb() / 1024.f ) / 100.f;
-    info.hardware.ramAvailableGiB = std::round( 100.f * bugle::ramAvailableMb() / 1024.f ) / 100.f;
+    info.hardware.ramTotalGiB = bugle::ramTotalMb() / 1024.f;
+    info.hardware.ramAvailableGiB = bugle::ramAvailableMb() / 1024.f;
 
     return info;
 }
