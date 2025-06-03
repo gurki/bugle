@@ -17,18 +17,17 @@ class ConsoleLogger : public Recipient
 
     private:
 
-        void h1( const std::string& title );
-        void h2( const std::string& title );
-        void kv( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false );
-
         static const uint8_t tx1_ = 254;
         static const uint8_t tx2_ = 250;
         static const uint8_t tx3_ = 246;
         
-        void logBuild( const Letter& );    
-        void logSession( const Letter& );    
-        void logAttributes( const attributes_t& );    
+        void h1( const std::string& title );
+        void h2( const std::string& title );
+        void kv( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false );
+            
         void logEnvelope( const Letter& );
+        void logAttributes( const attributes_t& );    
+        
         FormatterPtr formatter_ = nullptr;
 };
 
