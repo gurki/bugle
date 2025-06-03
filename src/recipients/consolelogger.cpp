@@ -143,31 +143,31 @@ void ConsoleLogger::logBuild( const Letter& letter )
 
     //  environment
     h2( "🌳 Environment" );
-    kv( "timestamp:", info.timestamp );
-    kv( "bugle:", info.bugle );
-    kv( "host:", info.host, true );
-    kv( "directory:", info.directory );
+    kv( "timestamp", info.timestamp );
+    kv( "bugle", info.bugle );
+    kv( "host", info.host, true );
+    kv( "directory", info.directory );
 
     //  compilation
     h2( "🏭 Compilation" );
-    kv( "type:", info.type );
-    kv( "cmake:", info.cmakeVersion );
-    kv( "generator:", info.cmakeGenerator );
-    kv( "compiler:", info.compilerName );
-    kv( "version:", info.compilerVersion, true, true );
+    kv( "type", info.type );
+    kv( "cmake", info.cmakeVersion );
+    kv( "generator", info.cmakeGenerator );
+    kv( "compiler", info.compilerName );
+    kv( "version", info.compilerVersion, true, true );
 
     // //  system
     // h2( "💻 System" );
-    // kv( "name:", info.systemName );
-    // kv( "version:", info.systemVersion );
-    // kv( "architecture:", info.systemArchitecture, true );
+    // kv( "name", info.systemName );
+    // kv( "version", info.systemVersion );
+    // kv( "architecture", info.systemArchitecture, true );
 
     // //  hardware
     // h2( "💾 Hardware" );
-    // kv( "cpu:", info.cpuName );
-    // kv( "cores:", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
-    // kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
-    // kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
+    // kv( "cpu", info.cpuName );
+    // kv( "cores", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
+    // kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+    // kv( "vram", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
 
     std::println( "" );
     std::fflush( nullptr );
@@ -183,22 +183,22 @@ void ConsoleLogger::logSession( const Letter& letter )
 
     //  app
     h2( "🍎 Application" );
-    kv( "timestamp:", info.timestamp );
-    kv( "app:", info.appName );
-    kv( "version:", info.appVersion );
-    kv( "commit:", info.appCommit, true );
+    kv( "timestamp", info.timestamp );
+    kv( "app", info.appName );
+    kv( "version", info.appVersion );
+    kv( "commit", info.appCommit, true );
 
     //  system
     h2( "💻 System" );
-    kv( "name:", info.systemName );
-    kv( "version:", info.systemVersion );
-    kv( "architecture:", info.systemArchitecture, true );
+    kv( "name", info.systemName );
+    kv( "version", info.systemVersion );
+    kv( "architecture", info.systemArchitecture, true );
 
     //  hardware
     h2( "💾 Hardware" );
-    kv( "cpu:", std::format( "{}", info.cpuModel ) );
-    kv( "cores:", std::format( "{}", info.cpuCores ) );
-    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true, true );
+    kv( "cpu", std::format( "{}", info.cpuModel ) );
+    kv( "cores", std::format( "{}", info.cpuCores ) );
+    kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true, true );
 
     std::println( "" );
     std::fflush( nullptr );
@@ -255,14 +255,14 @@ void ConsoleLogger::logAttributes( const attributes_t& attributes )
         }
     }
 
-    std::println( "" );
     std::fflush( nullptr );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::h1( const std::string& title ) {
-    std::println( "┌ {}",
+    std::println( "  {} {}",
+        formatter_->colorize( "┌", 244 ),
         formatter_->colorize( title, tx1_ )
     );
 };
@@ -270,7 +270,9 @@ void ConsoleLogger::h1( const std::string& title ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::h2( const std::string& title ) {
-    std::println( "│ ┌ {}",
+    std::println( "  {} {} {}",
+        formatter_->colorize( "│", 244 ),
+        formatter_->colorize( "┌", 244 ),
         formatter_->colorize( title, tx1_ )
     );
 };
@@ -283,9 +285,9 @@ void ConsoleLogger::kv(
     const bool closeInner, 
     const bool closeOuter ) 
 {
-    std::println( "{} {} {:<20}: {}",
-        closeOuter ? "└" : "│",
-        closeInner ? "└" : "├",
+    std::println( "  {} {} {:<20}: {}",
+        formatter_->colorize( closeOuter ? "└" : "│", 244 ),
+        formatter_->colorize( closeInner ? "└" : "├", 244 ),
         formatter_->colorize( key, tx3_ ),
         formatter_->colorize( std::format( "{}", val ), tx2_ )
     );
