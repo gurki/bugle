@@ -4,6 +4,8 @@
 #include <chrono>
 #include <format>
 #include <thread>
+#include <filesystem>
+#include <print>
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
@@ -50,6 +52,9 @@ SessionInfo SessionInfo::current()
     info.application.appVersion = "n/a";
     info.application.appCommit = "n/a";
 #endif 
+
+    info.paths.current = std::filesystem::weakly_canonical( std::filesystem::current_path() ).string();
+    info.paths.temp = std::filesystem::weakly_canonical( std::filesystem::temp_directory_path() ).string();
 
     info.system.systemName = bugle::systemName();
     info.system.systemVersion = bugle::systemVersion();

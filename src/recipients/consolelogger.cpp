@@ -121,9 +121,19 @@ void ConsoleLogger::logAttributes( const attributes_t& attributes )
                 continue;
             }
 
+            std::string value;
+
+            if ( item.value().is_number_float() ) {
+                value = std::format( "{:.2f}", item.value().get<float>() );
+            } else if ( item.value().is_string() ) {
+                value = item.value();
+            } else {
+                value = item.value().dump();
+            }
+
             kv( 
                 item.key(), 
-                item.value().dump( 2 ), 
+                value,
                 itemId == items.size(), 
                 itemId == items.size() && sectionId == attributes.size() 
             );

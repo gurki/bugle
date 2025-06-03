@@ -18,6 +18,12 @@ struct SessionInfo
         std::string appCommit;
     } application;
      
+    struct Paths {
+        std::string _icon = "🛣️";
+        std::string current;
+        std::string temp;
+    } paths;
+    
     struct System {
         std::string _icon = "💾";
         std::string systemName;
@@ -52,6 +58,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo::System,
     systemArchitecture
 );
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo::Paths,
+    _icon,
+    current,
+    temp
+);
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo::Hardware,
     _icon,
     cpuModel,
@@ -64,6 +76,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo,
     _title,
     _icon,
     application,
+    paths,
     system,
     hardware
 );
