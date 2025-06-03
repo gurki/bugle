@@ -30,19 +30,6 @@ void ConsoleLogger::receive( const Letter& letter )
         return;
     }
 
-    // if ( letter.tags.contains( "system" ) )
-    // {
-    //     if ( letter.tags.contains( "build" ) ) {
-    //         logBuild( letter );
-    //         return;
-    //     }
-
-    //     if ( letter.tags.contains( "session" ) ) {
-    //         logSession( letter );
-    //         return;
-    //     }
-    // }
-
     if ( letter.tags.contains( "envelope" ) ) {
         logEnvelope( letter );
         return;
@@ -80,57 +67,6 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
 
     std::println( "{}", formatter_->format( envelope ) );
     std::fflush( nullptr );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-//  helper: split a string by '.' into a vector of parts
-static std::vector<std::string> splitKey( const std::string& key ) 
-{
-    std::vector<std::string> parts;
-    std::istringstream ss( key );
-    std::string token;
-
-    while ( std::getline( ss, token, '.' ) ) {
-        parts.push_back( token );
-    }
-
-    return parts;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-//  convert a flat json with dotted keys into a nested json structure
-nlohmann::json unflattenJson( const nlohmann::json& flat ) 
-{
-    nlohmann::json nested = nlohmann::json::object();
-
-    for ( auto it = flat.begin(); it != flat.end(); ++it ) 
-    {
-        const std::string flatKey = it.key();
-        const nlohmann::json& value = it.value();
-
-        auto parts = splitKey( flatKey );
-        nlohmann::json* cur = &nested;
-
-        //  traverse (or create) intermediate objects
-        for ( size_t i = 0; i + 1 < parts.size(); ++i ) 
-        {
-            const std::string& part = parts[i];
-        
-            if ( ! (*cur).contains(part) || !(*cur)[part].is_object() ) {
-                (*cur)[part] = nlohmann::json::object();
-            }
-
-            cur = &(*cur)[part];
-        }
-
-        //  assign the value to the deepest key
-        const std::string& lastPart = parts.back();
-        (*cur)[lastPart] = value;
-    }
-
-    return nested;
 }
 
 
@@ -177,31 +113,31 @@ void ConsoleLogger::logBuild( const Letter& letter )
 //////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::logSession( const Letter& letter )
 {
-    SessionInfo info = nlohmann::json( letter.attributes );
+    // SessionInfo info = nlohmann::json( letter.attributes );
 
-    h1( "💡 SESSION" );
+    // h1( "💡 SESSION" );
 
-    //  app
-    h2( "🍎 Application" );
-    kv( "timestamp", info.timestamp );
-    kv( "app", info.appName );
-    kv( "version", info.appVersion );
-    kv( "commit", info.appCommit, true );
+    // //  app
+    // h2( "🍎 Application" );
+    // kv( "timestamp", info.timestamp );
+    // kv( "app", info.appName );
+    // kv( "version", info.appVersion );
+    // kv( "commit", info.appCommit, true );
 
-    //  system
-    h2( "💻 System" );
-    kv( "name", info.systemName );
-    kv( "version", info.systemVersion );
-    kv( "architecture", info.systemArchitecture, true );
+    // //  system
+    // h2( "💻 System" );
+    // kv( "name", info.systemName );
+    // kv( "version", info.systemVersion );
+    // kv( "architecture", info.systemArchitecture, true );
 
-    //  hardware
-    h2( "💾 Hardware" );
-    kv( "cpu", std::format( "{}", info.cpuModel ) );
-    kv( "cores", std::format( "{}", info.cpuCores ) );
-    kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true, true );
+    // //  hardware
+    // h2( "💾 Hardware" );
+    // kv( "cpu", std::format( "{}", info.cpuModel ) );
+    // kv( "cores", std::format( "{}", info.cpuCores ) );
+    // kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true, true );
 
-    std::println( "" );
-    std::fflush( nullptr );
+    // std::println( "" );
+    // std::fflush( nullptr );
 }
 
 
@@ -237,7 +173,7 @@ void ConsoleLogger::logAttributes( const attributes_t& attributes )
         
         std::string title = section.first;
         title[ 0 ] = std::toupper( title[ 0 ] );
-        
+
         const auto& items = section.second;
         
         if ( items.contains( "_icon" ) ) {

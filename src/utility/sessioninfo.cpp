@@ -39,25 +39,27 @@ int ramAvailableMb();
 SessionInfo SessionInfo::current() 
 {
     SessionInfo info {};
-    info.timestamp = bugle::localTime();
+    info.application.timestamp = bugle::localTime();
 
 #ifdef APP_NAME
-    info.appName = APP_NAME;
-    info.appVersion = APP_VERSION;
-    info.appCommit = APP_COMMIT;
+    info.application.appName = APP_NAME;
+    info.application.appVersion = APP_VERSION;
+    info.application.appCommit = APP_COMMIT;
 #else
-    info.appName = "n/a";
-    info.appVersion = "n/a";
-    info.appCommit = "n/a";
+    info.application.appName = "n/a";
+    info.application.appVersion = "n/a";
+    info.application.appCommit = "n/a";
 #endif 
 
-    info.systemName = bugle::systemName();
-    info.systemVersion = bugle::systemVersion();
-    info.systemArchitecture = bugle::systemArchitecture();
-    info.cpuModel = bugle::cpuModel();
-    info.cpuCores = std::thread::hardware_concurrency();
-    info.ramTotalMb = bugle::ramTotalMb();
-    info.ramAvailableMb = bugle::ramAvailableMb();
+    info.system.systemName = bugle::systemName();
+    info.system.systemVersion = bugle::systemVersion();
+    info.system.systemArchitecture = bugle::systemArchitecture();
+    
+    info.hardware.cpuModel = bugle::cpuModel();
+    info.hardware.cpuCores = std::thread::hardware_concurrency();
+    info.hardware.ramTotalMb = bugle::ramTotalMb();
+    info.hardware.ramAvailableMb = bugle::ramAvailableMb();
+
     return info;
 }
 
