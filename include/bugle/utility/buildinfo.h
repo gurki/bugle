@@ -7,53 +7,74 @@ namespace bugle {
 
 struct BuildInfo
 {
-    //  environment
-    std::string timestamp;
-    std::string bugle;
-    std::string host;
-    std::string directory;
+    std::string _title = "Build";
+    std::string _icon = "🚧";
 
-    //  compilation
-    std::string type;
-    std::string cmakeVersion;
-    std::string cmakeGenerator;
-    std::string compilerName;
-    std::string compilerVersion;
-
-    //  system
-    std::string systemName;
-    std::string systemVersion;
-    std::string systemArchitecture;
-
-    //  hardware
-    std::string cpuName;
-    int cpuCoresLogical;
-    int cpuCoresPhysical;
-    int ramTotalMb;
-    int ramAvailableMb;
-    int vramTotalMb;
-    int vramAvailableMb;
+    struct Environment {
+        std::string _icon = "🌳";
+        std::string timestamp;
+        std::string bugle;
+        std::string host;
+        std::string directory;
+    } environment;
+    
+    struct Compilation {
+        std::string _icon = "🏭";
+        std::string type;
+        std::string cmakeVersion;
+        std::string cmakeGenerator;
+        std::string compilerName;
+        std::string compilerVersion;
+    } compilation;
+    
+    struct System {
+        std::string _icon = "💾";
+        std::string systemName;
+        std::string systemVersion;
+        std::string systemArchitecture;
+    } system;
+    
+    struct Hardware {
+        std::string _icon = "💻";
+        std::string cpuName;
+        int cpuCoresLogical;
+        int cpuCoresPhysical;
+        int ramTotalMb;
+        int ramAvailableMb;
+        int vramTotalMb;
+        int vramAvailableMb;
+    } hardware;
 
     static BuildInfo current();
 };
 
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo::Environment,
+    _icon,
     timestamp,
     bugle,
     host,
-    directory,
+    directory
+);
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo::Compilation,
+    _icon,
     type,
     cmakeVersion,
     cmakeGenerator,
     compilerName,
-    compilerVersion,
+    compilerVersion
+);
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo::System,
+    _icon,
     systemName,
     systemVersion,
-    systemArchitecture,
+    systemArchitecture
+);
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo::Hardware,
+    _icon,
     cpuName,
     cpuCoresLogical,
     cpuCoresPhysical,
@@ -61,6 +82,15 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
     ramAvailableMb,
     vramTotalMb,
     vramAvailableMb
+);
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
+    _title,
+    _icon,
+    environment,
+    compilation,
+    system,
+    hardware
 );
 
 

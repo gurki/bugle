@@ -30,18 +30,18 @@ void ConsoleLogger::receive( const Letter& letter )
         return;
     }
 
-    if ( letter.tags.contains( "system" ) )
-    {
-        if ( letter.tags.contains( "build" ) ) {
-            logBuild( letter );
-            return;
-        }
+    // if ( letter.tags.contains( "system" ) )
+    // {
+    //     if ( letter.tags.contains( "build" ) ) {
+    //         logBuild( letter );
+    //         return;
+    //     }
 
-        if ( letter.tags.contains( "session" ) ) {
-            logSession( letter );
-            return;
-        }
-    }
+    //     if ( letter.tags.contains( "session" ) ) {
+    //         logSession( letter );
+    //         return;
+    //     }
+    // }
 
     if ( letter.tags.contains( "envelope" ) ) {
         logEnvelope( letter );
@@ -137,40 +137,40 @@ nlohmann::json unflattenJson( const nlohmann::json& flat )
 //////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::logBuild( const Letter& letter )
 {
-    BuildInfo info = nlohmann::json( letter.attributes );
+    // BuildInfo info = nlohmann::json( letter.attributes );
 
-    h1( "🚧 BUILD" );
+    // h1( "🚧 BUILD" );
 
-    //  environment
-    h2( "🌳 Environment" );
-    kv( "timestamp", info.timestamp );
-    kv( "bugle", info.bugle );
-    kv( "host", info.host, true );
-    kv( "directory", info.directory );
+    // //  environment
+    // h2( "🌳 Environment" );
+    // kv( "timestamp", info.timestamp );
+    // kv( "bugle", info.bugle );
+    // kv( "host", info.host, true );
+    // kv( "directory", info.directory );
 
-    //  compilation
-    h2( "🏭 Compilation" );
-    kv( "type", info.type );
-    kv( "cmake", info.cmakeVersion );
-    kv( "generator", info.cmakeGenerator );
-    kv( "compiler", info.compilerName );
-    kv( "version", info.compilerVersion, true, true );
+    // //  compilation
+    // h2( "🏭 Compilation" );
+    // kv( "type", info.type );
+    // kv( "cmake", info.cmakeVersion );
+    // kv( "generator", info.cmakeGenerator );
+    // kv( "compiler", info.compilerName );
+    // kv( "version", info.compilerVersion, true, true );
 
-    // //  system
-    // h2( "💻 System" );
-    // kv( "name", info.systemName );
-    // kv( "version", info.systemVersion );
-    // kv( "architecture", info.systemArchitecture, true );
+    // // //  system
+    // // h2( "💻 System" );
+    // // kv( "name", info.systemName );
+    // // kv( "version", info.systemVersion );
+    // // kv( "architecture", info.systemArchitecture, true );
 
-    // //  hardware
-    // h2( "💾 Hardware" );
-    // kv( "cpu", info.cpuName );
-    // kv( "cores", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
-    // kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
-    // kv( "vram", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
+    // // //  hardware
+    // // h2( "💾 Hardware" );
+    // // kv( "cpu", info.cpuName );
+    // // kv( "cores", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
+    // // kv( "ram", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
+    // // kv( "vram", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
 
-    std::println( "" );
-    std::fflush( nullptr );
+    // std::println( "" );
+    // std::fflush( nullptr );
 }
 
 
@@ -208,33 +208,43 @@ void ConsoleLogger::logSession( const Letter& letter )
 //////////////////////////////////////////////////////////////////////////////////
 void ConsoleLogger::logAttributes( const attributes_t& attributes )
 {
-    const auto sections = unflattenJson( attributes );
-    
-    h1( std::format( "{} {}", 
-        sections.value( "_icon", "" ), 
-        sections.value( "_title", "" ) 
-    ));
+    if ( attributes.contains( "_title" ) )
+    {
+        std::string heading = attributes.at( "_title" );
+        std::ranges::transform( 
+            heading, heading.begin(), 
+            []( unsigned char c ) { 
+                return (char)( std::toupper( c ) ); 
+            }
+        );
+
+        if ( attributes.contains( "_icon" ) ) {
+            h1( std::format( "{} {}", attributes.at( "_icon" ).get<std::string>(), heading ) );
+        } else {
+            h1( std::format( "{}", heading ) );
+        }
+    }
     
     int sectionId = 0;
 
-    for ( const auto& section : sections.items() ) 
+    for ( const auto& section : attributes ) 
     {
         sectionId++;
         
-        if ( section.key() == "_title" || section.key() == "_icon" ) {
+        if ( ! section.second.is_object() ) {
             continue;
         }
         
-        const auto& items = section.value();
-
-        if ( ! items.is_object() || ! items.contains( "_title" ) ) {
-            continue; 
-        }
+        std::string title = section.first;
+        title[ 0 ] = std::toupper( title[ 0 ] );
         
-        h2( std::format( "{} {}", 
-            items.value( "_icon", "" ), 
-            items.value( "_title", "" ) 
-        ));
+        const auto& items = section.second;
+        
+        if ( items.contains( "_icon" ) ) {
+            h2( std::format( "{} {}", items.value( "_icon", "" ), title ) );
+        } else {
+            h2( std::format( "{}", title ) );
+        }
 
         int itemId = 0;
 
@@ -250,7 +260,7 @@ void ConsoleLogger::logAttributes( const attributes_t& attributes )
                 item.key(), 
                 item.value().dump( 2 ), 
                 itemId == items.size(), 
-                itemId == items.size() && sectionId == sections.size() 
+                itemId == items.size() && sectionId == attributes.size() 
             );
         }
     }
