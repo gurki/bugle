@@ -41,11 +41,6 @@ void ConsoleLogger::receive( const Letter& letter )
             logSession( letter );
             return;
         }
-
-        if ( letter.tags.contains( "gpu" ) ) {
-            logGpu( letter );
-            return;
-        }
     }
 
     if ( letter.tags.contains( "envelope" ) ) {
@@ -54,6 +49,11 @@ void ConsoleLogger::receive( const Letter& letter )
     }
 
     std::println( "{}", formatter_->format( letter ) );
+
+    if ( letter.attributes.contains( "_title" ) ) {
+        logAttributes( letter.attributes );
+    }
+
     std::fflush( nullptr );
 }
 
@@ -87,31 +87,6 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
 void ConsoleLogger::logBuild( const Letter& letter )
 {
     BuildInfo info = nlohmann::json( letter.attributes );
-
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
 
     h1( "🚧 BUILD" );
 
@@ -153,31 +128,6 @@ void ConsoleLogger::logSession( const Letter& letter )
 {
     SessionInfo info = nlohmann::json( letter.attributes );
 
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
     h1( "💡 SESSION" );
 
     //
@@ -204,51 +154,111 @@ void ConsoleLogger::logSession( const Letter& letter )
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logGpu( const Letter& letter )
+////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::h1( const std::string& title ) {
+    std::println( "┌ {}",
+        formatter_->colorize( title, tx1_ )
+    );
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::h2( const std::string& title ) {
+    std::println( "│ ┌ {}",
+        formatter_->colorize( title, tx1_ )
+    );
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::kv( 
+    const std::string& key, 
+    const auto& val,
+    const bool closeInner, 
+    const bool closeOuter ) 
 {
-    bugle::GpuInfo info = nlohmann::json( letter.attributes );
+    std::println( "{} {} {:<20} {}",
+            closeOuter ? "└" : "│",
+            closeInner ? "└" : "├",
+            formatter_->colorize( key, tx3_ ),
+            formatter_->colorize( std::format( "{}", val ), tx2_ )
+    );
+};
 
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
 
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
 
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
+////////////////////////////////////////////////////////////////////////////////
+//  helper: split a string by '.' into a vector of parts
+static std::vector<std::string> splitKey( const std::string& key ) 
+{
+    std::vector<std::string> parts;
+    std::istringstream ss( key );
+    std::string token;
 
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-              closeOuter ? "└" : "│",
-              closeInner ? "└" : "├",
-              formatter_->colorize( key, tx3 ),
-              formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
+    while ( std::getline( ss, token, '.' ) ) {
+        parts.push_back( token );
+    }
 
-    h1( "🎨 GPU" );
+    return parts;
+}
 
-    //  renderer
-    h2( "👩‍🎨 Renderer" );
-    kv( "renderer:", info.renderer );
-    kv( "version:", info.version );
-    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true );
 
-    //  capabilities
-    h2( "🦾 Capabilities" );
-    kv( "maxPatchVertices:", info.maxPatchVertices );
-    kv( "maxTextureImageUnits:", info.maxTextureImageUnits );
-    kv( "maxTextureSize:", info.maxTextureSize );
-    kv( "maxArrayTextureLayers:", info.maxArrayTextureLayers );
-    kv( "max3dTextureSize:", info.max3dTextureSize, true, true );
+////////////////////////////////////////////////////////////////////////////////
+//  convert a flat json with dotted keys into a nested json structure
+nlohmann::json unflattenJson( const nlohmann::json& flat ) 
+{
+    nlohmann::json nested = nlohmann::json::object();
+
+    for ( auto it = flat.begin(); it != flat.end(); ++it ) 
+    {
+        const std::string flatKey = it.key();
+        const nlohmann::json& value = it.value();
+
+        auto parts = splitKey( flatKey );
+        nlohmann::json* cur = &nested;
+
+        //  traverse (or create) intermediate objects
+        for ( size_t i = 0; i + 1 < parts.size(); ++i ) 
+        {
+            const std::string& part = parts[i];
+        
+            if ( ! (*cur).contains(part) || !(*cur)[part].is_object() ) {
+                (*cur)[part] = nlohmann::json::object();
+            }
+
+            cur = &(*cur)[part];
+        }
+
+        //  assign the value to the deepest key
+        const std::string& lastPart = parts.back();
+        (*cur)[lastPart] = value;
+    }
+
+    return nested;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logAttributes( const attributes_t& attributes )
+{
+    const auto unflattened = unflattenJson( attributes );
+    h1( std::format( "{} {}", unflattened[ "_icon" ].get<std::string_view>(), unflattened[ "_title" ].get<std::string_view>() ) );
+    
+    // h1( "🎨 GPU" );
+
+    // //  renderer
+    // h2( "👩‍🎨 Renderer" );
+    // kv( "renderer:", info.renderer );
+    // kv( "version:", info.version );
+    // kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true );
+
+    // //  capabilities
+    // h2( "🦾 Capabilities" );
+    // kv( "maxPatchVertices:", info.maxPatchVertices );
+    // kv( "maxTextureImageUnits:", info.maxTextureImageUnits );
+    // kv( "maxTextureSize:", info.maxTextureSize );
+    // kv( "maxArrayTextureLayers:", info.maxArrayTextureLayers );
+    // kv( "max3dTextureSize:", info.max3dTextureSize, true, true );
 
     std::println( "" );
     std::fflush( nullptr );
