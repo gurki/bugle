@@ -29,8 +29,8 @@ struct SessionInfo
         std::string _icon = "💻";
         std::string cpuModel;
         int cpuCores;
-        int ramTotalMb;
-        int ramAvailableMb;
+        float ramTotalGiB;
+        float ramAvailableGiB;
     } hardware;
 
     static SessionInfo current();
@@ -56,8 +56,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo::Hardware,
     _icon,
     cpuModel,
     cpuCores,
-    ramTotalMb,
-    ramAvailableMb
+    ramTotalGiB,
+    ramAvailableGiB
 );
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( SessionInfo,

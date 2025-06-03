@@ -39,10 +39,10 @@ struct BuildInfo
         std::string cpuName;
         int cpuCoresLogical;
         int cpuCoresPhysical;
-        int ramTotalMb;
-        int ramAvailableMb;
-        int vramTotalMb;
-        int vramAvailableMb;
+        float ramTotalGiB;
+        float ramAvailableGiB;
+        float vramTotalGiB;
+        float vramAvailableGiB;
     } hardware;
 
     static BuildInfo current();
@@ -78,10 +78,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo::Hardware,
     cpuName,
     cpuCoresLogical,
     cpuCoresPhysical,
-    ramTotalMb,
-    ramAvailableMb,
-    vramTotalMb,
-    vramAvailableMb
+    ramTotalGiB,
+    ramAvailableGiB,
+    vramTotalGiB,
+    vramAvailableGiB
 );
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE( BuildInfo,
