@@ -95,10 +95,15 @@ std::string Timestamp::isoInfo() const {
 
 
 //////////////////////////////////////////////////////////////////////////////////
-std::string Timestamp::fileInfo() const {
+std::string Timestamp::fileInfo() const
+{
     const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( *this );
+#ifdef __APPLE__
+    return std::format( "{:%F}T{:%T}", tp, tp );
+#else
     const auto zt = std::chrono::zoned_time( std::chrono::current_zone(), tp );
-    return std::format( "{:%F}_{:%H%M%S}", zt, zt );
+    return std::format( "{:%F}T{:%T%z}", zt, zt );
+#endif
 }
 
 

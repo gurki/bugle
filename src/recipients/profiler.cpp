@@ -44,7 +44,16 @@ void Profiler::receive( const Letter& letter )
         return;
     }
 
+#ifdef __APPLE__
+    std::string path;
+    for ( size_t i = 0; i < stack.size(); ++i ) {
+        if ( i > 0 ) path += ';';
+        path += stack[i];
+    }
+#else
     const auto path = stack | std::views::join_with( ';' );
+#endif
+
     const int dur = letter.attributes.at( "duration" ).get<int>();
     const int off = offload.back();
     offload.pop_back();

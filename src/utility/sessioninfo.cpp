@@ -38,7 +38,7 @@ int ramAvailableMb();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-SessionInfo SessionInfo::current() 
+SessionInfo SessionInfo::current()
 {
     SessionInfo info {};
     info.application.timestamp = bugle::localTime();
@@ -51,7 +51,7 @@ SessionInfo SessionInfo::current()
     info.application.appName = "n/a";
     info.application.appVersion = "n/a";
     info.application.appCommit = "n/a";
-#endif 
+#endif
 
     info.paths.current = std::filesystem::current_path().string();
     info.paths.temp = std::filesystem::temp_directory_path().string();
@@ -59,7 +59,7 @@ SessionInfo SessionInfo::current()
     info.system.systemName = bugle::systemName();
     info.system.systemVersion = bugle::systemVersion();
     info.system.systemArchitecture = bugle::systemArchitecture();
-    
+
     info.hardware.cpuModel = bugle::cpuModel();
     info.hardware.cpuCores = std::thread::hardware_concurrency();
     info.hardware.ramTotalGiB = bugle::ramTotalMb() / 1024.f;
@@ -263,8 +263,12 @@ std::string localTime()
 {
     const auto now = std::chrono::system_clock::now();
     const auto tp = std::chrono::time_point_cast<std::chrono::seconds>( now );
+#ifdef __APPLE__
+    return std::format( "{:%F}T{:%T}", tp, tp );
+#else
     const auto zt = std::chrono::zoned_time( std::chrono::current_zone(), tp );
     return std::format( "{:%F}T{:%T%z}", zt, zt );
+#endif
 }
 
 

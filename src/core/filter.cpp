@@ -23,6 +23,7 @@ static std::optional<Line> buildLine( const Literal& literal )
         case VariableType::Attribute: filter = AttributeFilter( variable ); break;
         // case VariableType::Value: filter = ValueFilter( variable );
         case VariableType::Invalid: return {};
+        default: return {};
     }
 
     if ( ! filter.matches ) {
