@@ -16,8 +16,9 @@ project( bugle-tests
 
 add_executable( ${PROJECT_NAME}
     filter.cpp
-    main.cpp
     parse.cpp
+    postoffice.cpp
+    timestamp.cpp
 )
 
 target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_23 )
@@ -27,8 +28,9 @@ target_include_directories( ${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+#  tests only exercise the core, keeping the core-only configuration testable
 target_link_libraries( ${PROJECT_NAME} PRIVATE
-    bugle
+    bugle::core
     Catch2::Catch2WithMain
 )
 

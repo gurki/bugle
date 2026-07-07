@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+
+  windows-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: configure
+        run: cmake -S . -B build -DBUGLE_ENABLE=ON -DBUGLE_BUILD_TESTS=ON -DBUGLE_BUILD_EXAMPLES=ON
+
+      - name: build
+        run: cmake --build build --config Debug
+
+      - name: test
+        run: ctest --test-dir build/tests -C Debug --output-on-failure
+
+  linux-gcc:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install toolchain
+        run: sudo apt-get update && sudo apt-get install -y g++-14 ninja-build
+
+      - name: configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=g++-14
+          -DBUGLE_ENABLE=ON
+          -DBUGLE_BUILD_TESTS=ON
+
+      - name: build
+        run: cmake --build build
+
+      - name: test
+        run: ctest --test-dir build/tests --output-on-failure
+
+  disabled-noop:
+    #  the library must also build with logging compiled out
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install toolchain
+        run: sudo apt-get update && sudo apt-get install -y g++-14 ninja-build
+
+      - name: configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=g++-14
+          -DBUGLE_BUILD_TESTS=ON
+
+      - name: build
+        run: cmake --build build
+
+      - name: test
+        run: ctest --test-dir build/tests --output-on-failure
+
+  linux-core-only:
+    #  core must build and test without any recipient modules
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install toolchain
+        run: sudo apt-get update && sudo apt-get install -y g++-14 ninja-build
+
+      - name: configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=g++-14
+          -DBUGLE_ENABLE=ON
+          -DBUGLE_BUILD_TESTS=ON
+          -DBUGLE_MODULE_CONSOLE=OFF
+          -DBUGLE_MODULE_JSON=OFF
+          -DBUGLE_MODULE_PROFILER=OFF
+          -DBUGLE_MODULE_SYSINFO=OFF
+
+      - name: build
+        run: cmake --build build
+
+      - name: test
+        run: ctest --test-dir build/tests --output-on-failure
