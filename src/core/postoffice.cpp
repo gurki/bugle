@@ -5,17 +5,11 @@
 namespace bugle {
 
 
-PostOfficeUPtr PostOffice::instance_ = nullptr;
-
-
 ////////////////////////////////////////////////////////////////////////////////
 PostOffice& PostOffice::instance()
 {
-    if ( ! instance_ ) {
-        instance_ = std::make_unique<PostOffice>();
-    }
-
-    return *instance_;
+    static PostOffice office;
+    return office;
 }
 
 
@@ -36,7 +30,11 @@ PostOffice::~PostOffice()
         return;
     }
 
-    shouldExit_ = true;
+    {
+        std::scoped_lock lock( queueMutex_ );
+        shouldExit_ = true;
+    }
+
     queueReady_.notify_one();
     workerThread_.join();
 #endif
@@ -47,11 +45,11 @@ PostOffice::~PostOffice()
 void PostOffice::flush()
 {
 #ifdef BUGLE_ENABLE
-    //  FIXME: probably need to guard empty check against threading
-    while ( ! letters_.empty() || onRoute_ ) {
-        std::scoped_lock lock( queueMutex_ );
-        queueReady_.notify_one();
-    }
+    std::unique_lock lock( queueMutex_ );
+
+    queueDrained_.wait( lock, [ this ](){
+        return letters_.empty() && ! dispatching_;
+    });
 #endif
 }
 
@@ -66,7 +64,7 @@ void PostOffice::post( Letter&& letter )
 
     {
         std::scoped_lock lock( queueMutex_ );
-        letters_.emplace_back( letter );
+        letters_.emplace_back( std::move( letter ) );
     }
 
     queueReady_.notify_one();
@@ -110,13 +108,15 @@ void PostOffice::card( const tags_t& tags, const std::source_location& location 
 int PostOffice::level( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
-    std::scoped_lock lock( queueMutex_ );
+    std::scoped_lock lock( levelMutex_ );
 
-    if ( ! levels_.contains( thread ) ) {
+    const auto it = levels_.find( thread );
+
+    if ( it == levels_.end() ) {
         return 0;
     }
 
-    return levels_.at( thread );
+    return it->second;
 #else
     return 0;
 #endif
@@ -127,13 +127,7 @@ int PostOffice::level( const std::thread::id& thread )
 void PostOffice::push( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
-    std::scoped_lock lock( queueMutex_ );
-
-    if ( ! levels_.contains( thread ) ) {
-        levels_[ thread ] = 1;
-        return;
-    }
-
+    std::scoped_lock lock( levelMutex_ );
     levels_[ thread ]++;
 #endif
 }
@@ -143,13 +137,17 @@ void PostOffice::push( const std::thread::id& thread )
 void PostOffice::pop( const std::thread::id& thread )
 {
 #ifdef BUGLE_ENABLE
-    std::scoped_lock lock( queueMutex_ );
+    std::scoped_lock lock( levelMutex_ );
 
-    if ( ! levels_.contains( thread ) ) {
+    const auto it = levels_.find( thread );
+
+    if ( it == levels_.end() ) {
         return;
     }
 
-    levels_[ thread ]--;
+    if ( --it->second <= 0 ) {
+        levels_.erase( it );
+    }
 #endif
 }
 
@@ -188,38 +186,33 @@ void PostOffice::removeObserver( const RecipientRef& observer )
 ////////////////////////////////////////////////////////////////////////////////
 void PostOffice::processQueue()
 {
-    while ( ! shouldExit_ )
+    while ( true )
     {
+        Letter letter {};
+
         {
             std::unique_lock lock( queueMutex_ );
 
             queueReady_.wait( lock, [ this ](){
-                return ! letters_.empty() || shouldExit_ ;
+                return ! letters_.empty() || shouldExit_;
             });
-        }
 
-        Letter letter {};
-
-        while ( ! letters_.empty() )
-        {
-            if ( shouldExit_ ) {
+            //  exit only once the queue is fully drained, so no letters are
+            //  lost on shutdown
+            if ( letters_.empty() ) {
+                queueDrained_.notify_all();
                 return;
             }
 
-            onRoute_ = true;
+            letter = std::move( letters_.front() );
+            letters_.pop_front();
+            dispatching_ = true;
+        }
 
-            {
-                std::scoped_lock lock( queueMutex_ );
-                letter = std::move( letters_.front() );
-                letters_.pop_front();
-            }
+        //  remove expired observers under exclusive lock before dispatching
+        {
+            std::scoped_lock lock( observerMutex_ );
 
-            //  lock to avoid observer insertion from another thread during iteration.
-            //  as a side effect, this ensures multiple postAsync calls run sequentially, keeping
-            //  chronological order.
-            std::shared_lock lock( observerMutex_ );
-
-            //  remove expired observers
             for ( auto it = observers_.begin(); it != observers_.end(); )
             {
                 if ( ! it->expired() ) {
@@ -230,13 +223,16 @@ void PostOffice::processQueue()
                 filter_.erase( *it );
                 it = observers_.erase( it );
             }
+        }
 
-            for ( auto& observerRef : observers_ )
+        {
+            //  lock to avoid observer insertion from another thread during iteration.
+            //  as a side effect, this ensures letters are dispatched sequentially,
+            //  keeping chronological order.
+            std::shared_lock lock( observerMutex_ );
+
+            for ( const auto& observerRef : observers_ )
             {
-                if ( shouldExit_ ) {
-                    return;
-                }
-
                 if ( filter_.contains( observerRef ) )
                 {
                     const auto& filter = filter_.at( observerRef );
@@ -246,15 +242,19 @@ void PostOffice::processQueue()
                     }
                 }
 
-                if ( observerRef.expired() ) {
-                    continue;
+                if ( auto observer = observerRef.lock() ) {
+                    observer->receive( letter );
                 }
+            }
+        }
 
-                auto observer = observerRef.lock();
-                observer->receive( letter );
-            };
+        {
+            std::scoped_lock lock( queueMutex_ );
+            dispatching_ = false;
 
-            onRoute_ = false;
+            if ( letters_.empty() ) {
+                queueDrained_.notify_all();
+            }
         }
     }
 }

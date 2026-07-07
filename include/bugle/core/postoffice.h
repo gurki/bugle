@@ -10,11 +10,9 @@
 #include <atomic>   //  enabled_, ...
 #include <condition_variable>
 #include <deque>
-#include <format>
-#include <memory>   //  MessageCenterPtr, ...
+#include <memory>   //  PostOfficePtr, ...
 #include <mutex>    //  observerMutex_, ...
 #include <shared_mutex>
-#include <stack>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>    //  observers_, ...
@@ -87,17 +85,19 @@ class PostOffice
             WeakPtrEqual<Recipient>
         > filter_;
 
+        std::mutex levelMutex_;
         std::unordered_map<std::thread::id, int> levels_;
 
         std::thread workerThread_;
         std::shared_mutex observerMutex_;
+
+        //  queueMutex_ guards letters_, dispatching_ and shouldExit_
         std::mutex queueMutex_;
         std::deque<Letter> letters_;
         std::condition_variable queueReady_;
-        std::atomic_bool shouldExit_ = false;
-        std::atomic_bool onRoute_ = false;
-
-        static PostOfficeUPtr instance_;
+        std::condition_variable queueDrained_;
+        bool dispatching_ = false;
+        bool shouldExit_ = false;
 };
 
 
