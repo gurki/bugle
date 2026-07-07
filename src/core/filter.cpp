@@ -8,6 +8,43 @@ namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+static std::optional<ValueFilter::comp_t> comparatorFromString( std::string_view op )
+{
+    using json = nlohmann::json;
+
+    if ( op == "=" || op == "==" ) return std::equal_to<>{};
+    if ( op == "!=" ) return std::not_equal_to<>{};
+    if ( op == ">" ) return []( const json& a, const json& b ){ return a > b; };
+    if ( op == ">=" ) return []( const json& a, const json& b ){ return a >= b; };
+    if ( op == "<" ) return []( const json& a, const json& b ){ return a < b; };
+    if ( op == "<=" ) return []( const json& a, const json& b ){ return a <= b; };
+
+    return {};
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+static std::optional<Filter> buildValueFilter( const Literal& literal )
+{
+    const auto compare = comparatorFromString( literal.op );
+
+    if ( ! compare ) {
+        return {};
+    }
+
+    //  operands parse as json where possible ("100" -> 100, "true" -> true),
+    //  and fall back to plain strings otherwise ("core" -> "core")
+    nlohmann::json value = nlohmann::json::parse( literal.value, nullptr, false );
+
+    if ( value.is_discarded() ) {
+        value = std::string( literal.value );
+    }
+
+    return ValueFilter( std::string( literal.variable ), value, compare.value() );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 static std::optional<Line> buildLine( const Literal& literal )
 {
     Filter filter;
@@ -20,9 +57,29 @@ static std::optional<Line> buildLine( const Literal& literal )
         case VariableType::Message: filter = MessageFilter( variable ); break;
         case VariableType::File: filter = FileFilter( variable ); break;
         case VariableType::Function: filter = FunctionFilter( variable ); break;
-        case VariableType::Attribute: filter = AttributeFilter( variable ); break;
-        // case VariableType::Value: filter = ValueFilter( variable );
-        case VariableType::Invalid: return {};
+
+        case VariableType::Attribute:
+        case VariableType::Value:
+        {
+            if ( literal.op.empty() ) {
+                filter = AttributeFilter( variable );
+                break;
+            }
+
+            const auto maybeFilter = buildValueFilter( literal );
+
+            if ( ! maybeFilter ) {
+                return {};
+            }
+
+            filter = maybeFilter.value();
+            break;
+        }
+
+        case VariableType::Timestamp:
+        case VariableType::Line:
+        case VariableType::Invalid:
+            return {};
     }
 
     if ( ! filter.matches ) {

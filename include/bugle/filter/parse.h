@@ -4,6 +4,7 @@
 #include <ranges>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 
 namespace bugle {
 
@@ -24,6 +25,8 @@ enum class VariableType {
 struct Literal {
     std::string_view type;
     std::string_view variable;
+    std::string_view op;        //  optional comparison operator, e.g. ">" in "attribute:value>100"
+    std::string_view value;     //  optional comparison operand
     bool negate;
 };
 
@@ -40,7 +43,7 @@ static constexpr auto toStringView = []( const auto& expression ) constexpr {
 
 ////////////////////////////////////////////////////////////////////////////////
 static constexpr auto notIsSpace = []( const auto& c ) {
-    return ! std::isspace( c );
+    return ! std::isspace( static_cast<unsigned char>( c ) );
 };
 
 
@@ -73,7 +76,7 @@ constexpr VariableType typeFromString( std::string_view type )
     if ( type == "tag" ) return VariableType::Tag;
     if ( type == "file" ) return VariableType::File;
     if ( type == "function" ) return VariableType::Function;
-    if ( type == "attribte" ) return VariableType::Attribute;
+    if ( type == "attribute" ) return VariableType::Attribute;
     if ( type == "value" ) return VariableType::Value;
 
     return VariableType::Invalid;
@@ -83,6 +86,11 @@ constexpr VariableType typeFromString( std::string_view type )
 constexpr Literal parseLiteral( std::string_view expression )
 {
     const size_t id = expression.find_first_of( ':' );
+
+    if ( id == std::string_view::npos ) {
+        return {};  //  empty type parses as VariableType::Invalid
+    }
+
     std::string_view type = expression.substr( 0, id );
     std::string_view variable = expression.substr( id + 1 );
 
@@ -93,7 +101,22 @@ constexpr Literal parseLiteral( std::string_view expression )
         type = type.substr( 1 );
     }
 
-    return { type, variable, negate };
+    //  optional comparison, e.g. "value>100", "count>=2", "name=core", "state!=idle"
+    std::string_view op {};
+    std::string_view value {};
+    const size_t opId = variable.find_first_of( "<>=!" );
+
+    if ( opId != std::string_view::npos )
+    {
+        const bool wide = ( opId + 1 < variable.size() ) && ( variable[ opId + 1 ] == '=' );
+        const size_t opSize = wide ? 2 : 1;
+
+        op = variable.substr( opId, opSize );
+        value = variable.substr( opId + opSize );
+        variable = variable.substr( 0, opId );
+    }
+
+    return { type, variable, op, value, negate };
 }
 
 

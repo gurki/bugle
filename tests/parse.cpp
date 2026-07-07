@@ -32,7 +32,35 @@ TEST_CASE( "parse filter", "[filter]" )
 
         REQUIRE( literals[ 2 ].negate == true );
         REQUIRE( std::string( literals[ 2 ].type ) == "attribute" );
-        REQUIRE( std::string( literals[ 2 ].variable ) == "value>100" );
+        REQUIRE( std::string( literals[ 2 ].variable ) == "value" );
+        REQUIRE( std::string( literals[ 2 ].op ) == ">" );
+        REQUIRE( std::string( literals[ 2 ].value ) == "100" );
+    }
+
+    SECTION( "comparison operators" )
+    {
+        auto con = bugle::parseConjunction( "attribute:count>=2 attribute:name=core attribute:state!=idle" );
+        const auto literals = std::ranges::to<bugle::Conjunction>( con );
+
+        REQUIRE( literals.size() == 3 );
+
+        REQUIRE( std::string( literals[ 0 ].variable ) == "count" );
+        REQUIRE( std::string( literals[ 0 ].op ) == ">=" );
+        REQUIRE( std::string( literals[ 0 ].value ) == "2" );
+
+        REQUIRE( std::string( literals[ 1 ].variable ) == "name" );
+        REQUIRE( std::string( literals[ 1 ].op ) == "=" );
+        REQUIRE( std::string( literals[ 1 ].value ) == "core" );
+
+        REQUIRE( std::string( literals[ 2 ].variable ) == "state" );
+        REQUIRE( std::string( literals[ 2 ].op ) == "!=" );
+        REQUIRE( std::string( literals[ 2 ].value ) == "idle" );
+    }
+
+    SECTION( "literal without colon is invalid" )
+    {
+        const auto literal = bugle::parseLiteral( "loose" );
+        REQUIRE( bugle::typeFromString( literal.type ) == bugle::VariableType::Invalid );
     }
 
     SECTION( "disjunction" )
@@ -113,5 +141,56 @@ TEST_CASE( "build filter", "[filter]" )
 
         letter.message = "hi";
         REQUIRE( filter.matches( letter ) );
+    }
+
+    SECTION( "value comparison" )
+    {
+        const bugle::Filter filter = bugle::Filter::fromString( "attribute:value>100" );
+
+        bugle::Letter letter;
+
+        letter.attributes = { { "value", 101 } };
+        REQUIRE( filter.matches( letter ) );
+
+        letter.attributes = { { "value", 100 } };
+        REQUIRE_FALSE( filter.matches( letter ) );
+
+        letter.attributes = { { "other", 200 } };
+        REQUIRE_FALSE( filter.matches( letter ) );
+    }
+
+    SECTION( "negated value comparison" )
+    {
+        //  the canonical example expression: info, not debug, and not value > 100
+        const bugle::Filter filter = bugle::Filter::fromString( "tag:info !attribute:value>100" );
+
+        bugle::Letter letter;
+        letter.tags = { "info" };
+
+        letter.attributes = { { "value", 50 } };
+        REQUIRE( filter.matches( letter ) );
+
+        letter.attributes = { { "value", 150 } };
+        REQUIRE_FALSE( filter.matches( letter ) );
+
+        letter.attributes = {};     //  missing attribute is not > 100
+        REQUIRE( filter.matches( letter ) );
+    }
+
+    SECTION( "comparison operator variants" )
+    {
+        bugle::Letter letter;
+        letter.attributes = { { "count", 2 }, { "name", "core" } };
+
+        REQUIRE( bugle::Filter::fromString( "attribute:count>=2" ).matches( letter ) );
+        REQUIRE( bugle::Filter::fromString( "attribute:count<=2" ).matches( letter ) );
+        REQUIRE( bugle::Filter::fromString( "attribute:count<3" ).matches( letter ) );
+        REQUIRE( bugle::Filter::fromString( "attribute:count=2" ).matches( letter ) );
+        REQUIRE( bugle::Filter::fromString( "attribute:count!=3" ).matches( letter ) );
+        REQUIRE_FALSE( bugle::Filter::fromString( "attribute:count!=2" ).matches( letter ) );
+
+        //  string operands
+        REQUIRE( bugle::Filter::fromString( "attribute:name=core" ).matches( letter ) );
+        REQUIRE_FALSE( bugle::Filter::fromString( "attribute:name=shell" ).matches( letter ) );
     }
 }
