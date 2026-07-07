@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <chrono>
+#include <filesystem>
 #include <format>
 #include <thread>
 
@@ -36,28 +37,33 @@ int ramAvailableMb();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-SessionInfo SessionInfo::current() 
+SessionInfo SessionInfo::current()
 {
     SessionInfo info {};
-    info.timestamp = bugle::localTime();
+    info.application.timestamp = bugle::localTime();
 
 #ifdef APP_NAME
-    info.appName = APP_NAME;
-    info.appVersion = APP_VERSION;
-    info.appCommit = APP_COMMIT;
+    info.application.appName = APP_NAME;
+    info.application.appVersion = APP_VERSION;
+    info.application.appCommit = APP_COMMIT;
 #else
-    info.appName = "n/a";
-    info.appVersion = "n/a";
-    info.appCommit = "n/a";
-#endif 
+    info.application.appName = "n/a";
+    info.application.appVersion = "n/a";
+    info.application.appCommit = "n/a";
+#endif
 
-    info.systemName = bugle::systemName();
-    info.systemVersion = bugle::systemVersion();
-    info.systemArchitecture = bugle::systemArchitecture();
-    info.cpuModel = bugle::cpuModel();
-    info.cpuCores = std::thread::hardware_concurrency();
-    info.ramTotalMb = bugle::ramTotalMb();
-    info.ramAvailableMb = bugle::ramAvailableMb();
+    info.paths.current = std::filesystem::current_path().string();
+    info.paths.temp = std::filesystem::temp_directory_path().string();
+
+    info.system.name = bugle::systemName();
+    info.system.version = bugle::systemVersion();
+    info.system.architecture = bugle::systemArchitecture();
+
+    info.hardware.cpuModel = bugle::cpuModel();
+    info.hardware.cpuCores = std::thread::hardware_concurrency();
+    info.hardware.ramTotalGiB = bugle::ramTotalMb() / 1024.f;
+    info.hardware.ramAvailableGiB = bugle::ramAvailableMb() / 1024.f;
+
     return info;
 }
 
@@ -165,8 +171,6 @@ std::string systemVersion()
     } else {
         struct utsname buffer;
         if (uname(&buffer) == 0) {
-            // os_version = buffer.sysname;
-            // os_version += " ";
             os_version += buffer.release;
         } else {
             os_version = "Failed to get Linux OS version";
@@ -177,15 +181,12 @@ std::string systemVersion()
     FILE* pipe = popen("sw_vers -productVersion", "r");
     if (pipe) {
         if (fgets(buffer, sizeof(buffer), pipe)) {
-            // os_version = "macOS ";
             os_version += buffer;
         }
         pclose(pipe);
     } else {
         struct utsname buffer;
         if (uname(&buffer) == 0) {
-            // os_version = buffer.sysname;
-            // os_version += " ";
             os_version += buffer.release;
         } else {
             os_version = "Failed to get MacOS version";
