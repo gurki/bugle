@@ -19,8 +19,16 @@ Profiler::~Profiler() {
 ////////////////////////////////////////////////////////////////////////////////
 void Profiler::receive( const Letter& letter )
 {
-    assert( letter.tags.contains( "envelope" ) );
-    assert( letter.attributes.contains( "open" ) );
+    //  only well-formed envelope letters carry profiling information
+    if ( ! letter.tags.contains( "envelope" ) ) {
+        return;
+    }
+
+    const auto openIt = letter.attributes.find( "open" );
+
+    if ( openIt == letter.attributes.end() || ! openIt->second.is_boolean() ) {
+        return;
+    }
 
     const std::thread::id tid = letter.thread;
 
@@ -38,14 +46,24 @@ void Profiler::receive( const Letter& letter )
         std::format( "{}::{}", letter.functionInfo(), letter.message )
     );
 
-    if ( letter.attributes.at( "open" ).get<bool>() ) {
+    if ( openIt->second.get<bool>() ) {
         stack.push_back( name );
         offload.push_back( 0 );
         return;
     }
 
+    //  a close without a matching open, e.g. when attached mid-envelope
+    if ( stack.empty() || offload.empty() ) {
+        return;
+    }
+
+    const auto durIt = letter.attributes.find( "duration" );
+    const int dur = (
+        durIt != letter.attributes.end() && durIt->second.is_number() ?
+        durIt->second.get<int>() : 0
+    );
+
     const auto path = stack | std::views::join_with( ';' );
-    const int dur = letter.attributes.at( "duration" ).get<int>();
     const int off = offload.back();
     offload.pop_back();
 

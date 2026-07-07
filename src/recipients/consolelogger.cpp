@@ -1,19 +1,62 @@
 #include "bugle/recipients/consolelogger.h"
-#include "bugle/format/colortable.h"
 #include "bugle/format/duration.h"
 #include "bugle/format/doge.h"
-#include "bugle/utility/buildinfo.h"
-#include "bugle/utility/sessioninfo.h"
-#include "bugle/utility/gpuinfo.h"
 
 #include <print>
+
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+    #include <windows.h>
+    #include <io.h>
+#else
+    #include <unistd.h>
+#endif
 
 namespace bugle {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-ConsoleLogger::ConsoleLogger() {
-    formatter_ = std::make_shared<AsciiFormatter>();
+//  returns true if stdout is a terminal with working ansi escape support.
+//  on windows, this also enables virtual terminal processing and utf-8 output.
+static bool enableConsoleColors()
+{
+#ifdef _WIN32
+    if ( ! _isatty( _fileno( stdout ) ) ) {
+        return false;
+    }
+
+    SetConsoleOutputCP( CP_UTF8 );
+
+    HANDLE handle = GetStdHandle( STD_OUTPUT_HANDLE );
+
+    if ( handle == INVALID_HANDLE_VALUE || handle == nullptr ) {
+        return false;
+    }
+
+    DWORD mode = 0;
+
+    if ( ! GetConsoleMode( handle, &mode ) ) {
+        return false;
+    }
+
+    return SetConsoleMode( handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
+#else
+    return isatty( fileno( stdout ) );
+#endif
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+ConsoleLogger::ConsoleLogger()
+{
+    //  fall back to the color-free base formatter when piped or without
+    //  ansi support, so redirected output stays free of escape codes
+    if ( enableConsoleColors() ) {
+        formatter_ = std::make_shared<AsciiFormatter>();
+    } else {
+        formatter_ = std::make_shared<Formatter>();
+    }
 }
 
 
@@ -30,31 +73,32 @@ void ConsoleLogger::receive( const Letter& letter )
         return;
     }
 
-    if ( letter.tags.contains( "system" ) )
-    {
-        if ( letter.tags.contains( "build" ) ) {
-            logBuild( letter );
-            return;
-        }
-
-        if ( letter.tags.contains( "session" ) ) {
-            logSession( letter );
-            return;
-        }
-
-        if ( letter.tags.contains( "gpu" ) ) {
-            logGpu( letter );
-            return;
-        }
-    }
-
     if ( letter.tags.contains( "envelope" ) ) {
         logEnvelope( letter );
         return;
     }
 
+    if ( letter.attributes.contains( "_title" ) ) {
+        logBanner( letter );
+        return;
+    }
+
     std::println( "{}", formatter_->format( letter ) );
-    std::fflush( nullptr );
+    std::fflush( stdout );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+void ConsoleLogger::logBanner( const Letter& letter )
+{
+    //  the message line first for chronology and source location; the banner
+    //  content renders below, so strip the attributes from the line itself
+    Letter heading = letter;
+    heading.attributes.clear();
+
+    std::println( "{}", formatter_->format( heading ) );
+    std::println( "{}", formatter_->banner( letter.attributes ) );
+    std::fflush( stdout );
 }
 
 
@@ -63,7 +107,15 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
 {
     Letter envelope = letter;
 
-    if ( letter.attributes.at( "open" ) )
+    //  open/duration are internal bookkeeping; the duration is rendered
+    //  into the message below, so don't repeat them as attributes
+    envelope.attributes.erase( "open" );
+    envelope.attributes.erase( "duration" );
+
+    const auto openIt = letter.attributes.find( "open" );
+    const bool open = openIt != letter.attributes.end() && openIt->second.is_boolean() && openIt->second.get<bool>();
+
+    if ( open )
     {
         const std::string name = (
             letter.message.empty() ?
@@ -74,184 +126,24 @@ void ConsoleLogger::logEnvelope( const Letter& letter )
         envelope.message = std::format( "{} …", name );
     }
     else {
-        const std::string duration = durationInfo( letter.attributes.at( "duration" ) );
-        envelope.message = std::format( "\033[3m({}) {}\033[0m", duration, randomDoge() );
+        const auto durIt = letter.attributes.find( "duration" );
+        const uint64_t durationUs = (
+            durIt != letter.attributes.end() && durIt->second.is_number() ?
+            durIt->second.get<uint64_t>() : 0
+        );
+
+        const std::string duration = durationInfo( durationUs );
+
+        envelope.message = std::format( "{}({}) {}{}",
+            formatter_->beginItalic(),
+            duration,
+            randomDoge(),
+            formatter_->endItalic()
+        );
     }
 
     std::println( "{}", formatter_->format( envelope ) );
-    std::fflush( nullptr );
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logBuild( const Letter& letter )
-{
-    BuildInfo info = nlohmann::json( letter.attributes );
-
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
-    h1( "🚧 BUILD" );
-
-    //  environment
-    h2( "🌳 Environment" );
-    kv( "timestamp:", info.timestamp );
-    kv( "bugle:", info.bugle );
-    kv( "host:", info.host, true );
-    kv( "directory:", info.directory );
-
-    //  compilation
-    h2( "🏭 Compilation" );
-    kv( "type:", info.type );
-    kv( "cmake:", info.cmakeVersion );
-    kv( "generator:", info.cmakeGenerator );
-    kv( "compiler:", info.compilerName );
-    kv( "version:", info.compilerVersion, true, true );
-
-    // //  system
-    // h2( "💻 System" );
-    // kv( "name:", info.systemName );
-    // kv( "version:", info.systemVersion );
-    // kv( "architecture:", info.systemArchitecture, true );
-
-    // //  hardware
-    // h2( "💾 Hardware" );
-    // kv( "cpu:", info.cpuName );
-    // kv( "cores:", std::format( "{} / {}", info.cpuCoresPhysical, info.cpuCoresLogical ) );
-    // kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ) );
-    // kv( "vram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.vramAvailableMb / 1024.f, info.vramTotalMb / 1024.f ), true, true );
-
-    std::println( "" );
-    std::fflush( nullptr );
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logSession( const Letter& letter )
-{
-    SessionInfo info = nlohmann::json( letter.attributes );
-
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-            closeOuter ? "└" : "│",
-            closeInner ? "└" : "├",
-            formatter_->colorize( key, tx3 ),
-            formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
-    h1( "💡 SESSION" );
-
-    //
-    h2( "🍎 Application" );
-    kv( "timestamp:", info.timestamp );
-    kv( "app:", info.appName );
-    kv( "version:", info.appVersion );
-    kv( "commit:", info.appCommit, true );
-
-    //  system
-    h2( "💻 System" );
-    kv( "name:", info.systemName );
-    kv( "version:", info.systemVersion );
-    kv( "architecture:", info.systemArchitecture, true );
-
-    //  hardware
-    h2( "💾 Hardware" );
-    kv( "cpu:", std::format( "{}", info.cpuModel ) );
-    kv( "cores:", std::format( "{}", info.cpuCores ) );
-    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true, true );
-
-    std::println( "" );
-    std::fflush( nullptr );
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-void ConsoleLogger::logGpu( const Letter& letter )
-{
-    bugle::GpuInfo info = nlohmann::json( letter.attributes );
-
-    const auto tx = 254;
-    const auto tx2 = 250;
-    const auto tx3 = 246;
-
-    const auto h1 = [ this ]( const std::string& title ) {
-        std::println( "┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto h2 = [ this ]( const std::string& title ) {
-        std::println( "│ ┌ {}",
-            formatter_->colorize( title, tx )
-        );
-    };
-
-    const auto kv = [ this ]( const std::string& key, const auto& val, const bool closeInner = false, const bool closeOuter = false ) {
-        std::println( "{} {} {:<20} {}",
-              closeOuter ? "└" : "│",
-              closeInner ? "└" : "├",
-              formatter_->colorize( key, tx3 ),
-              formatter_->colorize( std::format( "{}", val ), tx2 )
-        );
-    };
-
-    h1( "🎨 GPU" );
-
-    //  renderer
-    h2( "👩‍🎨 Renderer" );
-    kv( "renderer:", info.renderer );
-    kv( "version:", info.version );
-    kv( "ram:", std::format( "{:.2f} GiB / {:.2f} GiB", info.ramAvailableMb / 1024.f, info.ramTotalMb / 1024.f ), true );
-
-    //  capabilities
-    h2( "🦾 Capabilities" );
-    kv( "maxPatchVertices:", info.maxPatchVertices );
-    kv( "maxTextureImageUnits:", info.maxTextureImageUnits );
-    kv( "maxTextureSize:", info.maxTextureSize );
-    kv( "maxArrayTextureLayers:", info.maxArrayTextureLayers );
-    kv( "max3dTextureSize:", info.max3dTextureSize, true, true );
-
-    std::println( "" );
-    std::fflush( nullptr );
+    std::fflush( stdout );
 }
 
 

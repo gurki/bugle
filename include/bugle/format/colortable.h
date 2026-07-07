@@ -12,24 +12,18 @@ namespace bugle {
 
 //  256 ansi colors
 //  indexed, with names and different representations
-//  requires 'colors.json' to be in the specified MC_RESOURCE_DIR directory
 class ColorTable
 {
     public:
 
         static std::string hex( const uint8_t id );
         static std::string name( const uint8_t id );
-        static uint8_t findHex( const std::string& hex );
         static uint8_t findName( const std::string& name );
-
-        static void printTestTable( const uint8_t numSteps = 6 );
 
     private:
 
         ColorTable();
         ~ColorTable() {}
-
-        static void load( const std::string& path );
 
         static nlohmann::json table_;
         static ColorTable instance_;    //  trigger population of table_

@@ -5,8 +5,8 @@
 
 #include <sstream>
 #include <format>
-#include <regex>
-#include <print>
+#include <algorithm>
+#include <cctype>
 
 namespace bugle {
 
@@ -33,13 +33,6 @@ void Formatter::setIndent( const uint8_t indent ) {
 ////////////////////////////////////////////////////////////////////////////////
 void Formatter::setTheme( const ThemePtr& theme ) {
     theme_ = theme;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-std::string elide( const std::string& msg, const int max ) {
-    if ( msg.size() > max ) return std::format( "{}…", msg.substr( 0, max ) );
-    return std::format( "{}", msg );
 }
 
 
@@ -73,8 +66,6 @@ std::string Formatter::format( const Letter& letter ) const
         ss << skip( 2 );
     }
 
-    // ss << "\033[80G";
-
     //  tags
 
     const std::string tinfo = tagInfo( letter.tags );
@@ -83,39 +74,194 @@ std::string Formatter::format( const Letter& letter ) const
         ss << tinfo << skip( 2 );
     }
 
-    // //  attributes
+    //  attributes
 
-    // const std::string ainfo = attributeInfo( letter.attributes );
+    const std::string ainfo = attributeInfo( letter.attributes );
 
-    // if ( ! ainfo.empty() ) {
-    //     ss << ainfo << skip( 2 );
-    // }
+    if ( ! ainfo.empty() ) {
+        ss << ainfo << skip( 2 );
+    }
 
     //  meta
 
-    // ss << "\033[120G";
-
-    // static const std::regex re( R"((.* )?(.*)(\(.*\))(::<lambda(.*)>)?)" );
-    // const std::string fn = letter.function();
-    // std::smatch match;
-    // std::regex_match( fn, match, re );
-
-    // std::string name;
-    // if ( ! match.empty() )
-    // {
-    //     name = match[ 2 ].str();
-
-    //     if ( match[ 4 ].matched ) {
-    //         name += "::lambda";
-    //     }
-    // }
-
     const auto text = std::format( "{}:{}", letter.fileInfo(), letter.line() );
-    // const auto link = std::format( "{}:{}", letter.file(), letter.line() );
-    // const auto hyperlink = std::format( "\e]8;;{}\e\\{}\e]8;;\e\\", link, text );
     const auto location = std::format( "[{} {}]", letter.functionInfo(), text );
 
     ss << colorize( location, theme_->secondary().variant );
+    return ss.str();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//  banner styling
+static constexpr uint8_t kBannerGlyph = 244;
+static constexpr uint8_t kBannerTitle = 254;
+static constexpr uint8_t kBannerValue = 250;
+static constexpr uint8_t kBannerKey = 246;
+
+
+////////////////////////////////////////////////////////////////////////////////
+static std::string bannerValueInfo( const nlohmann::json& value )
+{
+    if ( value.is_number_float() ) {
+        return std::format( "{:.2f}", value.get<float>() );
+    }
+
+    if ( value.is_string() ) {
+        return value.get<std::string>();
+    }
+
+    return value.dump();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//  visible keys of an object: "_order"-listed first, remaining alphabetically;
+//  keys starting with '_' are metadata and skipped
+static std::vector<std::string> bannerKeys( const nlohmann::json& object )
+{
+    std::vector<std::string> keys;
+
+    for ( const auto& item : object.items() )
+    {
+        if ( item.key().starts_with( '_' ) ) {
+            continue;
+        }
+
+        keys.push_back( item.key() );   //  json objects iterate alphabetically
+    }
+
+    if ( ! object.contains( "_order" ) || ! object.at( "_order" ).is_array() ) {
+        return keys;
+    }
+
+    std::vector<std::string> ordered;
+
+    for ( const auto& entry : object.at( "_order" ) )
+    {
+        if ( ! entry.is_string() ) {
+            continue;
+        }
+
+        const auto it = std::ranges::find( keys, entry.get<std::string>() );
+
+        if ( it == keys.end() ) {
+            continue;
+        }
+
+        ordered.push_back( *it );
+        keys.erase( it );
+    }
+
+    ordered.insert( ordered.end(), keys.begin(), keys.end() );
+    return ordered;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Formatter::banner( const attributes_t& attributes ) const
+{
+    const nlohmann::json object( attributes );
+    std::vector<std::string> lines;
+
+    //  heading
+
+    if ( object.contains( "_title" ) && object.at( "_title" ).is_string() )
+    {
+        std::string heading = object.at( "_title" ).get<std::string>();
+        std::ranges::transform( heading, heading.begin(), []( unsigned char c ) {
+            return (char)std::toupper( c );
+        });
+
+        if ( object.contains( "_icon" ) && object.at( "_icon" ).is_string() ) {
+            heading = std::format( "{} {}", object.at( "_icon" ).get<std::string>(), heading );
+        }
+
+        lines.push_back( std::format( "  {} {}",
+            colorize( "┌", kBannerGlyph ),
+            colorize( heading, kBannerTitle )
+        ));
+    }
+
+    //  partition top-level keys into scalar rows and sections
+
+    std::vector<std::string> scalars;
+    std::vector<std::string> sections;
+
+    for ( const auto& key : bannerKeys( object ) )
+    {
+        if ( ! object.at( key ).is_object() ) {
+            scalars.push_back( key );
+            continue;
+        }
+
+        if ( ! bannerKeys( object.at( key ) ).empty() ) {
+            sections.push_back( key );  //  sections without visible keys are skipped
+        }
+    }
+
+    const auto kv = [ this, &lines ](
+        const std::string& key,
+        const nlohmann::json& value,
+        const bool closeInner,
+        const bool closeOuter )
+    {
+        lines.push_back( std::format( "  {} {} {}: {}",
+            colorize( closeOuter ? "└" : "│", kBannerGlyph ),
+            colorize( closeInner ? "└" : "├", kBannerGlyph ),
+            colorize( std::format( "{:<20}", key ), kBannerKey ),
+            colorize( bannerValueInfo( value ), kBannerValue )
+        ));
+    };
+
+    //  top-level scalar rows
+
+    for ( size_t i = 0; i < scalars.size(); i++ )
+    {
+        const bool last = ( i + 1 == scalars.size() );
+        kv( scalars[ i ], object.at( scalars[ i ] ), last, last && sections.empty() );
+    }
+
+    //  sections
+
+    for ( size_t si = 0; si < sections.size(); si++ )
+    {
+        const auto& section = object.at( sections[ si ] );
+
+        std::string title = sections[ si ];
+        title[ 0 ] = (char)std::toupper( (unsigned char)title[ 0 ] );
+
+        if ( section.contains( "_icon" ) && section.at( "_icon" ).is_string() ) {
+            title = std::format( "{} {}", section.at( "_icon" ).get<std::string>(), title );
+        }
+
+        lines.push_back( std::format( "  {} {} {}",
+            colorize( "│", kBannerGlyph ),
+            colorize( "┌", kBannerGlyph ),
+            colorize( title, kBannerTitle )
+        ));
+
+        const auto keys = bannerKeys( section );
+
+        for ( size_t i = 0; i < keys.size(); i++ )
+        {
+            const bool closeInner = ( i + 1 == keys.size() );
+            const bool closeOuter = closeInner && ( si + 1 == sections.size() );
+            kv( keys[ i ], section.at( keys[ i ] ), closeInner, closeOuter );
+        }
+    }
+
+    std::stringstream ss;
+
+    for ( size_t i = 0; i < lines.size(); i++ )
+    {
+        if ( i > 0 ) {
+            ss << newline();
+        }
+
+        ss << lines[ i ];
+    }
+
     return ss.str();
 }
 
@@ -169,64 +315,25 @@ std::string Formatter::indent( const Letter& letter ) const
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//  tags render as colorized "#tag"
 std::string Formatter::pretty( const nlohmann::json& value ) const
 {
-    if ( value.is_string() )
-    {
-        const auto cols = theme_->get( value );
-
-        return std::format( "{}{}",
-            colorize( "#", theme_->secondary().color ),
-            colorize( value.get<std::string>(), cols.color )
-        );
-    }
-
-    if ( value.is_primitive() ) {
+    if ( ! value.is_string() ) {
         return {};
     }
 
-    if ( value.size() > 1 ) {
-        return colorize( "#…", theme_->secondary().color );
-    }
+    const auto cols = theme_->get( value );
 
-    if ( value.is_object() )
-    {
-        std::stringstream stream;
-
-        const auto iter = value.items().begin();
-        const auto& key = iter.key();
-        const auto& value = iter.value();
-
-        const auto pair = theme_->get( key );
-        const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
-
-        stream << colorize( "#", theme_->secondary().color );
-        stream << colorize( key, cols.color );
-
-        if ( value.empty() ) {
-            return stream.str();
-        }
-
-        stream << colorize( ":", theme_->primary().variant );
-
-        if ( value.is_primitive() ) {
-            stream << colorize( value.dump(), cols.variant );
-        } else {
-            stream << colorize( "…", cols.variant );
-        }
-
-        return stream.str();
-    }
-
-    return {};
+    return std::format( "{}{}",
+        colorize( "#", theme_->secondary().color ),
+        colorize( value.get<std::string>(), cols.color )
+    );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::tagInfo( const tags_t& tags ) const
 {
-    static const size_t maxSize = 24;
-
     if ( tags.empty() ) {
         return {};
     }
@@ -252,8 +359,6 @@ std::string Formatter::tagInfo( const tags_t& tags ) const
 ////////////////////////////////////////////////////////////////////////////////
 std::string Formatter::attributeInfo( const attributes_t& attributes ) const
 {
-    static const size_t maxSize = 24;
-
     if ( attributes.empty() ) {
         return {};
     }
@@ -263,6 +368,11 @@ std::string Formatter::attributeInfo( const attributes_t& attributes ) const
 
     for ( const auto& [ key, value ] : attributes )
     {
+        //  metadata keys, e.g. banner "_title"/"_icon"/"_order"
+        if ( key.starts_with( '_' ) ) {
+            continue;
+        }
+
         if ( firstItem ) {
             firstItem = false;
         } else {
@@ -272,7 +382,6 @@ std::string Formatter::attributeInfo( const attributes_t& attributes ) const
         const auto pair = theme_->get( key );
         const auto cols = ( ! value.empty() && value.is_primitive() ) ? ColorPair( { pair.variant, pair.color } ) : pair;
 
-        // stream << colorize( "#", theme_->secondary().variant );
         stream << colorize( key, cols.color );
 
         if ( value.empty() ) {
@@ -282,7 +391,7 @@ std::string Formatter::attributeInfo( const attributes_t& attributes ) const
         stream << colorize( ":", theme_->secondary().variant );
 
         if ( value.is_primitive() ) {
-            stream << colorize( value.dump(), cols.variant );
+            stream << colorize( bannerValueInfo( value ), cols.variant );
         } else {
             stream << colorize( "…", cols.variant );
         }
@@ -300,6 +409,18 @@ std::string AsciiFormatter::beginColor( const uint8_t index ) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string AsciiFormatter::endColor() const {
+    return "\x1b[0m";
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string AsciiFormatter::beginItalic() const {
+    return "\x1b[3m";
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string AsciiFormatter::endItalic() const {
     return "\x1b[0m";
 }
 

@@ -25,8 +25,17 @@ class Formatter
         );
 
         virtual std::string format( const Letter& message ) const;
+
+        //  renders attributes following the banner convention: "_title" and
+        //  "_icon" describe the heading, object-valued keys become sections,
+        //  scalars become key/value rows. an optional "_order" array fixes
+        //  key order; unlisted keys follow alphabetically.
+        virtual std::string banner( const attributes_t& attributes ) const;
+
         virtual std::string beginColor( const uint8_t ) const { return {}; }
         virtual std::string endColor() const { return {}; }
+        virtual std::string beginItalic() const { return {}; }
+        virtual std::string endItalic() const { return {}; }
 
         const std::string& space() const { return space_; }
         const std::string& spacer() const { return spacer_; }
@@ -66,6 +75,8 @@ class AsciiFormatter : public Formatter
 
         virtual std::string beginColor( const uint8_t index ) const override;
         virtual std::string endColor() const override;
+        virtual std::string beginItalic() const override;
+        virtual std::string endItalic() const override;
 };
 
 

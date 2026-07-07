@@ -17,10 +17,9 @@ class ConsoleLogger : public Recipient
 
     private:
 
-        void logBuild( const Letter& );    
-        void logSession( const Letter& );    
-        void logGpu( const Letter& );    
         void logEnvelope( const Letter& );
+        void logBanner( const Letter& );
+
         FormatterPtr formatter_ = nullptr;
 };
 

@@ -1,8 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <algorithm>    //  std::ranges::sample
+#include <format>
 #include <random>
+#include <string>
+#include <string_view>
+#include <vector>
 
 using namespace std::literals::string_view_literals;
 

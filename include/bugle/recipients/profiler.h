@@ -5,7 +5,6 @@
 
 #include <unordered_map>
 #include <fstream>
-#include <queue>
 
 namespace bugle {
 
@@ -22,7 +21,6 @@ struct Profiler : public Recipient
 
         std::unordered_map< std::thread::id, std::vector<std::string> > stacks_;
         std::unordered_map< std::thread::id, std::vector<int> > offloads_;
-        std::queue<std::string> buffer_;
         std::ofstream fout_;
 };
 

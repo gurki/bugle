@@ -1,17 +1,13 @@
 #include "bugle/format/colortable.h"
 #include "bugle/format/colors.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <algorithm>
+#include <cmath>
 #include <ios>  //  std::hex
 #include <regex>
-#include <print>
+#include <sstream>
 
 namespace bugle {
-
-
-using namespace std::string_literals;
 
 
 nlohmann::json ColorTable::table_ = {};
@@ -25,24 +21,6 @@ ColorTable::ColorTable() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void ColorTable::load( const std::string& path )
-{
-    std::ifstream fin( path );
-
-    if ( ! fin.is_open() ) {
-        std::println( "couldn't load {}", path );
-        return;
-    }
-
-    try {
-        table_ = nlohmann::json::parse( fin );
-    } catch ( const std::exception& err ) {
-        std::println( "coudln't parse {}", path );
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 std::string ColorTable::hex( const uint8_t id ) {
     return table_.at( id ).at( "hexString" );
 }
@@ -51,28 +29,6 @@ std::string ColorTable::hex( const uint8_t id ) {
 ////////////////////////////////////////////////////////////////////////////////
 std::string ColorTable::name( const uint8_t id )  {
     return table_.at( id ).at( "name" );
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-uint8_t ColorTable::findHex( const std::string& hex )
-{
-    if ( table_.is_null() ) {
-        return 0;
-    }
-
-    auto it = std::find_if(
-        table_.begin(), table_.end(),
-        [ &hex ]( const nlohmann::json& item ) {
-            return item[ "hexString" ] == hex;
-        }
-    );
-
-    if ( it == table_.end() ) {
-        return 0;
-    }
-
-    return it->at( "colorId" );
 }
 
 
@@ -95,74 +51,6 @@ uint8_t ColorTable::findName( const std::string& name )
     }
 
     return it->at( "colorId" );
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-void ColorTable::printTestTable( const uint8_t numSteps )
-{
-    static const std::string sym = "\xe2\x97\x8f";
-
-    if ( numSteps == 0 ) {
-        return;
-    }
-
-    std::cout << std::endl;
-
-    auto ansi = []( const Color& col ) -> std::string {
-       return "\x1b[38;5;" + std::to_string( col.id() ) + "m";
-    };
-
-    for ( uint8_t i = 0; i < 8; i++ ) {
-        std::cout << ansi( i ) << sym;
-    }
-
-    std::cout << " ";
-    std::cout << ansi( "#000000"s ) << sym;
-    std::cout << ansi( "#ff0000"s ) << sym;
-    std::cout << ansi( "#00ff00"s ) << sym;
-    std::cout << ansi( "#ffff00"s ) << sym;
-    std::cout << ansi( "#0000ff"s ) << sym;
-    std::cout << ansi( "#ff00ff"s ) << sym;
-    std::cout << ansi( "#00ffff"s ) << sym;
-    std::cout << ansi( "#ffffff"s ) << sym;
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    const float step = ( numSteps == 1 ) ? 255.f : ( 255.f / ( numSteps - 1 ) );
-
-    for ( float r = 0.f; r <= 255.f; r += step )
-    {
-        const uint8_t r8 = (uint8_t)std::round( r );
-
-        for ( float g = 0.f; g <= 255.f; g += step )
-        {
-            const uint8_t g8 = (uint8_t)std::round( g );
-
-            for ( float b = 0.f; b <= 255.f; b += step )
-            {
-                const uint8_t b8 = (uint8_t)std::round( b );
-                const uint32_t val = ( r8 << 16 ) + ( g8 << 8 ) + b8;
-
-                std::stringstream ss;
-                ss << "#" << std::hex << val;
-                std::cout << ansi( ss.str() ) << sym;
-            }
-
-            std::cout << " ";
-        }
-
-        std::cout << std::endl;
-    }
-
-    std::cout << std::endl;
-
-    //  NOTE(tgurdan): uint8_t causes endless loop here
-    for ( uint16_t i = 232; i <= 255; i++ ) {
-        std::cout << ansi( uint8_t( i ) ) << sym;
-    }
-
-    std::cout << std::endl << std::endl;
 }
 
 
@@ -236,4 +124,4 @@ uint8_t Color::fromRGBA( const uint32_t rgba )
 }
 
 
-}   //  mc
+}   //  ::bugle
