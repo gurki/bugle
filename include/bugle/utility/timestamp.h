@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 #include <chrono>
+#include <format>
 #include <string>
 
 namespace bugle {
@@ -19,12 +20,10 @@ struct Timestamp : public std::chrono::system_clock::time_point
         template <typename Resolution>
         std::string timeInfo() const;
 
-        std::string isoInfo() const;
         std::string fileInfo() const;
         std::string dateInfo() const;
         uint16_t milliseconds() const;
         uint32_t microseconds() const;
-        double elapsed() const;
         uint64_t elapsedUs() const;
 
         static Timestamp now();

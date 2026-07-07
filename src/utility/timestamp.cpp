@@ -1,9 +1,8 @@
 #include "bugle/utility/timestamp.h"
 
-#include <iostream>
 #include <sstream>
-#include <iomanip>  //  std::put_time
-#include <ctime>    //  localtime
+#include <iomanip>  //  std::get_time
+#include <ctime>    //  mktime
 #include <regex>
 
 
@@ -44,12 +43,6 @@ uint64_t Timestamp::elapsedUs() const {
 
 
 //////////////////////////////////////////////////////////////////////////////////
-double Timestamp::elapsed() const {
-    return elapsedUs() / 1000000.0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
 Timestamp Timestamp::now() {
     return { system_clock::now() };
 }
@@ -66,31 +59,34 @@ Timestamp Timestamp::parse( const std::string& str )
         return {};
     }
 
-    std::tm t;
+    std::tm t {};
     std::istringstream istr( str );
     istr >> std::get_time( &t, "%Y-%m-%dT%H:%M:%S" );
-    std::time_t time = std::mktime( &t );
+
+    //  interpret as utc, matching the utc-based output of info()
+#ifdef _WIN32
+    std::time_t time = _mkgmtime( &t );
+#else
+    std::time_t time = timegm( &t );
+#endif
 
     Timestamp dt = { std::chrono::system_clock::from_time_t( time ) };
 
     if ( match.length( 2 ) > 0 )
     {
-        const int f = std::stoi( match[ 2 ] );
+        //  scale the fraction by its digit count, e.g. ".5" -> 500 ms,
+        //  ".050" -> 50 ms, ".000123" -> 123 us
+        const std::string digits = match[ 2 ].str().substr( 0, 6 );
+        int64_t f = std::stoll( digits );
 
-        if ( f < 999 ) {
-            dt += std::chrono::milliseconds( f );
-        } else {
-            dt += std::chrono::microseconds( f );
+        for ( size_t i = digits.size(); i < 6; i++ ) {
+            f *= 10;
         }
+
+        dt += std::chrono::microseconds( f );
     }
 
     return dt;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-std::string Timestamp::isoInfo() const {
-    return info<std::chrono::seconds>();
 }
 
 
