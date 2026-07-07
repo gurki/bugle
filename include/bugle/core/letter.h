@@ -5,9 +5,6 @@
 
 #include <string>
 #include <thread>
-#include <chrono>
-#include <iostream>
-#include <mutex>
 #include <memory>
 #include <source_location>
 
@@ -50,7 +47,6 @@ struct Letter
 
 
 void to_json( nlohmann::json&, const Letter& );
-void from_json( const nlohmann::json&, Letter& );
 
 
 

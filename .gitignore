@@ -3,8 +3,13 @@
 
 # Products
 build/
-.build/
+.build*/
 .vscode/
+.claude/
+
+# Run output
+logs/
+profiles/
 
 # Prerequisites
 *.d

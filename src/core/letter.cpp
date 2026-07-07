@@ -1,8 +1,7 @@
 #include "bugle/core/letter.h"
 
 #include <format>
-#include <unordered_set>
-#include <functional>
+#include <functional>   //  std::hash
 #include <regex>
 #include <filesystem>
 
@@ -29,19 +28,11 @@ Letter::Letter(
 ////////////////////////////////////////////////////////////////////////////////
 std::string Letter::locationInfo() const
 {
-    static const bool useEmojis = false;
-    static const std::string locOpen = ( useEmojis ? "📁 " : "[" );
-    static const std::string locClose = ( useEmojis ? "" : "]" );
-    static const std::string thrOpen = ( useEmojis ? "🧵 " : "" );
-    static const std::string thrClose = ( useEmojis ? "" : "]" );
-
-    return std::format( "{}{}@{}:{}.{}{}",
-        locOpen,
+    return std::format( "[{}@{}:{}.{}]",
         functionInfo(),
         fileInfo(),
         line(),
-        column(),
-        locClose
+        column()
     );
 }
 
@@ -84,34 +75,6 @@ void to_json( nlohmann::json& json, const Letter& letter )
     json[ "message" ] = letter.message;
     json[ "tags" ] = letter.tags;
     json[ "attributes" ] = letter.attributes;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-void from_json( const nlohmann::json& json, Letter& message )
-{
-    //  TODO
-
-    // try
-    // {
-    //     message.timestamp_ = json.at( "timestamp" ).get<Timestamp>();
-    //     message.thread_ = json.at( "thread" ).get<uint64_t>();
-
-    //     if ( json.find( "file" ) != json.end() )
-    //     {
-    //         message.file_ = json.at( "file" ).get<std::string>();
-    //         message.function_ = json.at( "function" ).get<std::string>();
-    //         message.line_ = json.at( "line" ).get<int>();
-    //         message.level_ = json.at( "level" ).get<int>();
-    //     }
-
-    //     message.content_ = json.at( "content" ).get<std::string>();
-    //     message.tags_ = json.at( "tags" ).get<tags_t>();
-    // }
-    // catch ( const std::exception& ) {
-    //     message = {};
-    //     std::cerr << "couldn't parse message from json" << std::endl;
-    // }
 }
 
 
