@@ -15,16 +15,18 @@ JsonLogger::~JsonLogger() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-bool JsonLogger::open( const std::string& filename )
+bool JsonLogger::open( const std::string& filename, const Format format )
 {
 #ifdef BUGLE_ENABLE
     fout_.close();
+    format_ = format;
 
     std::string filepath = filename;
 
     if ( filename.empty() ) {
         const auto dt = Timestamp::now();
-        filepath = std::format( "logs/{}.jsonl", dt.fileInfo() );
+        const auto extension = ( format == Format::Cbor ) ? "cborseq" : "jsonl";
+        filepath = std::format( "logs/{}.{}", dt.fileInfo(), extension );
     }
 
     const auto directory = std::filesystem::path( filepath ).parent_path();
@@ -38,7 +40,11 @@ bool JsonLogger::open( const std::string& filename )
         }
     }
 
-    fout_.open( filepath );
+    if ( format == Format::Cbor ) {
+        fout_.open( filepath, std::ios_base::binary );
+    } else {
+        fout_.open( filepath );
+    }
 #endif
     return fout_.is_open();
 }
@@ -52,6 +58,13 @@ void JsonLogger::receive( const Letter& letter )
     }
 
     const nlohmann::json data = letter;
+
+    if ( format_ == Format::Cbor ) {
+        const auto bytes = nlohmann::json::to_cbor( data );
+        fout_.write( (const char*)bytes.data(), bytes.size() );
+        return;
+    }
+
     fout_ << data.dump() << "\n";
 }
 

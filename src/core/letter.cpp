@@ -1,4 +1,5 @@
 #include "bugle/core/letter.h"
+#include "bugle/core/postoffice.h"
 
 #include <format>
 #include <functional>   //  std::hash
@@ -67,14 +68,28 @@ void to_json( nlohmann::json& json, const Letter& letter )
     json[ "thread" ] = letter.threadInfo();
     json[ "level" ] = letter.level;
 
+    const auto threadName = PostOffice::threadName( letter.thread );
+
+    if ( threadName ) {
+        json[ "threadName" ] = threadName.value();
+    }
+
     json[ "file" ] = letter.file();
     json[ "function" ] = letter.function();
     json[ "line" ] = letter.line();
     json[ "column" ] = letter.column();
 
-    json[ "message" ] = letter.message;
-    json[ "tags" ] = letter.tags;
-    json[ "attributes" ] = letter.attributes;
+    if ( ! letter.message.empty() ) {
+        json[ "message" ] = letter.message;
+    }
+
+    if ( ! letter.tags.empty() ) {
+        json[ "tags" ] = letter.tags;
+    }
+
+    if ( ! letter.attributes.empty() ) {
+        json[ "attributes" ] = letter.attributes;
+    }
 }
 
 

@@ -188,8 +188,15 @@ Custom predicates can be composed programmatically, e.g. a `ValueFilter` with an
 Built-in recipients:
 
 - `ConsoleLogger` — colorized, aligned, tree-style console output; automatically strips colors when piped or redirected
-- `JsonLogger` — newline-delimited JSON (one letter per line)
+- `JsonLogger` — newline-delimited JSON (one letter per line), or compact binary CBOR sequences via `open( path, Format::Cbor )`
 - `Profiler` — turns envelope pairs into collapsed-stack profiling data
+
+Threads can be given human-readable names, which structured logs pick up as `threadName`:
+
+```cpp
+bugle::PostOffice::setThreadName( "render" );   //  current thread
+po.registerThread();                            //  or name it after the enclosing function
+```
 
 Custom sinks implement one virtual:
 

@@ -12,6 +12,7 @@
 #include <deque>
 #include <memory>   //  PostOfficePtr, ...
 #include <mutex>    //  observerMutex_, ...
+#include <optional>
 #include <shared_mutex>
 #include <thread>
 #include <unordered_map>
@@ -64,6 +65,17 @@ class PostOffice
             const std::source_location& location = std::source_location::current()
         );
 
+        //  names the calling thread after the enclosing function, keeping an
+        //  existing name if one was already registered
+        void registerThread(
+            const std::source_location& location = std::source_location::current()
+        );
+
+        static void setThreadName( const std::string& );
+        static void setThreadName( const std::string&, const std::thread::id );
+        static std::optional<std::string> threadName();
+        static std::optional<std::string> threadName( const std::thread::id );
+
         static PostOffice& instance();
 
     private:
@@ -98,6 +110,9 @@ class PostOffice
         std::condition_variable queueDrained_;
         bool dispatching_ = false;
         bool shouldExit_ = false;
+
+        static std::unordered_map<std::thread::id, std::string> threadNames_;
+        static std::shared_mutex threadNameMutex_;
 };
 
 

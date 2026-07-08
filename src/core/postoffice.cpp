@@ -5,6 +5,10 @@
 namespace bugle {
 
 
+std::unordered_map<std::thread::id, std::string> PostOffice::threadNames_ = {};
+std::shared_mutex PostOffice::threadNameMutex_;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 PostOffice& PostOffice::instance()
 {
@@ -180,6 +184,53 @@ void PostOffice::removeObserver( const RecipientRef& observer )
     observers_.erase( observer );
     filter_.erase( observer );
 #endif
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::registerThread( const std::source_location& location )
+{
+    if ( threadName().has_value() ) {
+        return;
+    }
+
+    //  reuse the letter's function name cleanup
+    setThreadName( Letter( {}, {}, {}, location ).functionInfo() );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::setThreadName( const std::string& name ) {
+    setThreadName( name, std::this_thread::get_id() );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void PostOffice::setThreadName( const std::string& name, const std::thread::id id )
+{
+    std::unique_lock lock( threadNameMutex_ );
+    threadNames_[ id ] = name;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::optional<std::string> PostOffice::threadName() {
+    return threadName( std::this_thread::get_id() );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::optional<std::string> PostOffice::threadName( const std::thread::id id )
+{
+    std::shared_lock lock( threadNameMutex_ );
+
+    const auto it = threadNames_.find( id );
+
+    if ( it == threadNames_.end() ) {
+        return {};
+    }
+
+    return it->second;
 }
 
 

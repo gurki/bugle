@@ -16,6 +16,7 @@ project( bugle-tests
 
 add_executable( ${PROJECT_NAME}
     filter.cpp
+    letter.cpp
     parse.cpp
     postoffice.cpp
     timestamp.cpp

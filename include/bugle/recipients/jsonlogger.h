@@ -11,13 +11,23 @@ struct Letter;
 
 struct JsonLogger : public Recipient
 {
+    enum class Format {
+        Lines,      //  newline-delimited json (jsonl)
+        Cbor        //  binary cbor sequence
+    };
+
     ~JsonLogger();
-    bool open( const std::string& filename = {} );
+
+    bool open(
+        const std::string& filename = {},
+        const Format format = Format::Lines
+    );
 
     virtual void receive( const Letter& ) override;
 
     private:
 
+        Format format_ = Format::Lines;
         std::ofstream fout_;
 };
 
