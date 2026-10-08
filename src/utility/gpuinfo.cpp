@@ -42,30 +42,46 @@ static std::string adapterTypeName( wgpu::AdapterType adapterType )
 ////////////////////////////////////////////////////////////////////////////////
 GpuInfo GpuInfo::current()
 {
-    static GpuInfo info {};
-    static bool dirty = true;
-
-    if ( dirty )
-    {
+    static const GpuInfo info = [] {
         wgpu::Instance instance = wgpu::createInstance( {} );
+        if ( ! instance ) {
+            return GpuInfo {};
+        }
         wgpu::Adapter adapter = instance.requestAdapter( {} );
+        if ( ! adapter ) {
+            instance.release();
+            return GpuInfo {};
+        }
 
-        wgpu::AdapterInfo adapterInfo;
-        wgpu::Limits limits;
-        wgpu::SupportedFeatures features;
-        adapter.getInfo( &adapterInfo );
-        adapter.getLimits( &limits );
-        adapter.getFeatures( &features );
+        wgpu::AdapterInfo adapterInfo {};
+        wgpu::Limits limits {};
+        struct Cleanup {
+            wgpu::Instance instance;
+            wgpu::Adapter adapter;
+            wgpu::AdapterInfo& info;
+            ~Cleanup() {
+                info.freeMembers();
+                adapter.release();
+                instance.release();
+            }
+        } cleanup { instance, adapter, adapterInfo };
+        if ( adapter.getInfo( &adapterInfo ) != wgpu::Status::Success ||
+             adapter.getLimits( &limits ) != wgpu::Status::Success ) {
+            return GpuInfo {};
+        }
+        const auto copyString = []( const auto& view ) {
+            return view.data ? std::string( view.data, view.length ) : std::string {};
+        };
 
-        info = GpuInfo {
+        const GpuInfo result = GpuInfo {
             .adapter = {
                 //  copies, not string_views — the wgpu strings die with adapterInfo
                 .adapterType = adapterTypeName( adapterInfo.adapterType ),
                 .backendType = backendTypeName( adapterInfo.backendType ),
-                .description = std::string( adapterInfo.description.data, adapterInfo.description.length ),
-                .device = std::string( adapterInfo.device.data, adapterInfo.device.length ),
+                .description = copyString( adapterInfo.description ),
+                .device = copyString( adapterInfo.device ),
                 .deviceID = adapterInfo.deviceID,
-                .vendor = std::string( adapterInfo.vendor.data, adapterInfo.vendor.length ),
+                .vendor = copyString( adapterInfo.vendor ),
                 .vendorID = adapterInfo.vendorID
             },
             .textures = {
@@ -93,11 +109,8 @@ GpuInfo GpuInfo::current()
             }
         };
 
-        adapter.release();
-        instance.release();
-
-        dirty = false;
-    }
+        return result;
+    }();
 
     return info;
 }

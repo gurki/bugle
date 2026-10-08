@@ -9,11 +9,14 @@ jobs:
 
   windows-msvc:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        gpu: [ "OFF", "ON" ]
     steps:
       - uses: actions/checkout@v4
 
       - name: configure
-        run: cmake -S . -B build -DBUGLE_ENABLE=ON -DBUGLE_BUILD_TESTS=ON -DBUGLE_BUILD_EXAMPLES=ON
+        run: cmake -S . -B build -DBUGLE_ENABLE=ON -DBUGLE_BUILD_TESTS=ON -DBUGLE_BUILD_EXAMPLES=ON -DBUGLE_MODULE_GPU=${{ matrix.gpu }}
 
       - name: build
         run: cmake --build build --config Debug

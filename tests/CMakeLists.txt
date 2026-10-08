@@ -31,12 +31,16 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 #  Add module coverage only when the module is enabled.
-foreach( module json profiler )
+foreach( module json profiler gpu )
     if( TARGET bugle-${module} )
         target_sources( ${PROJECT_NAME} PRIVATE ${module}.cpp )
         target_link_libraries( ${PROJECT_NAME} PRIVATE bugle::${module} )
     endif()
 endforeach()
+if( TARGET bugle-gpu )
+    target_copy_webgpu_binaries( ${PROJECT_NAME} )
+endif()
+
 target_link_libraries( ${PROJECT_NAME} PRIVATE
     bugle::core
     Catch2::Catch2WithMain
