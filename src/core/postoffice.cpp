@@ -1,6 +1,7 @@
 #include "bugle/core/postoffice.h"
 #include "bugle/core/letter.h"
 #include "bugle/core/recipient.h"
+#include <stdexcept>
 
 namespace bugle {
 
@@ -49,6 +50,9 @@ PostOffice::~PostOffice()
 void PostOffice::flush()
 {
 #ifdef BUGLE_ENABLE
+    if ( std::this_thread::get_id() == workerThread_.get_id() ) {
+        throw std::logic_error( "PostOffice::flush cannot run in a recipient callback" );
+    }
     std::unique_lock lock( queueMutex_ );
 
     queueDrained_.wait( lock, [ this ](){
@@ -164,13 +168,9 @@ void PostOffice::addObserver(
 #ifdef BUGLE_ENABLE
     std::scoped_lock lock( observerMutex_ );
 
-    observers_.insert( observer );
-
-    if ( ! filter.matches ) {
-        return;
+    if ( ! observer.expired() ) {
+        observers_.insert_or_assign( observer, filter );
     }
-
-    filter_[ observer ] = filter;
 #endif
 }
 
@@ -182,7 +182,6 @@ void PostOffice::removeObserver( const RecipientRef& observer )
     std::scoped_lock lock( observerMutex_ );
 
     observers_.erase( observer );
-    filter_.erase( observer );
 #endif
 }
 
@@ -260,44 +259,35 @@ void PostOffice::processQueue()
             dispatching_ = true;
         }
 
-        //  remove expired observers under exclusive lock before dispatching
+        //  Snapshot recipients and filters; user code runs without our locks.
+        std::vector<std::pair<std::shared_ptr<Recipient>, Filter>> recipients;
         {
             std::scoped_lock lock( observerMutex_ );
 
             for ( auto it = observers_.begin(); it != observers_.end(); )
             {
-                if ( ! it->expired() ) {
+                if ( auto recipient = it->first.lock() ) {
+                    recipients.emplace_back( std::move( recipient ), it->second );
                     ++it;
                     continue;
                 }
 
-                filter_.erase( *it );
                 it = observers_.erase( it );
             }
         }
 
-        {
-            //  lock to avoid observer insertion from another thread during iteration.
-            //  as a side effect, this ensures letters are dispatched sequentially,
-            //  keeping chronological order.
-            std::shared_lock lock( observerMutex_ );
-
-            for ( const auto& observerRef : observers_ )
-            {
-                if ( filter_.contains( observerRef ) )
-                {
-                    const auto& filter = filter_.at( observerRef );
-
-                    if ( ! filter.matches( letter ) ) {
-                        continue;
-                    }
+        for ( const auto& [ recipient, filter ] : recipients ) {
+            try {
+                if ( ! filter.matches || filter.matches( letter ) ) {
+                    recipient->receive( letter );
                 }
-
-                if ( auto observer = observerRef.lock() ) {
-                    observer->receive( letter );
-                }
+            } catch ( ... ) {
+                //  A faulty sink/predicate must not stop delivery to other sinks.
+                ++dispatchFailures_;
             }
         }
+        //  Release snapshots before signalling flush completion.
+        recipients.clear();
 
         {
             std::scoped_lock lock( queueMutex_ );

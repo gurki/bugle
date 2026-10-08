@@ -19,6 +19,7 @@ add_executable( ${PROJECT_NAME}
     letter.cpp
     parse.cpp
     postoffice.cpp
+    lifecycle.cpp
     timestamp.cpp
 )
 
@@ -38,7 +39,7 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE
 list( APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras )
 include( CTest )
 include( Catch )
-catch_discover_tests( ${PROJECT_NAME} TEST_SPEC --success )
+catch_discover_tests( ${PROJECT_NAME} TEST_SPEC --success PROPERTIES TIMEOUT 15 )
 add_test( NAME installed-package
     COMMAND ${CMAKE_COMMAND}
         -DBUGLE_BUILD_DIR=${CMAKE_BINARY_DIR}

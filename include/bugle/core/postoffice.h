@@ -3,7 +3,6 @@
 #include "bugle/core/filter.h"
 #include "bugle/core/letter.h"
 #include "bugle/core/envelope.h"
-#include "bugle/utility/utility.h"  //  WeakPtrHash, WeakPtrEqual
 
 #include <nlohmann/json.hpp>
 
@@ -11,12 +10,13 @@
 #include <condition_variable>
 #include <deque>
 #include <memory>   //  PostOfficePtr, ...
+#include <map>
 #include <mutex>    //  observerMutex_, ...
 #include <optional>
 #include <shared_mutex>
 #include <thread>
 #include <unordered_map>
-#include <unordered_set>    //  observers_, ...
+#include <vector>
 
 namespace bugle {
 
@@ -34,12 +34,17 @@ class PostOffice
 
         void enable() { enabled_ = true; }
         void disable() { enabled_ = false; }
+        //  Waits for queued and in-flight delivery. Throws std::logic_error
+        //  when called from this office's dispatcher.
         void flush();
+        //  Exceptions from recipient callbacks and predicates.
+        uint64_t dispatchFailures() const { return dispatchFailures_.load(); }
 
         int level( const std::thread::id& );
         void push( const std::thread::id& );
         void pop( const std::thread::id& );
 
+        //  Replaces the filter; mutations affect subsequent dispatch snapshots.
         void addObserver(
             const RecipientRef& observer,
             const Filter& filter = {}
@@ -84,24 +89,14 @@ class PostOffice
 
         std::atomic_bool enabled_ = true;
 
-        std::unordered_set<
-            RecipientRef,
-            WeakPtrHash<Recipient>,
-            WeakPtrEqual<Recipient>
-        > observers_;
-
-        std::unordered_map<
-            RecipientRef,
-            Filter,
-            WeakPtrHash<Recipient>,
-            WeakPtrEqual<Recipient>
-        > filter_;
+        std::map<RecipientRef, Filter, std::owner_less<RecipientRef>> observers_;
+        std::atomic_uint64_t dispatchFailures_ = 0;
 
         std::mutex levelMutex_;
         std::unordered_map<std::thread::id, int> levels_;
 
         std::thread workerThread_;
-        std::shared_mutex observerMutex_;
+        std::mutex observerMutex_;
 
         //  queueMutex_ guards letters_, dispatching_ and shouldExit_
         std::mutex queueMutex_;
