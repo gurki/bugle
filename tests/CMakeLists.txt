@@ -39,3 +39,14 @@ list( APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras )
 include( CTest )
 include( Catch )
 catch_discover_tests( ${PROJECT_NAME} TEST_SPEC --success )
+add_test( NAME installed-package
+    COMMAND ${CMAKE_COMMAND}
+        -DBUGLE_BUILD_DIR=${CMAKE_BINARY_DIR}
+        -DBUGLE_TEST_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DBUGLE_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DBUGLE_CONFIG=$<CONFIG>
+        -DBUGLE_GENERATOR=${CMAKE_GENERATOR}
+        -DBUGLE_COMPILER=${CMAKE_CXX_COMPILER}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/package.cmake
+)
+set_tests_properties( installed-package PROPERTIES TIMEOUT 120 )

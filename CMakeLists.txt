@@ -37,6 +37,7 @@ add_library( bugle-core STATIC
 )
 
 add_library( bugle::core ALIAS bugle-core )
+set_target_properties( bugle-core PROPERTIES EXPORT_NAME core )
 
 target_compile_features( bugle-core PUBLIC cxx_std_23 )
 
@@ -79,6 +80,7 @@ install( TARGETS bugle EXPORT bugleTargets )
 function( bugle_add_module name )
     add_library( bugle-${name} STATIC ${ARGN} )
     add_library( bugle::${name} ALIAS bugle-${name} )
+    set_target_properties( bugle-${name} PROPERTIES EXPORT_NAME ${name} )
     target_link_libraries( bugle-${name} PUBLIC bugle-core )
     target_link_libraries( bugle INTERFACE bugle-${name} )
 
