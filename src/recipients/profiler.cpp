@@ -34,7 +34,7 @@ void Profiler::receive( const Letter& letter )
 
     if ( ! stacks_.contains( tid ) ) {
         stacks_[ tid ] = std::vector<std::string>();
-        offloads_[ tid ] = std::vector<int>();
+        offloads_[ tid ] = std::vector<int64_t>();
     }
 
     auto& stack = stacks_[ tid ];
@@ -58,13 +58,13 @@ void Profiler::receive( const Letter& letter )
     }
 
     const auto durIt = letter.attributes.find( "duration" );
-    const int dur = (
+    const int64_t dur = (
         durIt != letter.attributes.end() && durIt->second.is_number() ?
-        durIt->second.get<int>() : 0
+        durIt->second.get<int64_t>() : 0
     );
 
     const auto path = stack | std::views::join_with( ';' );
-    const int off = offload.back();
+    const int64_t off = offload.back();
     offload.pop_back();
 
     const std::string line = std::format( "{};{} {}",

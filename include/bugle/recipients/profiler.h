@@ -20,7 +20,7 @@ struct Profiler : public Recipient
     private:
 
         std::unordered_map< std::thread::id, std::vector<std::string> > stacks_;
-        std::unordered_map< std::thread::id, std::vector<int> > offloads_;
+        std::unordered_map< std::thread::id, std::vector<int64_t> > offloads_;
         std::ofstream fout_;
 };
 
