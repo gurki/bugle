@@ -45,8 +45,8 @@ Enjoy and let me know what you think!
 - **Structured attributes.** Attach arbitrary JSON key/values to any message — no more stringly-typed data in log lines.
 - **Scopes.** RAII `Envelope`s give you indentation, tracing and duration profiling as side effects of logging.
 - **Colors.** Colorized, aligned console output to spot relevant messages fast.
-- **Thread-safe.** Messages are posted from any thread and dispatched in order by a background worker.
-- **Zero-cost opt-out.** With `BUGLE_ENABLE` off, posts compile to early-out no-ops.
+- **Thread-safe.** Messages are posted from any thread and dispatched in queue insertion order by a background worker.
+- **Opt-out.** With `BUGLE_ENABLE` off, posting bodies are no-ops and envelope macros expand to nothing. Ordinary function arguments are still evaluated.
 
 
 ## Integration
@@ -212,7 +212,9 @@ auto sink = std::make_shared<MySink>();
 po.addObserver( sink, bugle::Filter::fromString( "tag:radio !tag:debug" ) );
 ```
 
-Recipients are held as `weak_ptr` — destroy your `shared_ptr` and the observer unregisters itself; no manual removal required.
+Recipients are held as `weak_ptr` and expired registrations are removed during dispatch. Keep your `shared_ptr` alive through `flush()` to ensure delivery. Each letter uses a snapshot of its recipients: adding or removing observers in a callback takes effect on subsequent letters. Re-registering a recipient replaces its filter, including clearing it when no filter is supplied.
+
+Callbacks and predicates run without the observer lock. Exceptions are caught independently for each recipient and counted by `dispatchFailures()`, so delivery continues to other recipients. `flush()` from a callback on the same office throws `std::logic_error`, because the worker cannot wait for its own callback to finish. Configure sinks before registering them; sink methods are not synchronized for direct concurrent calls or sharing a sink between offices.
 
 
 ## Banners
@@ -280,7 +282,11 @@ po.post( {}, { "server", "system" }, nlohmann::json( info ) );
 
 ## Discussion
 
-Letters are queued and dispatched by a single background worker, keeping posting cheap on hot paths while preserving chronological order across threads. `flush()` blocks until the queue is fully drained; destruction drains the queue as well, so no messages are lost at shutdown.
+Letters are queued and dispatched by a single background worker in queue insertion order. Timestamps record message creation and can appear out of order across threads; delivery does not sort them. `flush()` blocks until the queue and current dispatch are complete. Destruction drains accepted letters; stop producers before destroying the office and keep recipients alive until draining completes. Destroying an office from its own callback is unsupported.
+
+The queue holds up to 8192 pending letters by default. Producers block when it is full, providing backpressure. Construct `PostOffice( capacity )` to change this limit, or `PostOffice( 0 )` to opt into an unbounded queue. A callback posting to its own full queue drops that new letter instead of waiting for itself; `droppedLetters()` reports these drops. Callbacks must not wait for producers that may be blocked on the same queue. The limit bounds pending message count, not the bytes in their JSON payloads.
+
+Envelope durations use `std::chrono::steady_clock`, independent of wall-clock adjustments. Public opening/closing timestamps still use the wall clock. Envelopes cannot be copied or moved and must stay on their creating thread.
 
 Logging frameworks should be efficient and lightweight. bugle tries to be, but its priority is flexible, powerful and *readable* logging. Attributes allocate JSON per message — for extremely data-intensive logging (millions of messages per second), consider a specialized system instead.
 
