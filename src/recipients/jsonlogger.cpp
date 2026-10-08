@@ -31,7 +31,7 @@ bool JsonLogger::open( const std::string& filename, const Format format )
 
     const auto directory = std::filesystem::path( filepath ).parent_path();
 
-    if ( ! std::filesystem::exists( directory ) )
+    if ( ! directory.empty() && ! std::filesystem::exists( directory ) )
     {
         const bool succ = std::filesystem::create_directories( directory );
 

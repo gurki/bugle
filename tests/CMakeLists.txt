@@ -30,7 +30,13 @@ target_include_directories( ${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-#  tests only exercise the core, keeping the core-only configuration testable
+#  Add module coverage only when the module is enabled.
+foreach( module json )
+    if( TARGET bugle-${module} )
+        target_sources( ${PROJECT_NAME} PRIVATE ${module}.cpp )
+        target_link_libraries( ${PROJECT_NAME} PRIVATE bugle::${module} )
+    endif()
+endforeach()
 target_link_libraries( ${PROJECT_NAME} PRIVATE
     bugle::core
     Catch2::Catch2WithMain
