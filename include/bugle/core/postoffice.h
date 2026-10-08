@@ -29,7 +29,8 @@ class PostOffice
 {
     public:
 
-        PostOffice();
+        //  Full queues block producers; 0 opts into an unbounded queue.
+        explicit PostOffice( size_t queueCapacity = 8192 );
         ~PostOffice();
 
         void enable() { enabled_ = true; }
@@ -37,6 +38,8 @@ class PostOffice
         //  Waits for queued and in-flight delivery. Throws std::logic_error
         //  when called from this office's dispatcher.
         void flush();
+        //  Callback posts to a full queue (or a shutting-down office).
+        uint64_t droppedLetters() const { return droppedLetters_.load(); }
         //  Exceptions from recipient callbacks and predicates.
         uint64_t dispatchFailures() const { return dispatchFailures_.load(); }
 
@@ -90,6 +93,8 @@ class PostOffice
         std::atomic_bool enabled_ = true;
 
         std::map<RecipientRef, Filter, std::owner_less<RecipientRef>> observers_;
+        const size_t queueCapacity_;
+        std::atomic_uint64_t droppedLetters_ = 0;
         std::atomic_uint64_t dispatchFailures_ = 0;
 
         std::mutex levelMutex_;
@@ -103,6 +108,7 @@ class PostOffice
         std::deque<Letter> letters_;
         std::condition_variable queueReady_;
         std::condition_variable queueDrained_;
+        std::condition_variable queueSpace_;
         bool dispatching_ = false;
         bool shouldExit_ = false;
 

@@ -19,7 +19,7 @@ PostOffice& PostOffice::instance()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-PostOffice::PostOffice()
+PostOffice::PostOffice( size_t queueCapacity ) : queueCapacity_( queueCapacity )
 {
 #ifdef BUGLE_ENABLE
     workerThread_ = std::thread( &PostOffice::processQueue, this );
@@ -41,6 +41,7 @@ PostOffice::~PostOffice()
     }
 
     queueReady_.notify_one();
+    queueSpace_.notify_all();
     workerThread_.join();
 #endif
 }
@@ -71,7 +72,20 @@ void PostOffice::post( Letter&& letter )
     }
 
     {
-        std::scoped_lock lock( queueMutex_ );
+        std::unique_lock lock( queueMutex_ );
+        //  The dispatcher cannot wait for itself to make queue space.
+        if ( queueCapacity_ && letters_.size() >= queueCapacity_ &&
+             std::this_thread::get_id() == workerThread_.get_id() ) {
+            ++droppedLetters_;
+            return;
+        }
+        queueSpace_.wait( lock, [ this ] {
+            return shouldExit_ || ! queueCapacity_ || letters_.size() < queueCapacity_;
+        } );
+        if ( shouldExit_ ) {
+            ++droppedLetters_;
+            return;
+        }
         letters_.emplace_back( std::move( letter ) );
     }
 
@@ -258,6 +272,8 @@ void PostOffice::processQueue()
             letters_.pop_front();
             dispatching_ = true;
         }
+
+        queueSpace_.notify_one();
 
         //  Snapshot recipients and filters; user code runs without our locks.
         std::vector<std::pair<std::shared_ptr<Recipient>, Filter>> recipients;

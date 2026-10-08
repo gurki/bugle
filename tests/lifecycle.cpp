@@ -67,8 +67,35 @@ TEST_CASE( "reregistering an observer clears its previous filter", "[postoffice]
     REQUIRE( office.dispatchFailures() == 0 );
 }
 
+TEST_CASE( "bounded queues block producers and count recursive overflow", "[postoffice]" ) {
+    bugle::PostOffice office( 1 );
+    std::promise<void> entered, release;
+    auto released = release.get_future().share();
+    int count = 0;
+    auto sink = std::make_shared<Callback>( [&]( const bugle::Letter& letter ) {
+        ++count;
+        if ( letter.message == "first" ) {
+            entered.set_value();
+            released.wait();
+            office.post( "recursive-overflow" );
+        }
+    } );
+    office.addObserver( sink );
+    office.post( "first" );
+    entered.get_future().wait();
+    office.post( "second" );
+    auto producer = std::async( std::launch::async, [&] { office.post( "third" ); } );
+    const auto status = producer.wait_for( std::chrono::milliseconds( 50 ) );
+    release.set_value();
+    producer.get();
+    office.flush();
+    REQUIRE( status == std::future_status::timeout );
+    REQUIRE( count == 3 );
+    REQUIRE( office.droppedLetters() == 1 );
+}
+
 TEST_CASE( "dispatch preserves insertion order for out of order timestamps", "[postoffice]" ) {
-    bugle::PostOffice office;
+    bugle::PostOffice office( 0 );
     std::vector<std::string> messages;
     auto sink = std::make_shared<Callback>( [&]( const auto& letter ) { messages.push_back( letter.message ); } );
     office.addObserver( sink );
@@ -78,5 +105,13 @@ TEST_CASE( "dispatch preserves insertion order for out of order timestamps", "[p
     office.post( std::move( second ) );
     office.flush();
     REQUIRE( messages == std::vector<std::string> { "first", "second" } );
+}
+#else
+TEST_CASE( "disabled logging starts no dispatch and never fills the queue", "[postoffice]" ) {
+    bugle::PostOffice office( 1 );
+    for ( int i = 0; i < 100; ++i ) office.post( "disabled" );
+    office.flush();
+    REQUIRE( office.droppedLetters() == 0 );
+    REQUIRE( office.dispatchFailures() == 0 );
 }
 #endif
