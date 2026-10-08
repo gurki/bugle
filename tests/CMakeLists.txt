@@ -31,7 +31,7 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 #  Add module coverage only when the module is enabled.
-foreach( module json profiler gpu )
+foreach( module console json profiler sysinfo gpu )
     if( TARGET bugle-${module} )
         target_sources( ${PROJECT_NAME} PRIVATE ${module}.cpp )
         target_link_libraries( ${PROJECT_NAME} PRIVATE bugle::${module} )
