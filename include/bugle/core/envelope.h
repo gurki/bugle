@@ -32,9 +32,15 @@ struct Envelope
     );
 
     ~Envelope();
+    Envelope( const Envelope& ) = delete;
+    Envelope& operator=( const Envelope& ) = delete;
 
     void close();
     uint64_t durationUs() const;
+
+    private:
+        std::chrono::steady_clock::time_point started_ = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::time_point stopped_;
 };
 
 

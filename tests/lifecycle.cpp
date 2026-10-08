@@ -4,6 +4,20 @@
 #include <stdexcept>
 #include <type_traits>
 
+TEST_CASE( "envelope duration uses a monotonic clock", "[envelope]" ) {
+    STATIC_REQUIRE_FALSE( std::is_copy_constructible_v<bugle::Envelope> );
+    bugle::PostOffice office;
+    bugle::Envelope scope( office );
+    scope.openedAt += std::chrono::hours( 24 );
+    scope.close();
+    const auto duration = scope.durationUs();
+    REQUIRE( duration < 1000000 );
+    scope.closedAt -= std::chrono::hours( 48 );
+    REQUIRE( scope.durationUs() == duration );
+    scope.close();
+    REQUIRE( scope.durationUs() == duration );
+}
+
 #ifdef BUGLE_ENABLE
 namespace {
 struct Callback : bugle::Recipient {

@@ -1,6 +1,5 @@
 #include "bugle/core/envelope.h"
 #include "bugle/core/postoffice.h"
-#include "bugle/format/duration.h"
 
 namespace bugle {
 
@@ -35,20 +34,15 @@ Envelope::Envelope(
 
 ////////////////////////////////////////////////////////////////////////////////
 Envelope::~Envelope() {
-#ifdef BUGLE_ENABLE
     close();
-#endif
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 uint64_t Envelope::durationUs() const
 {
-    if ( open ) {
-        return openedAt.elapsedUs();
-    }
-
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( closedAt - openedAt );
+    const auto end = open ? std::chrono::steady_clock::now() : stopped_;
+    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - started_ );
     return duration.count();
 }
 
@@ -56,16 +50,15 @@ uint64_t Envelope::durationUs() const
 ////////////////////////////////////////////////////////////////////////////////
 void Envelope::close()
 {
-#ifdef BUGLE_ENABLE
     if ( ! open ) {
         return;
     }
 
     open = false;
+    stopped_ = std::chrono::steady_clock::now();
     closedAt = Timestamp::now();
-
+#ifdef BUGLE_ENABLE
     const auto duration = durationUs();
-    const std::string dur = durationInfo( duration );
 
     attributes_t attributes = {
         { "duration", duration },
